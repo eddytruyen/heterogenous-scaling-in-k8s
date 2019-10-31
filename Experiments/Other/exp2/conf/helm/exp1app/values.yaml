@@ -1,0 +1,6 @@
+namespace: blue
+demoCPU: 200m
+workerCPU: 200m
+workerReplicas: 1
+stressSize: "100"
+

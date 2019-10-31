@@ -1,0 +1,10 @@
+namespace: purple
+workerReplicas: 1
+demoCPU: 600m
+consumers:
+  consumer1:
+    id: 1
+    cpu: 600m
+  consumer2:
+    id: 2
+    cpu: 1000m

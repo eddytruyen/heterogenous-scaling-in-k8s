@@ -1,0 +1,46 @@
+bin:
+  path: ./slaconfig
+charts:
+  name: mychart
+  chartdir: /home/mychart
+slas:
+  - name : gold
+    slos: 
+      jobsize: 10
+      throughput: 0.5
+    maxTenants: 10
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 3
+      elements:
+        - size: 
+          - cpu: 2250
+          - mem: 200Mi
+        - size: 
+          - cpu: 750
+          - mem: 150Mi
+        - size: 
+          - cpu: 250
+          - mem: 100Mi
+  - name : silver
+    slos: 
+      jobsize: 5
+      throughput: 0.3
+    maxTenants: 3
+    demoCPU: 600
+    alphabet:
+      searchWindow: 4
+      base: 5
+      elements:
+        - size: 
+          - cpu: 2500
+          - mem: 150Mi
+        - size: 
+          - cpu: 500
+          - mem: 100Mi
+        - size: 
+          - cpu: 100
+          - mem: 50Mi
+utilFunc: alphabetBased
+output: Results/experiments

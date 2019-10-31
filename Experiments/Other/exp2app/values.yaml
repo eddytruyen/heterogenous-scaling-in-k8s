@@ -1,0 +1,12 @@
+namespace: bronze
+stressSize: 100
+poolSize: 100
+poolSize: 30
+poolSize: 10
+worker1Replicas: 1
+worker2Replicas: 1
+worker3Replicas: 1
+worker1CPU: 200m
+worker2CPU: 200m
+worker3CPU: 200m
+demoCPU: 200m

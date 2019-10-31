@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: consumer
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: {{.Values.workerReplicas}}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: matthijskaminski/consumer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8090
+        resources:
+          requests:
+            cpu: {{.Values.workerCPU}}
+          limits:
+            cpu: {{.Values.workerCPU}}
+        env:
+        - name: DNS_NAMESPACE
+          value: {{.Values.namespace}}
+        readinessProbe:
+          httpGet:
+            path: /cpu
+            port: 8090
+            httpHeaders:
+          initialDelaySeconds: 30
+          periodSeconds: 5
+       

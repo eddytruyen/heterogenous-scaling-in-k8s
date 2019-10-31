@@ -1,0 +1,12 @@
+apiVersion: "autoscaling.k8s.io/v1beta2"
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{.Values.namespace}}-vpa    
+  namespace: {{.Values.namespace}}
+spec:
+  targetRef:
+    apiVersion: "extensions/v1beta1"
+    kind: Deployment
+    name: consumer1
+  updatePolicy:
+    updateMode: "Recreate"

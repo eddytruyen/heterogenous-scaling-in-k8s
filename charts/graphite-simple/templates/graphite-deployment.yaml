@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: graphite
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: graphite
+    spec:
+      containers:
+      - name: graphite
+        hostname: graphite
+        image: graphiteapp/graphite-statsd
+        ports:
+        - containerPort: 80
+        - containerPort: 8080
+        - containerPort: 2003
+        - containerPort: 2004
+        - containerPort: 2023
+        - containerPort: 2024
+        - containerPort: 8125
+        - containerPort: 8126
+      nodeSelector: 
+        monitoringNode: "yes"

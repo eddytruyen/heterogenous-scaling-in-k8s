@@ -1,0 +1,13 @@
+
+
+
+
+
+REPORT optimizer 0 :
+config #	worker1CPU	worker1Replicas	worker2CPU	worker2Replicas	worker3CPU	worker3Replicas	demoCPU	score	Tenant-0 Throughtput	Tenant-0 avg Latency	Tenant-0 #Failures	Tenant-1 Throughtput	Tenant-1 avg Latency	Tenant-1 #Failures	Tenant-2 Throughtput	Tenant-2 avg Latency	Tenant-2 #Failures	Tenant-3 Throughtput	Tenant-3 avg Latency	Tenant-3 #Failures	Tenant-4 Throughtput	Tenant-4 avg Latency	Tenant-4 #Failures	Tenant-5 Throughtput	Tenant-5 avg Latency	Tenant-5 #Failures	Tenant-6 Throughtput	Tenant-6 avg Latency	Tenant-6 #Failures	Tenant-7 Throughtput	Tenant-7 avg Latency	Tenant-7 #Failures	Tenant-8 Throughtput	Tenant-8 avg Latency	Tenant-8 #Failures	
+0	2200	1	750	0	250	0	800	0.7708333333333334	0.64	1566	0	0.61	1620	0	0.62	1597	0	0.64	1553	0	0.61	1612	0	0.61	1623	0	0.61	1605	0	0.61	1610	0	0.62	1573	0	
+1	2200	1	750	0	250	2	800	0	0.31	3294	0	0.37	2591	0	0.41	2496	0	0.39	2585	0	0.42	2371	0	0.39	2560	0	0.42	2392	0	0.34	2973	0	0.34	2949	0	
+2	2200	1	750	0	250	1	800	0.7447916666666667	0.71	1377	0	0.76	1296	0	0.71	1401	0	0.61	1619	0	0.56	1793	0	0.72	1341	0	0.66	1520	0	0.56	1781	0	0.57	1736	0	
+ 
+
+

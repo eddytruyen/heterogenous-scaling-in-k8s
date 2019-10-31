@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: go-deployer
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: go-deployer
+    spec:
+      serviceAccountName: go-deployer
+      nodeSelector: 
+        workerNode: "yes"
+      containers:
+      - name: go-deployer
+        image: arguez/go-deployer:latest
+        imagePullPolicy: Always
+        env:
+        - name: RABBIT_MQ_HOST
+          value: "rabbitmq"
+        - name: RABBIT_MQ_PORT
+          value: "5672"
+        - name: RABBIT_MQ_USER
+          value: "guest"
+        - name: RABBIT_MQ_PASS
+          value: "guest" 
+        - name: RESOURCE_PLANNER_HOST
+          value: "resource-planner" 
+        # readinessProbe:
+        #   httpGet:
+        #     path: /pushJob/200
+        #     port: 8080
+        #     httpHeaders:
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 3
+      priorityClassName: {{.Values.priorityClass}}
+
+
+       

@@ -1,0 +1,13 @@
+class Taskset#TENANTID(TaskSet):
+    @task
+    def pushJob(self):
+        with self.client.get("/",name="#NAME", catch_response=True) as resp:
+            if resp.content != "completed all tasks":
+                resp.failure("Got wrong response")
+
+class Tenant#TENANTID(HttpLocust):
+    weight = #WEIGHT
+    host = "#URL"
+    min_wait = #MIN
+    max_wait = #MAX
+    task_set = Taskset#TENANTID

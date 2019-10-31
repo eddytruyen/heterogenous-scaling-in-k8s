@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: graphite
+  name: testsvc1
+  namespace: {{.Values.namespace}}
+spec:
+  ports:
+  - nodePort: 30689
+    port: 2023
+    protocol: TCP
+    targetPort: 2023
+  selector:
+    app: graphite
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

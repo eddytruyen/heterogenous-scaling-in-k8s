@@ -1,0 +1,80 @@
+- hosts: all
+  become: yes
+  tasks:
+   - name: Install APT Transport HTTPS
+     apt:
+       name: apt-transport-https
+       state: present
+
+   - name: Install CA Certificates
+     apt:
+       name: ca-certificates
+       state: present
+
+   - name: Install curl
+     apt:
+       name: curl
+       state: present
+
+   - name: Install Software Properties Common
+     apt:
+       name: software-properties-common
+       state: present       
+
+   - name: Add Docker apt-key
+     apt_key:
+       url: https://download.docker.com/linux/ubuntu/gpg
+       state: present
+
+   - name: Add Docker apt repository.
+     apt_repository:
+       repo: deb https://download.docker.com/linux/ubuntu/ {{ansible_lsb.codename}} stable
+       state: present
+
+   - name: Install Docker
+     apt:
+       name: docker-ce=18.06.1~ce~3-0~ubuntu
+       state: present
+       update_cache: true
+
+   - name: Add Kubernetes apt-key
+     apt_key:
+       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+       state: present
+
+   - name: Add Kubernetes' APT repository
+     apt_repository:
+      repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+      state: present
+      filename: 'kubernetes'
+
+    ## See https://github.com/kubernetes/kubernetes/issues/75701 for info
+   - name: Install kubernetes-cni
+     apt:
+       name: kubernetes-cni=0.6.0-00
+       state: present
+
+   - name: Install kubelet
+     apt:
+       name: kubelet=1.12.2-00
+       state: present
+       update_cache: true
+
+   - name: Install kubeadm
+     apt:
+       name: kubeadm=1.12.2-00
+       state: present
+
+   - name: Prevent kubelet,kubeadm and docker from updating
+     command: apt-mark hold kubelet kubeadm docker-ce
+
+- hosts: master
+  become: yes
+  tasks:
+   - name: Install kubectl
+     apt:
+       name: kubectl=1.12.2-00
+       state: present
+       
+   - name: Prevent kubectl from updating
+     command: apt-mark hold kubectl

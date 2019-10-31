@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: consumer2
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: {{.Values.worker2Replicas}}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: arguez/java-consumer:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{.Values.worker2CPU}}
+          limits:
+            cpu: {{.Values.worker2CPU}}
+        env:
+        - name: DNS_NAMESPACE
+          value: {{.Values.namespace}}

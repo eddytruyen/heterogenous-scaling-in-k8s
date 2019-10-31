@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: consumer
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: {{.Values.workerReplicas}}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      nodeSelector: 
+        workerNode: "yes"
+      containers:
+      - name: consumer
+        image: arguez/java-consumer:latest
+        imagePullPolicy: Always
+        env:
+        - name: STRESS_SIZE
+          value: {{.Values.stressSize}}
+        resources:
+          requests:
+            cpu: {{.Values.workerCPU}}
+          limits:
+            cpu: {{.Values.workerCPU}}
+        env:
+        - name: DNS_NAMESPACE
+          value: {{.Values.namespace}}

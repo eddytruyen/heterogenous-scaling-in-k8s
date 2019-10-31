@@ -1,0 +1,4 @@
+namespace: yellow
+workerReplicas: 1
+demoCPU: 600m
+workerCPU: 500m

@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: rabbitmq
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      nodeSelector: 
+        workerNode: "yes"
+      containers:
+      - name: rabbitmq
+        hostname: rabbitmq-server
+        image: rabbitmq:3-alpine
+        ports:
+        - containerPort: 15672
+        - containerPort: 5672
+        readinessProbe:
+          exec:
+            command: ["true"]
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      priorityClassName: {{.Values.priorityClass}}
+          

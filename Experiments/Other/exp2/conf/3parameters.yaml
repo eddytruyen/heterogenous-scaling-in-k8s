@@ -1,0 +1,40 @@
+
+nbOfIterations: 1
+nbOfSamplesPerIteration: 50
+charts:
+  - name: my-app
+    chartdir: conf/helm/exp1app
+slas:
+  - name : silver
+    chartName: my-app
+    slos: 
+      jobsize: 50
+      throughput: 0.5
+    nbOfTenants: 17
+    parameters:
+      - name: workerCPU
+        searchspace:
+          min: 1900
+          max: 1900
+          granularity: 20
+        prefix: 
+        suffix: m
+      - name: workerReplicas
+        searchspace:
+          min: 1
+          max: 1
+          granularity: 1
+        prefix: 
+        suffix: 
+      - name: demoCPU
+        searchspace:
+          min: 1200
+          max: 1200
+          granularity: 100
+        prefix: 
+        suffix: m
+namespaceStrategy: NSPSLA
+optimizer: exhaustive
+utilFunc: resourceBased
+outputDir: Results/exp1_exh
+# prevResultsPath: datasets/exhaustive1/results.json

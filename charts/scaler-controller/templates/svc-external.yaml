@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: resource-planner
+  name: testsvc
+  namespace: {{.Values.namespace}}
+spec:
+  ports:
+  - nodePort: 30681
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: resource-planner
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

@@ -1,0 +1,66 @@
+nbOfIterations: 1
+nbOfSamplesPerIteration: 3
+charts:
+  - name: my-app
+    chartdir: /exp/conf/helm/exp2app
+slas:
+  - name : gold
+    chartName: my-app
+    slos: 
+      jobsize: 10
+      throughput: 0.5
+    nbOfTenants: 8
+    parameters:
+      - name: worker1CPU
+        searchspace:
+          min: 2200
+          max: 2200
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker1Replicas
+        searchspace:
+          min: 1
+          max: 1
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: worker2CPU
+        searchspace:
+          min: 750
+          max: 750
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker2Replicas
+        searchspace:
+          min: 0
+          max: 0
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: worker3CPU
+        searchspace:
+          min: 250
+          max: 250
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker3Replicas
+        searchspace:
+          min: 0
+          max: 2
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: demoCPU
+        searchspace:
+          min: 800
+          max: 800
+          granularity: 100
+        prefix: 
+        suffix: m
+namespaceStrategy: NSPSLA
+optimizer: exhaustive
+utilFunc: alphabetBased
+outputDir: /exp/Results/exp3/gold/8_tenants-ex1/exh/

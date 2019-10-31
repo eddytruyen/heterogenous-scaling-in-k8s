@@ -1,0 +1,34 @@
+bin:
+  path: src/tester.py
+charts:
+  name: newchart
+  chartdir: conf/helm/newchart
+slas:
+  - name : silver
+    slos: 
+      jobsize: 20
+      throughput: 0.5
+    maxTenants: 3
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 5
+      elements:
+        - size: 625
+        - size: 125
+        - size: 25
+  - name : gold
+    slos: 
+      jobsize: 20
+      throughput: 0.3
+    maxTenants: 3
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 5
+      elements:
+        - size: 625
+        - size: 125
+        - size: 25
+utilFunc: alphabetBased
+output: Results/exp2

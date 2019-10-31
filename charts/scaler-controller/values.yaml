@@ -1,0 +1,4 @@
+namespace: scaler
+priorityClass: scaler
+priorityValue: 100000
+

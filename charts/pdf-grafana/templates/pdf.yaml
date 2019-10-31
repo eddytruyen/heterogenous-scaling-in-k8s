@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: pdf-grafana
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pdf-grafana
+    spec:
+      containers:
+      - name: pdf-grafana
+        hostname: pdf-grafana
+        image: izakmarais/grafana-reporter
+        command: ["grafana-reporter"]
+        args: ["-ip", "172.19.42.20:30345"]
+        ports:
+        - containerPort: 8686
+      nodeSelector: 
+        monitoringNode: "yes"

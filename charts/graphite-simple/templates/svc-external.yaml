@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: graphite
+  name: testsvc
+  namespace: {{.Values.namespace}}
+spec:
+  ports:
+  - nodePort: 30690
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: graphite
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

@@ -1,0 +1,11 @@
+"Method","Name","# requests","# failures","Median response time","Average response time","Min response time","Max response time","Average Content Size","Requests/s"
+"GET","silver-0",17,0,2800,3378,1863,6694,19,0.29
+"GET","silver-1",17,0,2800,3364,1743,6691,19,0.29
+"GET","silver-2",17,0,2700,3389,1899,7215,19,0.29
+"GET","silver-3",17,0,2700,3410,1700,6887,19,0.29
+"GET","silver-4",17,0,2600,3401,1741,6619,19,0.29
+"GET","silver-5",17,0,2700,3383,1881,6589,19,0.29
+"GET","silver-6",17,0,2700,3394,1907,6895,19,0.29
+"GET","silver-7",18,0,2800,3326,1737,6610,19,0.30
+"GET","silver-8",17,0,2800,3372,1802,6520,19,0.29
+"None","Total",154,0,2800,3380,1700,7215,19,2.60

@@ -1,0 +1,45 @@
+nbOfIterations: 1
+nbOfSamplesPerIteration: {{samples}}
+charts:
+  - name: my-app
+    chartdir: {{chart_dir}}
+slas:
+{% for sla in slas %}
+  - name : {{sla.class}}
+    chartName: my-app
+    slos: 
+      jobsize: {{sla.slos.jobsize}}
+      throughput: {{sla.slos.throughput}}
+    nbOfTenants: {{sla.tenants}}
+    parameters:
+    {% for worker in sla.workers %}
+      - name: worker{{worker.id}}CPU
+        searchspace:
+          min: {{worker.cpu}}
+          max: {{worker.cpu}}
+          granularity: 20
+        prefix: 
+        suffix: m
+      - name: worker{{worker.id}}Replicas
+        searchspace:
+          min: {{worker.replicas.min}}
+          max: {{worker.replicas.max}}
+          granularity: 1
+        prefix: 
+        suffix:
+       {% endfor %}
+      - name: demoCPU
+        searchspace:
+          min: {{sla.demoCPU}}
+          max: {{sla.demoCPU}}
+          granularity: 100
+        prefix: 
+        suffix: m
+{% endfor %}
+namespaceStrategy: NSPSLA
+optimizer: {{optimizer}}
+utilFunc: {{util_func}}
+outputDir: {{output}}
+{% if prev_results %}
+prevResultsPath: {{prev_results}}
+{% endif %}

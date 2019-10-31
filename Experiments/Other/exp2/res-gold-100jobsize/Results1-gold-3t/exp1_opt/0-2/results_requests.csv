@@ -1,0 +1,4 @@
+"Method","Name","# requests","# failures","Median response time","Average response time","Min response time","Max response time","Average Content Size","Requests/s"
+"GET","silver-0",1,1,31000,30767,30767,30767,0,0.03
+"GET","silver-1",1,1,30000,30273,30273,30273,0,0.03
+"None","Total",2,2,30000,30520,30273,30767,0,0.07

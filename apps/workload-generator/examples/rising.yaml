@@ -1,0 +1,7 @@
+load:
+  - trace:
+    - segment: rising
+      initialCount: 1
+      endCount: 3
+      duration: 20
+    repeat: 1
