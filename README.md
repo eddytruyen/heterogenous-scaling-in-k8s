@@ -199,7 +199,7 @@ The metrics of graphite are available under performance.gold
 * Adapt the Metrics of the CPU panel as follows: ![pod-metrics-editor-1](images/pod-metrics-editor-1.PNG)
 * Select the mixed datasource to add the number of users as follows: ![pod-metrics-editor-2](images/pod-metrics-editor-2.PNG)
 * Move the number of tenants metrics to the right Y-axis as above: ![Y-axis-3](images/Y-axis-3.png]
-* Use the Display menu to customize the printing of the lines: ![Display](images/display.PNG)
+* Use the Display menu to customize the printing of the lines: ![Display](images/Display.PNG)
 * Use the Legends menu to add averages to the legend's items: ![Legend](images/Legend-avg.PNG)
 
 
