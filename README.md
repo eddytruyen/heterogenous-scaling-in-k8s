@@ -128,7 +128,7 @@ This script is going to fetch metrics from the current run using the Locust API 
 
 
 ## Troubleshooting missing modules in metrics.py
-Note metrics.py requires the aiohttp module that is not supported anymore in python3.6. This gives problems if the Locust program is installed for python3.5.
+Note metrics.py requires the aiohttp module that is not supported anymore in python3.5. This gives problems if the Locust program is installed for python3.5.
 The solution is to use virtual environments.
 
 First check your python3 version
