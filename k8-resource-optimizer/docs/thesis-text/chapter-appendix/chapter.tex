@@ -1,0 +1,52 @@
+\chapter{Short tutorial}
+This short tutorial describes how to build  container images for the simple batch processing application and k8-resource-optimizer. Next it describes how to deploy the tool and perform a SLA-decomposition for the simple batch processing application.
+\section{Prerequisites}
+The tutorial assumes that the following tools are installed on your development machine. The provided scripts are written in for a Bash compatible shell.
+\begin{itemize}
+    \item Apache Maven - \url{https://maven.apache.org}
+    \item Docker - \url{https://www.docker.com}
+    \item Minikube - \url{https://github.com/kubernetes/minikube}
+    \item Helm  - \url{https://github.com/helm/helm}
+    \item Golang - \url{https://golang.org}
+\end{itemize}
+The tutorial also requires a Docker Hub account with (empty) repositories named: k8-resource-optimizer, consumer and demo.
+
+\section{Simple batch processing application}
+The source code of the components of the simple batch application can be found in the directory named application. 
+A component can be build and pushed to your dedicated Docker Hub repository by running the provided bash script named \texttt{build.sh} located in the application directory inside the component's directory. Use the variable \texttt{DOCKERACCOUNT} part of the script to specify your Docker Hub account. The script expects the component name as a command-line argument. This is either \texttt{consumer} or \texttt{demo} (queue). The script uses Maven to build the application. In the \texttt{pom.xml}, a docker-maven plugin by Spotify is used for the creation of the docker container image.
+
+\begin{lstlisting}
+cd application/consumer
+./../build.sh consumer
+\end{lstlisting}
+
+\noindent The image names in the templates of the Helm chart belonging to the application have to be changed to those of your personal Docker Hub account. The helm chart is located in the \texttt{conf} directory. The provided \texttt{changeAccountName.sh} bash script can do this for you. This script keeps the original files with a \texttt{.bak} extension.
+\lstset{
+   basicstyle=\fontsize{11}{13}\selectfont\ttfamily
+}
+\begin{lstlisting}
+./changeAccountName.sh YOUR_ACCOUNT
+\end{lstlisting}
+
+\section{k8-resource-optimizer}
+The k8-resource-optimizer can be build and pushed to your dedicated Docker Hub repository by running the provided bash script name \texttt{build.sh} inside the main directory. This script first builds a Go binary for a Linux environment and stores it in the bin directory. It proceeds with building a Docker container capable of executing the tool. The dockerfile assures that the binary and configuration files are part of the Docker image. The script requires the specification of your Docker Hub account as the variable \texttt{DOCKERACCOUNT}.
+\begin{lstlisting}
+./build.sh
+\end{lstlisting}
+
+\noindent The k8-resource-optimizer can be deployed via the provided \texttt{tool-deployment.yaml} file in the main directory. The image specification in this file should be altered to your personal Docker account. The \texttt{changeAccountName.sh} script mentioned in the previous sections takes care of this. The following command actually deploys the tool within your Kubernetes cluster.
+\begin{lstlisting}
+kubectl create -f tool-deployment.yaml
+\end{lstlisting}
+When the pod containing the tool is deployed, you are able to start an interactive shell on the pod . The \texttt{connect.sh} script does this automatically. 
+\begin{lstlisting}
+./connect.sh
+\end{lstlisting}
+
+Once connected with the pod, you are able to run the tool on an given decomposition configuration. An example is given in \texttt{conf/decompose.yaml}. The configuration is passed as a command-line argument. Once the tool is finished a report is created under the name \texttt{test\_report.txt}.
+\begin{lstlisting}
+cd exp
+./k8-resource-optimizer conf/sladecompose.yaml
+\end{lstlisting}
+Since it is cumbersome task to rebuild the container image of the tool for every change during development, a script is provided to build and copy the binary of the tool to a running pod (containing an older version of the tool) from your development machine. The \texttt{buildandcp.sh} script can be found in the main directory of the project.
+

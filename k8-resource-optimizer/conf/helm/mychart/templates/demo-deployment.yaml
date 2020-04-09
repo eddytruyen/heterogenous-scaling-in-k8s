@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: demo
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+      - name: demo
+        image: matthijskaminski/demo:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{.Values.demoCPU}}
+          limits:
+            cpu: {{.Values.demoCPU}}
+        # readinessProbe:
+        #   httpGet:
+        #     path: /pushJob/200
+        #     port: 8080
+        #     httpHeaders:
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 3
+
+
+       

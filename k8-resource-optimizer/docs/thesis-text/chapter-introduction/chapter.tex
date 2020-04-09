@@ -1,0 +1,76 @@
+\chapter{Introduction}
+
+
+
+
+
+% The goal of multi-tenant SaaS applications is to serve tenants with varying needs with a minimal cost for the SaaS provider. These different needs are typically expressed by SLAs. Minimizing the cost is achieved by sharing the infrastructure between tenants at application level instead of having an application instance for each tenant. This approach introduces the need for performance isolation between these tenants allowing for Quality of Service differentiation. Traditionally this was solved by using middleware that involved complex control loops and configuration.  Recent research addresses the issues with the container orchestration. It shows that achieving QoS differentiation is feasible using container orchestration. \\\\
+% The goal of the thesis is to build upon the findings by the creation of a tool that utilizes performance tuning.\\\\
+
+\section{Context}
+
+In recent years, the cloud computing paradigm has become a key component of IT infrastructures. It is an umbrella term as it refers to both the hardware available in data centers and the various provided services utilizing that hardware~\cite{armbrust2010view}.  The paradigm enables on-demand network access to a rapidly available pool of computing resources~\cite{mell2011nist}. Computing is offered as a utility. The models offered by vendors range from the lower-level infrastructure as a service (IaaS) to higher level software as a service (SaaS). It is evident that SaaS providers themselves often make use of IaaS. The seemingly endless amount of on-demand resources offers SaaS providers the opportunity to minimize or completely abandon their on-premise infrastructure, thus minimizing capital expenses while dynamically managing operational expenses (i.e., CapEx to OpEx~\cite{armbrust2010view}). \\
+
+\noindent In a business context, a Service Level Agreement (SLA) between a customer and a service provider is a formal agreement, encapsulating, but not limited to, service behavior guarantees, customer usage terms and possible penalties for violating these guarantees/terms. An SLA typically also contains several Service Level Objectives (SLOs). An SLO represents a specific measurable characteristic of the service, typically Quality of Service (QoS) metrics such as availability, latency or throughput.\\
+
+\noindent SaaS providers face the constant challenge of offering their products at the best service level for the most competitive price. To further minimize their costs, SaaS providers employ the architectural design principle of multi-tenancy. Multi-tenancy attempts  maximizing the sharing of resources among multiple customers organizations, referred to as tenants.\\
+
+\noindent The sharing of resources between tenants, however, poses a few challenges: (i) dealing with aggressive tenants (admission control), (ii) offering quality of service differentiation (QoS-differentiation) for different SLA-classes and (iii) achieving efficient resource utilization. The research community has proposed several strategies for achieving multi-tenancy. \\\\
+
+\noindent In~\cite{Walraven2015b} these challenges are tackled at the application-level by introducing a middleware layer. The middleware allows prioritization of tenant tasks within a submission queue. This prioritization is achieved by scheduling tasks based on information retrieved by control loops. Assignment of both the task of dealing with aggressive tenants as the task of achieving QoS-differentiation to the scheduling  algorithm increases its complexity. As a result, these solutions appear unstable under changing workloads and thus often require reconfiguration of algorithm parameters. 
+\\\\
+\noindent More recent work~\cite{TruyenEddy2016Taca} proposes container technology and  container orchestration as a possible solution for multi-tenancy. Containers are a more lightweight version of virtualization compared to traditional virtual machines (VMs). By sharing the OS kernel, containers can offer similar performance as VMs with less overhead. Container orchestration platforms enable the operation and organization of containers on  a cluster of machines.~\cite{TruyenEddy2016Taca} suggest the use of resource allocation concepts (e.g., CPU and memory) of Kubernetes ~\cite{kubernetes}, a container orchestration platform, to achieve QoS-differentiation between SLA-classes. In addition, two strategies for sharing resources between multiple tenants of possible different SLA-classes are given. 
+
+
+
+\section{Problem statement}
+The goal of the thesis is to build upon the proposals of~\cite{TruyenEddy2016Taca}, using container orchestration resource allocation policies to achieve multi-tenancy for SaaS providers. The assignment of compute resources to achieve QoS-differentiation introduces the problem of SLA-decomposition~\cite{chen2007sla}. The problem can be formulated as follows. Given an application, a workload and set of SLOs find a resource allocation that satisfies the SLOs. In the context of SaaS providers, the resource allocation is preferable as cost-efficient as possible. A user study conducted by~\cite{jyothi2016morpheus} states that 70\%  of jobs submitted to a production cluster were over-provisioned. And for 20\% of the jobs 10x more resources than necessary were allocated. This indicates that resource allocation requires extensive expertise and knowledge of the application. Therefore, SLA-decomposition is proven to be an even more difficult task. Moreover, when new tenants are subscribed, simple linear resource scaling will either over-provision or under-provision resources as has been shown in previous work~\cite{andrejacobs,lang2014towards}.\\\\
+Existing state-of-the-art has applied non-linear programming to the problem of multi-tenant SLOs for databases~\cite{lang2014towards}. Here, an optimization problem is solved where the constraints of the objective function are non-linear.  However, the quality of the solution succeeds or breaks depending on how well the model of the SaaS application corresponds with  real application data. 
+
+
+\section{Approach}
+\label{goals}
+The ultimate goal of the thesis is the design and implementation of a tool capable of automatically deriving a cost-efficient SLA-decomposition for a SaaS application deployed via a container orchestration platform, Kubernetes in particular. In other words, given an application, a workload and SLOs find a cost-efficient resource allocation  that satisfies the SLOs. Furthermore, the tool should support the deployment strategies for multi-tenancy suggested by~\cite{TruyenEddy2016Taca}. The correctness and feasibility of the tool should be evaluated in the context of a multi-tenant batch processing application. \\\\
+Achieving this goal requires the completion of several smaller goals:
+\begin{itemize}
+    \item \textbf{Selection of a technique to perform a SLA-decomposition.}\\
+        The creation of an automated tool requires an algorithmic solution to the problem of SLA-decomposition. The purpose of the tool is to simplify the decomposition task for system administrators. The proposed solution should not require extensive knowledge of the application nor of the decomposition technique employed by the automated tool.
+    \item \textbf{Design and implementation of proof of concept automated SLA-decomposition tool. }
+        The selected SLA-decomposition technique should be adapted for the Kubernetes container orchestration environment. The adaption has to be implemented in a proof of concept automated tool. The design of the tool should also allow for compatibility with different Kubernetes applications. 
+    \item \textbf{Evaluation of the proof of concept in a controlled environment.}
+        The correctness and feasibility of the proposed solution have to be evaluated in a controlled environment. A controlled environment allows for easier validation. For that reason, a simple and understandable batch processing application should be designed and implemented. 
+\end{itemize}
+
+\section{Contribution of thesis}
+ The thesis provides insights into several SLO-decomposition capable techniques proposed in research. From these techniques, the performance optimization algorithm of BestConfig~\cite{zhu2017bestconfig}, a search-based configuration auto tuner, was selected for its understandability and adaptivity. The algorithm was adapted for the container orchestration setting and implemented in an automated tool named k8-resource-optimizer. k8-resource-optimizer searches for an optimal resource allocation based on real performance evaluation, thus eliminating uncertainties present in model-based approaches. To our knowledge, these techniques have not yet been applied to the problem of multi-tenant SLOs.
+ Building on top of well-known Kubernetes tools, k8-resource-optimizer is able to perform a resource efficient SLO-decomposition for a multi-tenant Kubernetes application starting from  an input configuration describing an application template, a deployment strategy and the required SLOs.
+
+
+\section{Overview of text}
+The remainder of the thesis is structured as follows. Chapter~\ref{ch:background} contains the necessary background information for the thesis. It presents an overview of cloud computing, multi-tenancy, container-technology and container orchestration. Chapter~\ref{ch:related} discusses relevant related work and gives insights into the several techniques that can be used for SLA-decomposition. The chapter concludes with the selection of the most appropriate technique used in the proposed solution. Chapter~\ref{chapter_app} presents the application built to evaluate the solution presented by the thesis. Chapter~\ref{ch:k8-bench} discusses the architecture and implementation of the proposed solution and associated prototype, called k8-resource-optimizer. Next, in Chapter~\ref{ch:eval} the accuracy and performance of the k8-resource-optimizer tool are evaluated in various scenarios. Finally, our conclusion and future work are presented in Chapter~\ref{ch:conclusion}. 
+
+
+
+
+% As mentioned in Section~\ref{multi-tenancy} a SaaS providers want to minimize the total cost of ownership by employing the design principle of multi-tenancy. The sharing of resources between tenants however posses a few challenges: dealing with aggressive tenants, offering quality of service differentiation for different SLA-classes and achieving efficient resource utilization. In this thesis the focus will be on batch-driven multi-tenant SaaS applications. 
+% \subsection{Application-level multi-tenancy}
+% In related work~\cite{WalravenStefan2015Apim} these challenges are tackled at the application-level by introducing a middleware layer. The middleware allows priorization of tenants tasks within a submission queue. This prioritization is achieved by scheduling tasks based on information retrieved by control loops. The control loops gather information on the different tenant profiles and the current situation of the system (queue and workers). Assignment of both the task of dealing with aggressive tenants as the task achieving QoS-differentiation to the scheduling  algorithm increases its complexity. As a result these solutions appear unstable under changing workloads and thus often require reconfiguration of algorithm parameters. 
+% \subsection{Container orchestration for multi-tenancy}
+% \label{findings}
+% Recent work~\cite{TruyenEddy2016Taca} proposes container orchestration as a possible solution for achieving multi-tenancy. Here, Kubernetes concepts such as resource limits and namespaces are proposed for QoS-differentiation between SLA-classes. Each SLA-class is assigned a namespace with dedicated pods. Containers within these pods are assigned the required resources to guarantee the SLA specifications. Other work shows the feasibility of this approach but notes the non-linear scalability characteristic of the method. Both vertical and horizontal scaling of pods show a more than linear increase in performance e.g. doubling the resource results in more than double the performance. 
+
+
+% The goal of the thesis is to build upon the findings discussed in Section~\ref{findings} by the creation of a offline workload modeling tool and open framework on top of Kubernetes.
+% \subsection{Offline workload modeling}
+% The first goal of the thesis is the creation of a offline workload modeling tool. The purpose of the tool is given input SLA-class, application and range possible amounts of tenants to output for each amount of tenants the required deployment settings (resources, replicas).
+% \subsection{Open framework}
+% The second goal of the thesis is the development of a open framework for batch driven application on top of Kubernetes. This framework should support different strategies to share resources between Namespaces. These strategies could be concerned with:
+% \begin{itemize}
+% \item How to share unallocated resources between active Namespaces: for example when no tenants of Namespace Y are present, these resources might be given to SLA class X.
+% \item However QoS-predictability must still be given for example when a tenant of Y submits a task.
+% \end{itemize}
+% The framework should also be able to scale the Namespaces based upon the offline workload model created by the workload modeling tool using different strategies:
+% \begin{itemize}
+% \item Horizontal pod scaling: scaling the number of worker pods in a Namespace.
+% \item Or scaling worker pods vertically, this however requires a restart and would result in a temporary dip in throughput of the tenant. Allowance of this strategy be reflected in the specification of the SLA-class.
+% \end{itemize}

@@ -1,0 +1,11 @@
+first start locust
+
+```
+locust -f ../../Locust/locustfile-exp.py
+```
+
+then start generator e.g. with a seasonal workload
+
+```
+python3 generator.py start -f thesis/seasonal.yaml --host=http://172.17.13.106:8089
+```

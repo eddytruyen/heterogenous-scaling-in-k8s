@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: consumer1
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: {{.Values.worker1Replicas}}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: arguez/python-consumer:process
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{.Values.worker1CPU}}
+          limits:
+            cpu: {{.Values.worker1CPU}}
+        env:
+        - name: DNS_NAMESPACE
+          value: {{.Values.namespace}}
+        - name: STRESS_SIZE
+          value: "{{.Values.stressSize}}"
+        - name: POOL_SIZE
+          value: "{{.Values.poolSize1}}"
+      priorityClassName: {{.Values.priorityClass}}
+          

@@ -1,4 +1,5 @@
 from locust import HttpLocust, TaskSet, task, events, web
+from locust.wait_time import between
 import locust.events
 import time
 import socket
@@ -12,7 +13,7 @@ class TasksetT1(TaskSet):
         self.sock = socket.socket()
         self.client.get("/login")
         try:
-            self.sock.connect(('172.19.42.20', 30588))
+            self.sock.connect(('172.17.13.106', 30688))
         except (socket.error):
             print("Couldnt connect with the socket-server: terminating program...")
         
@@ -25,7 +26,7 @@ class TasksetT1(TaskSet):
     # but it might be convenient to use the @task decorator
     @task
     def pushJob(self):
-        with self.client.get("/pushJob/10",name="bronze", catch_response=True) as resp:
+        with self.client.get("/pushJob/10",name="gold", catch_response=True) as resp:
             if resp.content.decode('UTF-8') != "completed all tasks":
                 resp.failure("Got wrong response")
 
@@ -33,17 +34,17 @@ class MyLocust(HttpLocust):
     weight = 1
   
     # host = "http://demo.gold.svc.cluster.local:80
-    host = "http://172.19.42.20:30598"
+    host = "http://172.17.13.106:30698"
 
-    min_wait = 0
-    max_wait = 0
+    wait_time = between(0,0)  
+    
     task_set = TasksetT1
 
     def __init__(self):
         super(MyLocust, self).__init__()
         self.sock = socket.socket()
         try:
-            self.sock.connect(('172.19.42.20', 30689))
+            self.sock.connect(('172.17.13.106', 30689))
         except (socket.error):
             print("Couldnt connect with the socket-server: terminating program...")
         

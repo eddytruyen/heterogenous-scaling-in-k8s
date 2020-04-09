@@ -1,8 +1,8 @@
-import utils
-from parser import ConfigParser
-from experiment import SLAConfigExperiment
-from analyzer import ExperimentAnalizer
-from sla import SLAConf,WorkerConf
+from . import utils
+from .parser import ConfigParser
+from .experiment import SLAConfigExperiment
+from .analyzer import ExperimentAnalizer
+from .sla import SLAConf,WorkerConf
 from functools import reduce
 
 def generate_matrix(initial_conf):

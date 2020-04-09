@@ -1,8 +1,8 @@
 bin:
-  path: ./slaconfig
+  path: /bin/k8-resource-optimizer
 charts:
   name: mychart
-  chartdir: conf/helm/exp2app
+  chartdir: /chart/exp2app
 slas:
   - name : gold
     slos: 

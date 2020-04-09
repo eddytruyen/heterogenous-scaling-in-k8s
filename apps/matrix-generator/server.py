@@ -5,7 +5,6 @@ import json
 
 
 
-config_data = yaml.safe_load(open('data/single-replica.yaml'))
 
 
 app = Flask(__name__)
@@ -14,6 +13,9 @@ app = Flask(__name__)
 def home():
     namespace = request.args.get('namespace')
     tenants = request.args.get('tenants')
+
+    config_data = yaml.safe_load(open('data/single-replica.yaml'))
+
 
     conf=config_data[str(namespace)][str(tenants)]
     return json.dumps(conf)

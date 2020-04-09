@@ -1,5 +1,5 @@
-import utils
-from template import SLAConfigTemplate
+from . import utils
+from .template import SLAConfigTemplate
 
 
 class SLAConfigExperiment:

@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: {{.Values.namespace}}
+  annotations:
+   scheduler.alpha.kubernetes.io/node-selector: workerNode=yes

@@ -1,4 +1,4 @@
-import utils
+from . import utils
 
 class ExperimentAnalizer:
 	def __init__(self, exp_path):

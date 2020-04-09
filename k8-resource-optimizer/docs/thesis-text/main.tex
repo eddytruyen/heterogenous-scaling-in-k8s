@@ -1,0 +1,197 @@
+\documentclass[master=cws,masteroption=gs]{config/kulemt}
+\setup{title={Multi-tenant performance SLOs for container orchestrated batch workloads},
+  author={Matthijs Kaminski},
+  promotor={Prof.\,dr.\,ir.\ Wouter Joosen \and  Dr. Eddy Truyen},
+  assessor={Prof.\,dr.\ Adalberto Simeone \and Emad Heydari Beni},
+  assistant={Emad Heydari Beni}}
+% The following \setup may be removed entirely if no filing card is wanted
+\setup{filingcard,
+  translatedtitle=,
+  udc=681.3,
+  shortabstract={  SaaS Providers face the constant challenge to maximize the use of their rented infrastructure in order to offer their software service at the most competitive price. Often a multi-tenant architecture is employed in order to maximize resource sharing between tenants. This requires techniques to differentiate the service between different classes of tenants. The quality of the service provided is specified in an Service Level Agreement (SLA) between tenant and provider. Recent work states that the resource management concepts of container technology such as Docker and  container orchestration platforms such as Kubernetes can be used to achieve multi-tenancy with quality of service differentiation while offering fine-grained resource allocation. In order to use these container orchestration concepts, SaaS providers need to translate Service Level Objectives (SLOs), which are part of the SLA, to low-level resource allocations. This difficult task typically requires extensive domain expertise.Existing state-of-the-art approaches to this problem rely on a model of the application and therefore again requires extensive domain expertise in order to create an accurate model of the application. In opposition to this approach, we propose a generic  approach that does not require any model of the application or another type of domain expertise. Instead, we determine mappings between SLOs and resource allocations by adapting a performance tuning technique that relies on continuous experimentation of the application in the production environment. We believe such continuous experimentation is feasible in contemporary DevOps environments where a new version of the application is tested in the production environment before exposing it to clients.In this master thesis this approach is implemented as part of an automated tool, k8-resource-optimizer,  capable of translating SLOs for a given application and workload to Kubernetes resource concepts.  Experimental evaluation of k8-resource-optimizer with a simple batch processing application has shown that this approach is practically able to produce an optimal or near-optimal resource allocation in various deployment scenarios with one or more SLOs for one or more tenant organizations. Therefore,  k8-resource-optimizer shows potential as a useful DevOps tool.}}
+% Uncomment the next line for generating the cover page
+% \setup{coverpageonly}
+% Uncomment the next \setup to generate only the first pages (e.g., if you
+% are a Word user.
+%\setup{frontpagesonly}
+
+% Choose the main text font (e.g., Latin Modern)
+\setup{font=lm}
+
+% If you want to include other LaTeX packages, do it here. 
+
+% Finally the hyperref package is used for pdf files.
+% This can be commented out for printed versions.
+\usepackage[pdfusetitle,colorlinks,plainpages=false]{hyperref}
+
+%%%%%%%
+% The lipsum package is used to generate random text.
+% You never need this in a real master's thesis text!
+\IfFileExists{lipsum.sty}%
+ {\usepackage{lipsum}\setlipsumdefault{11-13}}%
+ {\newcommand{\lipsum}[1][11-13]{\par And some text: lipsum ##1.\par}}
+%%%%%%%
+
+
+
+
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage{subfigure}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Code for YAML highlighting
+\usepackage[dvipsnames]{xcolor}
+\usepackage{listings}
+
+\newcommand\YAMLcolonstyle{\color{red}\mdseries}
+\newcommand\YAMLkeystyle{\color{black}\bfseries}
+\newcommand\YAMLvaluestyle{\color{blue}\mdseries}
+
+\makeatletter
+
+% here is a macro expanding to the name of the language
+% (handy if you decide to change it further down the road)
+\newcommand\language@yaml{yaml}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@yaml}
+{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{darkgray}\bfseries,
+  basicstyle=\YAMLkeystyle,                                 % assuming a key comes first
+  sensitive=false,
+  comment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\YAMLvaluestyle\ttfamily,
+  moredelim=[l][\color{orange}]{\&},
+  moredelim=[l][\color{magenta}]{*},
+  moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},   % switch to value style at :
+  morestring=[b]',
+  morestring=[b]",
+  literate =    {---}{{\ProcessThreeDashes}}3
+                {>}{{\textcolor{red}\textgreater}}1     
+                {|}{{\textcolor{red}\textbar}}1 
+                {\ -\ }{{\mdseries\ -\ }}3,
+}
+
+% switch to key style at EOL
+\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLkeystyle\fi}
+\makeatother
+
+\newcommand\ProcessThreeDashes{\llap{\color{cyan}\mdseries-{-}-}}
+
+
+%\includeonly{chap-n}
+\begin{document}
+
+\renewcommand{\prefacename}{Acknowledgements}
+\begin{preface}
+This thesis has been quite a long journey. Luckily,  I had a lot of wonderful people helping and supporting me throughout the ups and downs.  With this acknowledgement, I would like to thank each and everyone of them.\\\\
+I would like to thank my promotor, Eddy Truyen for the opportunity to work on such an interesting research topic. Your guidance and feedback led me to create this end result of which I am proud.\\\\
+Many thanks to my promotor, Wouter Joosen and my coach, Emad Heydari Beni for their feedback and insights during our meetings.\\\\ 
+Last but definitely not least, I would like to thank my parents, Sien and my friends for supporting me during these past years. 
+ 
+\end{preface}
+
+\tableofcontents*
+
+\begin{abstract}
+    The cloud computing paradigm has become more popular over the past recent years. Cloud providers offer various on-demand products ranging from hardware infrastructure to software services. Providers of the latter face the constant challenge to maximize the use of their rented infrastructure in order to offer their software service at the most competitive price. Often a multi-tenant architecture is employed in order to maximize resource sharing between tenants. This requires techniques to differentiate the service between different classes of tenants. The quality of the service provided is specified in an Service Level Agreement (SLA) between tenant and provider. Recent work states that the resource management concepts of container technology such as Docker and  container orchestration platforms such as Kubernetes can be used to achieve multi-tenancy with quality of service differentiation while offering fine-grained resource allocation. In order to use these container orchestration concepts, SaaS providers need to translate Service Level Objectives (SLOs), which are part of the SLA, to low-level resource allocations. This difficult task typically requires extensive domain expertise. \\\\
+    Existing state-of-the-art approaches to this problem rely on a model of the application and therefore again requires extensive domain expertise in order to create an accurate model of the application. In opposition to this approach, we propose a generic  approach that does not require any model of the application or another type of domain expertise. Instead, we determine mappings between SLOs and resource allocations by adapting a performance tuning technique that relies on continuous experimentation of the application in the production environment. We believe such continuous experimentation is feasible in contemporary DevOps environments where a new version of the application is tested in the production environment before exposing it to clients. \\\\
+    In this master thesis this approach is implemented as part of an automated tool, k8-resource-optimizer,  capable of translating SLOs for a given application and workload to Kubernetes resource concepts.
+    % The task is accomplished by the implementation of a known auto-tuning technique used to find  an optimal configuration in a multi-dimensional search space.
+    The tool allows the Kubernetes application to be declaratively specified as a typical Helm chart and allows declarative configuration of SLOs, resource search space parameters and workload profiles. The latter are intended to stress the application with the maximal allowed workload in order to determine whether the SLO is violated or not. \\\\
+    Experimental evaluation of k8-resource-optimizer with a simple batch processing application has shown that this approach is practically able to produce an optimal or near-optimal resource allocation in various deployment scenarios with one or more SLOs for one or more tenant organizations. Therefore,  k8-resource-optimizer shows potential as a useful DevOps tool.
+    % when a new version of the application is being tested in the production environment.
+    
+\end{abstract}
+
+\renewcommand{\abstractname}{Nederlandstalige samenvatting}
+\begin{abstract}
+Het cloud computing paradigma is gedurende de laatste jaren een belangrijk onderdeel geworden van IT-infrastructuren.  Het is een overkoepelende term die gebruikt wordt voor zowel de aangeboden hardware in datacenters, alsook voor de verschillende beschikbare diensten die gebruik maken van deze hardware. Computerkracht wordt aangeboden als een nutsvoorziening via het netwerk. De aangeboden modellen vari\"{e}ren van laag niveau \textit{Infrastructure as a Service} (IaaS) tot  hoog niveau \textit{Software as a Service} (SaaS).  Aanbieders van SaaS applicaties maken zelf meestal gebruik van een gehuurde IaaS.  Deze op aanvraag beschikbare infrastructuur maakt de nood aan een dure priv\`{e} infrastructuur van  SaaS aanbieders overbodig. \\\\
+Een \textit{Service Level Agreement} (SLA)  is een formele overeenkomst tussen een klant en een dienstleverancier. Dit contract bevat een beschrijving van de dienst, aangeboden garanties en gebruiksvoorwaarden. Een SLA bevat typisch ook enkele \textit{Service Level Objectives} (SLOs). Een SLO beschrijft een meetbare eigenschap van de aangeboden dienst zoals beschikbaarheid, wachttijd of doorvoer.
+\\\\
+SaaS aanbieders streven ernaar om hun dienst aan te bieden met een hoge kwaliteit voor een competitieve prijs. Hiervoor hanteren ze een \textit{multi-tenant} architectuur waarbij er gestreefd wordt naar een maximale benutting van de capaciteit door middel van het delen van hardware of software tussen klanten. Deze aanpak vereist echter wel technieken die het mogelijk maken om verschillende kwaliteitsniveaus van de dienst aan te kunnen bieden. Hiernaar wordt verwezen als \textit{Quality of Service} (QoS) differentiatie. 
+\\\\
+Recent is er een enorme groei aan de populariteit van containertechnologie\"{e}n zoals Docker. Deze virtualisatietechnologie biedt een gelijkaardige performantie als traditionele virtuele machines op een meer kost-effici\"{e}nte manier.  Containers laten bovendien een meer flexibele en verfijnde allocatie van \textit{compute resources} zoals CPU en geheugen toe. Voor het beheren van een groot aantal containers op een cluster van machines zijn er containerorchestratie systemen, zoals Kubernetes ontwikkeld. Recent academisch werk suggereert het gebruik van\textit{resource management}  concepten van Kubernetes voor het bereiken van QoS-differentiatie in een multi-tenant architectuur bovenop container orchestratie. SaaS aanbieders kunnen gebruikmakend van deze concepten de capaciteit van hun gehuurde infrastructuur beperken tot de capaciteit nodig voor het bereiken van afgesproken SLOs. 
+Om dit mogelijk te maken, moet er een kost-effici\"{e}nte vertaling van SLOs naar \textit{resource} allocatie strategie gemaakt worden voor de applicatie van de SaaS aanbieder. Voor deze taak wordt de term \textit{SLA-decomposition} gebruikt. Het uitvoeren van deze taak blijkt een moeilijke opdracht voor de meeste ontwikkelaars en vereist veel ervaring en domeinkennis.
+\\\\
+Bestaande oplossingen voor dit probleem gebruiken veelal een theoretisch model van de applicatie. Het opstellen van dergelijke modellen vereist echter ook enige expertise. In deze thesis stellen we een methode voor die geen applicatie modellen of domeinkennis vereist. In deze methode wordt de vertaling tussen SLOs en resource allocaties gerealiseerd door een aangepaste \textit{ performance tuning} techniek die de applicatie onderwerpt aan continue experimentatie in de productie omgeving. 
+\\\\
+In deze thesis wordt deze methode ge\"{i}mplementeerd als een geautomatiseerde tool genaamd k8-resource-optimizer. Deze tool is in staat om SLOs van een gegeven applicatie en gegeven werkbezetting te vertalen naar Kubernetes \textit{resource} concepten. Het ontwerp van de tool zorgt voor een gemakkelijke integratie met Kubernetes en Helm een populaire \textit{package manager} voor Kubernetes.
+\\\\
+Uit experimentele evaluatie van k8-resource-optimizer met een simpele \textit{batch processing} applicatie is gebleken dat deze tool is staat is om een optimale of bijna optimale \textit{resource} allocatie te produceren in scenario's met een of meer SLOs van verschillende klantorganisaties. Hoewel er verdere experimentatie nodig is, lijkt k8-resource-optimizer een handige DevOps applicatie die  gebruikt kan worden wanneer een nieuwe versie van een applicatie getest wordt in de productieomgeving, voordat deze toegankelijk is voor klanten.
+
+\end{abstract}
+
+% A list of figures and tables is optional
+%\listoffigures
+%\listoftables
+% If you only have a few figures and tables you can use the following instead
+\listoffiguresandtables
+% The list of symbols is also optional.
+% This list must be created manually, e.g., as follows:
+% \chapter{List of Abbreviations and Symbols}
+% \section*{Abbreviations}
+% \begin{flushleft}
+%   \renewcommand{\arraystretch}{1.1}
+%   \begin{tabularx}{\textwidth}{@{}p{12mm}X@{}}
+%     LoG   & Laplacian-of-Gaussian \\
+%     MSE   & Mean Square error \\
+%     PSNR  & Peak Signal-to-Noise ratio \\
+%   \end{tabularx}
+% \end{flushleft}
+% \section*{Symbols}
+% \begin{flushleft}
+%   \renewcommand{\arraystretch}{1.1}
+%   \begin{tabularx}{\textwidth}{@{}p{12mm}X@{}}
+%     42    & ``The Answer to the Ultimate Question of Life, the Universe,
+%             and Everything'' according to \cite{h2g2} \\
+%     $c$   & Speed of light \\
+%     $E$   & Energy \\
+%     $m$   & Mass \\
+%     $\pi$ & The number pi \\
+%   \end{tabularx}
+% \end{flushleft}
+
+% Now comes the main text
+\mainmatter
+
+% \include{intro}
+\include{chapter-introduction/chapter}
+\include{chapter-background/chapter}
+\include{chapter-related-work/chapter}
+\include{chapter-artificial-application/chapter}
+\include{chapter-k8-bench/chapter}
+\include{chapter-evaluation/chapter}
+\include{chapter-conclusion/chapter}
+% \include{chap-1}
+% \include{chap-2}
+% % ... and so on until
+% \include{chap-n}
+%\include{conclusion}
+
+% If you have appendices:
+\appendixpage*          % if wanted
+\appendix
+\include{chapter-appendix/chapter}
+% ... and so on until
+%\include{app-n}
+
+\backmatter
+% The bibliography comes after the appendices.
+% You can replace the standard "abbrv" bibliography style by another one.
+\bibliographystyle{abbrv}
+\bibliography{references}
+
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

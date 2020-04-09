@@ -1,6 +1,6 @@
 from jinja2 import Environment, FileSystemLoader, PackageLoader
-from parser import ConfigParser
-import utils
+from .parser import ConfigParser
+from . import utils
 import yaml
 
 

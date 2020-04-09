@@ -8,8 +8,8 @@ import socket
 import atexit
 
 
-GRAPHITE_HOST = '172.19.42.20'
-GRAPHITE_PORT = 30689
+GRAPHITE_HOST = '172.17.13.106'
+GRAPHITE_PORT = 30688
 SLA='gold'
 
 parser = argparse.ArgumentParser(

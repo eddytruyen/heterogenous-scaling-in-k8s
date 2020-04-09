@@ -1,0 +1,209 @@
+\chapter{Background}
+\label{ch:background}
+This chapter discusses relevant background material for the thesis. The concepts, explored in this chapter, further clarify the relevance of the thesis and serve as building blocks for the remaining chapters. Starting from the adoption of the cloud computing paradigm, the chapter elaborates on how concepts such as multi-tenancy and virtualization via containerization push the limits of efficient resource utilization. Next, an in-depth overview of the open-source container orchestration platform Kubernetes is provided. Lastly, insights are provided into the universal scalability law and the applicability of Little's law for performance testing.
+\section{Cloud computing}
+Companies try to minimize the total cost of ownership by moving to cloud computing or utility computing. The cloud computing paradigm enables on-demand access to a shared pool of configurable compute resources (software applications, system software and hardware infrastructure)~\cite{WalravenStefan2015PPmf}. A service provider can provision the required resources from the cloud with minimal effort.  Within this paradigm, services are offered in real time over the internet in three different models~\cite{MellPeter2010TNDo,rimal2009taxonomy}. 
+\begin{itemize}
+\item \textit{Infrastructure as a Service (IaaS)} in which access is offered to virtual machines, network, data storage and other fundamental computing resources. The customer is able to deploy arbitrary software using these resources.\\\\
+Examples: Digital Ocean, Microsoft Azure and Amazon Elastic Compute Cloud (EC2).
+\item \textit{Platform as a service (PaaS)} offers customers a platform enabling easy and efficient deployment of applications (at scale) while abstracting the complexity of managing the underlying infrastructure. PaaS allows customers to solely focus on the development of their application.\\\\
+Examples: Google app engine, Microsoft Azure and Heroku.
+\item \textit{Software as a service (SaaS) } allows customers to make use of a specific application developed by a SaaS provider. Compared to the traditional use of software, the management and deployment is the task of the SaaS provider. In this strategy, common resources and a single instance of both the application and underlying database are used to support multiple customers simultaneously. \\\\
+Examples: Google apps and Salesforce.
+\end{itemize}
+
+\section{Multi-tenancy}
+\label{multi-tenancy}
+The software as a service (SaaS) model offers applications to customers as an on-demand service. Providers of these applications try to leverage economies of scale by employing a multi-tenancy architectural design principle. The goal of multi-tenancy is to minimize the total cost of ownership for the provider by maximizing the sharing of resources among multiple customers organizations, referred to as tenants.~\cite{Walraven2015b} 
+\subsection{Service Level Agreements}
+By moving their core business functions to an entrusted cloud provider, cloud customers give up control of the underlying compute resources. It is vital for these tenants to obtain certain guarantees on the service delivered by the provider. 
+A Service Level Agreement (SLA) is a formal contract between the SaaS provider and the tenant specifying both properties of the provided service and the expected behavior of the tenant. An SLA typically also contains a set of Service Level Objectives (SLOs). An SLO is a measurable characteristic of the service. An SLO is typically related to performance constraints (latency, throughput and deadlines) or availability (uptime percentage) of the service. Within the specification of an SLA a trade-off must often be made between expressiveness and usability. The SLA must cover all the expectations of a customer while remaining simple to weight, verify, evaluated and enforce~\cite{dillon2010cloud}.  Some typical examples of SLOs are shown below: 
+\begin{itemize}
+\item The application has a monthly uptime percentage of 99.95\%.
+\item If the arrival rate of the tenant workload < X requests/s then a throughput T is guaranteed.
+\end{itemize}
+\subsection{Challenges}
+While the goal of multi-tenancy is promising, sharing a cluster of dynamically provisioned nodes between multiple tenants imposes a number of challenges and requirements~\cite{TruyenEddy2016Taca}. 
+\begin{itemize}
+\item Performance isolation: the activities of one tenant should not be able to influence the service level delivered to other tenants. This requirement should be achieved during normal system load and when an aggressive tenant violates the terms of the SLA. 
+\item QoS differentiation: the performance guarantees specified by an SLA can be individually customized for each tenant. A SaaS provider should be able to offer different subscriptions.
+\item Flexible resource allocation for improved server consolidation: a SaaS provider employs a multi-tenant architecture to achieve a lower operational cost. This is partially achieved by planning the required node capacity based on the actual resource usage of tenants instead of the theoretical required capacity.  This can be further aided by the use of request schedulers allowing to distinguish between normal, passive and aggressive tenants. 
+\end{itemize}
+\subsection{Strategies}
+To achieve multi-tenancy different strategies, each offering different trade-offs concerning operational costs and upfront application engineering costs, can be employed by the SaaS-provider~\cite{WalravenS.2011Amlf}. The strategies are illustrated in Figure~\ref{muti-tenant-strategies}.
+\begin{itemize}
+\item Multi-tenancy can be achieved at the level of the \textit{operating system}. In this strategy, a virtualization technology can be used to partition compute resources among multiple virtual machines. Each tenant is assigned an application instance running on a dedicated virtual machine. This approach offers both a higher level of performance isolation and lower upfront engineering costs but suffers from an inefficient utilization of resources.
+\item In \textit{middleware-level multi-tenancy} a middleware platform is used to enable sharing compute resources between multiple tenants at the level of the operating system. An application instance is deployed on top of the middleware platform for each tenant. By not replicating the operating system for each tenant a higher level of cost efficiency can be achieved but an increased complexity in managing resources and  performance isolation is introduced. By tackling these problems at the level of the middleware a part of the engineering complexity is shifted to this level.
+\item The most efficient resource utilization can be achieved by sharing application instances between multiple tenants. In \textit{Application-level} multi-tenancy achieving performance isolation is done by the application itself thereby increasing the engineering complexity and costs.
+\end{itemize}
+
+
+\begin{figure}[H]
+
+\caption{Different strategies to achieve multi-tenancy~\cite{WalravenS.2011Amlf}.\label{muti-tenant-strategies} }
+\centering
+\includegraphics[width=0.65\textwidth]{chapter-background/muti-tenant-strategies.png}
+\end{figure}
+
+
+\section{Containerization}
+Cloud providers rely on virtualization technology for the achievement of large-scale resource scaling. For more than a decade, virtual machines (VMs) have been the backbone of a provider's infrastructure offering hardware independence, availability, isolation and security~\cite{xavier2013performance}. More recently, containers a more lightweight virtualization technology have made advances in their multi-tenant capabilities and have seen an increase in adoption by providers~\cite{pahl2015containerization}. Both are discussed in this section.
+\subsection{Virtualization technology}
+In cloud environments, virtualization technology is used for flexible and dynamic allocation of physical resources to virtualized applications and to achieve multi-tenancy by sharing a physical server among multiple applications. In data centers virtualization is commonly used at the \textit{hardware level} and \textit{operating system level} to deploy and manage virtual machines and applications at scale~\cite{SharmaPrateek2016CaVM}. \\\\
+Hardware level virtualization uses a hypervisor on a server to create virtual machines. Each virtual machine provides an abstraction of a physical machine and runs an independent operating system with applications. The hypervisor is responsible for resource allocation and performance isolation.\\\\
+Operating system level virtualization allows resources to be shared at the level of the OS. Virtual machines running at the OS level are referred to as containers. Isolation, abstraction and resource allocation of containers is performed by the OS kernel of the host OS. By sharing the OS kernel among multiple containers, containers are regarded as a more lightweight virtualization technology. Containers only contain the application and its dependencies.\\\\
+Linux containers (LXC)~\cite{lxc} employ different mechanisms of the Linux kernel to achieve resource isolation, namely control groups and namespaces.
+\begin{itemize}
+    \item \textbf{Cgroups}~\cite{cgroups} allow for fine-grained control of the allocation of system resources (CPU time, system memory, network bandwidth) among processes and process groups. For example, it is possible to limit or prioritize memory, CPU or I/O usage of different containers. 
+    \item \textbf{Namespaces}~\cite{namespaces} allow for isolation of kernel resources among processes. A namespace makes a resource appear to be private and isolated for the container. The Linux kernel provides the following namespaces:  process ids, inter-process communication (IPC) mechanisms, network stack and mount points.
+\end{itemize}
+Linux containers (LXC) offers a lightweight implementation which performs at native speed and provides good isolation. However, while sharing a kernel between containers minimizes overhead, there are limitations in terms of the security environment.~\cite{dua2014virtualization}
+\\\\
+\noindent By offering virtualization at different levels, containers and VMs offer different trade-offs concerning performance isolation and performance. Research~\cite{SharmaPrateek2016CaVM} concludes that while containers offer closer to bare metal performance compared to VM, they offer worse performance isolation in multi-tenant environments. In addition, containers offer soft resource limits compared to the hard resource limits of virtual machines which allow for better server consolidation in over-commitment scenarios.  
+\begin{figure}[h]
+\caption{Container vs virtual machine.~\cite{container-vs-vms}}
+\centering
+\includegraphics[width=0.8\textwidth]{chapter-background/containervsvm.pdf}
+\end{figure}
+\subsubsection{Docker}
+Recently, thanks to Docker~\cite{dockersite}, containers have gained popularity and have been adopted into the software development process. However, Docker is not a new container technology, at its core it employs the kernel-level mechanisms of Linux containers (LXC), for which it defines a unified API~\cite{merkel2014docker}. In addition, the open-source Docker project offers a commandline-interface and daemon that offers easy packaging of applications in containers and the deployment of these containers.\\\\
+To achieve this Docker introduces the concept of images. A container is represented by a lightweight image. A container image is a lightweight, executable package containing an application and its dependencies (runtime, libraries, environment variables, and config files). Virtual machines (VMs) can be seen as full, monolithic images. In particular,  Docker image consists of file-system layers stacked upon each other, as illustrated in Figure~\ref{docker-layers}. Only the top layer, the container itself, is writable, therefore it is state-full and executable. A container is thus composed out of layers of individual images built on top of a base image, allowing for easy extensibility.~\cite{pahl2015containerization} \\\\
+A Docker image is specified by and build from a DockerFile. Images can be made easily accessible through Docker registries such as Dockerhub.\\
+These images allow for easy and fast deployment of Docker containers across different operating systems and cloud provider stacks. Resulting in a game-changing technology for DevOps, system administrators and developers.
+\begin{figure}[H]
+\caption{Architecture of a container image. Images can be stacked upon each other using the cgroups and namespace extensions of a Linux kernel. The top container image is writable.~\cite{pahl2015containerization} \label{docker-layers}}
+\centering
+\includegraphics[width=0.5\textwidth]{chapter-background/docker-layers.png}
+\end{figure}
+
+\section{Container Orchestration}
+Container technologies such as Docker offer advanced features to use containers in production. These solutions often offer deployment of applications limited to single machines. However, applications offered by  SaaS providers may include multiple different containers working together running on a cluster of nodes. Container orchestration (CO) systems allow deployment and management of containers at scale. Popular orchestration engines are Kubernetes, Docker Swarm and Mesos Marathon.
+\subsection{Key capabilities of a container orchestration platform}
+The task of a container orchestration (CO) platform is not limited to the initial deployment but the entire life-cycle of multiple containers. The goal of CO is to simplify cluster management while ensuring fault tolerance, availability, scalability and reliability. Allowing users to benefit from the complete potential of containers. In order to meet this goal, CO platform must at least offer the following key capabilities.~\cite{khan2017key}
+\paragraph{Cluster state management and scheduling}
+A cluster can be composed out of multiple virtualized or physical instances. Running containers on top of these instances and recover from failures requires a stable cluster. State management encapsulates various tasks such as flexible scheduling, re-partitioning of resources and data and propagating of dependent system changes.~\cite{khan2017key} 
+\paragraph{High availability and fault tolerance}
+A container orchestration platform must ensure high availability and fault tolerance in order to be useful for application developers. Most platforms therefor employ design principles of reliability engineering e.g., single point of failure elimination, failure detection or load balancing.~\cite{khan2017key}
+\paragraph{Security}
+Containers executing on top of the platform essentially form untrusted entities, with potentially malicious intentions, a high security standard is required. The standard should include: container images sanity check policies, access control for both containers and users, and techniques to minimize the container attack surface.~\cite{khan2017key}  
+\paragraph{Simplified networking}
+Containers must be able to communicate across nodes in  an efficient and secure manner. This requires the mapping of allocated host ports to containers. The overhead corresponding to this mapping intensifies at scale. The CO platform should thus provide a flexible, secure and scalable solution for networking.~\cite{khan2017key}
+\paragraph{Service discovery}
+The large number of services present in a cluster need to be able to communicate with each other. In traditional clusters services were handled as pets (i.e, having static names, IP addresses), however, in dynamic environments such as container orchestration platforms, they are regarded as cattle. The CO platform must provide mechanisms for addressing/labeling/grouping and service discovery.~\cite{khan2017key} 
+\paragraph{Monitoring and governance}
+The container orchestration platform needs to support traditional monitoring techniques such as logging, resource usage and network trace-routes. Monitoring must be possible at both the level of the underlying infrastructure and the containers themselves.~\cite{khan2017key}
+\paragraph{Integrating for continuous integration and delivery}
+Software development teams should be able to integrate the CO platform within their employed continuous integration and delivery (CI/CD) pipeline. The CO platform should contain mechanisms for rolling updates, rollbacks, etc.~\cite{khan2017key}
+
+
+\subsection{Kubernetes}
+Kubernetes~\cite{kubernetes}, commonly referred to as K8,  is one of the most popular and adopted orchestration systems. It is an open-source project led by Google. Kubernetes is Google's solution for the growing demand of container deployments by external developers in its public business cloud and is based upon its predecessors  Borg~\cite{verma2015large} and Omega~\cite{schwarzkopf2013omega} that have been used to schedule the internal Google workload. Its main design goal is formulated as:\textit{ "to make it easy to deploy and manage complex distributed systems, while still benefiting from the improved utilization that containers enable~\cite{Burns:2016:BOK:2930840.2890784}"}.  \\\\
+\noindent To achieve the above stated goal Kubernetes introduces a number of concepts for both containers and cluster resources. It implements the infrastructure as code model  by provides an abstraction layer on top of the physical infrastructure~\cite{hermanns2015current}. It allows to setup and manage container infrastructure by the configuration of these introduced concepts via a REST API or declarative YAML configuration files. Below the most relevant concepts are introduced.
+\subsubsection{Kubernetes concepts}
+\textbf{Pods.}  A pod is the smallest unit of deployment within Kubernetes. It is a group of one or more containers that logically belong together.   A pod and thus its containers run on the same node. They share the same network, storage and context (Linux namespaces, cgroups). A pod gets assigned a unique IP address. Pods are not self-healing meaning when an error occurs within the pod or during scheduling. It will be deleted. Due to this short life cycle using a single pod resource and its assigned IP address for applications is impractical. Kubernetes handles this by employing controllers and services.~\cite{pods}\\\\
+\textbf{Deployments.}  A Deployment controller manages a pod or a ReplicaSet of pods. A ReplicaSet allows pods to be replicated across multiple nodes. A Deployment object is used to specify the desired state of pods (e.g. number of replica's). A deployment, in addition, allows for declarative updates. These updates can be used to change the number of container replicas of a ReplicaSet or to update a specific container image within the pod.  The Deployment controller changes the actual state to the desired state described by the update.~\cite{deployments}
+\\\\
+\textbf{Services.}  Services offer a solution for the short life cycle of pods (and their IP addresses). Services within Kubernetes offer a manner to expose a ReplicaSet of Pods via a unique name, stable IP address, network policy and ports. To determine which set of pods is targeted by a service, Kubernetes employs a Label selector. Labels are the core grouping primitive of Kubernetes and unlike names and UIDs do not offer uniqueness.\\  A Service can be exposed outside the cluster by using an external load balancer or by specifying a NodePort. When using a Nodeport each node within the cluster will expose the port and forward request into the service.~\cite{services}
+\\\\
+\textbf{Namespaces.}  Namespaces allow to partition resources of a physical cluster among multiple user organizations. Each namespace gets a share of the resources of the cluster, via resource quotas. Resource quotas are supported for CPU, memory and persistent volumes.~\cite{namespaces-k8}
+\\\\
+\textbf{Resource limits.}  Kubernetes allows the allocation of compute resources of both containers and Namespaces by the means of resource limits. These limits can be soft (limit) and hard (request) limits. A Request specifies the quantity of resource that is guaranteed to the container. A limit specifies the maximum quantity allocated to the container. When the requested resource quantities of a container are less than its limit, the container may be allocated additional resources if there are unallocated resources available.  The current supported compute resources are CPU, memory and storage within the root partition of the local node. Within a Pod it is possible to specify both request and limit for each container. When request and limits are specified, the scheduler will use them for both scheduling and eviction (when node capacity is reached) decisions.~\cite{kubresources}
+\subsubsection{Kubernetes architecture}
+The basic architecture of Kubernetes is illustrated in Figure~\ref{fig:kubarch}. A client-server architecture is employed in which master and node setups are deployed on different machines. Below the different components that build up the architecture are briefly explained. 
+\paragraph{API Server.} The API server is responsible for the configuration and validation of API objects (pods, deployments, services,...). It offers communication on cluster state via a REST interface for both components and administrators.~\cite{kubernetes-api-server}
+\paragraph{Controller manager.} The controller manager is responsible for managing several core control loops part of Kubernetes. A control loop uses the API server to observe the shared state of the cluster and attempts to move to the desired state via configuration changes.~\cite{kubernetes-controller-manager}
+\paragraph{Scheduler.} The task of assigning pods to nodes is the responsibility of the scheduler component.  The scheduler attempts to do a reasonable placement based on resource and quality of service requirements (e.g., not place a pod on a node with insufficient resources). It is  possible for users to control the placement of pods via NodeSelector tags or affinity and anti-affinity constraints in the configuration file.~\cite{kubernetes-pods-to-nodes,kubernetes-scheduler}
+\\\\In addition it is possible to assign Quality of Service (QoS) classes to pods. These are used by Kubernetes in the decision process about scheduling and eviction of pods. Currently, Kubernetes supports three types of classes: guaranteed, burstable and best-effort. In decreasing order of priority (i.e., most likely to be killed in the case of resource shortages). The QoS classes are assigned to pods based on the presence of request and limit specifications of resources in their configuration files.~\cite{kubernetes-qos}
+
+
+\paragraph{Kubelet.} The kubelet component is an agent running on each node. It is responsible for running and maintaining pods on its residing node. The set of maintained pods is described in the form of PodSpecs (mainly received via the API-server).~\cite{kubernetes-kubelet}
+\paragraph{Kube-proxy.} The kube-proxy daemon provides a simple network proxy for the services on each node. It enables forwarding of requests to the correct containers and can provide primitive load balancing.~\cite{kubernetes-kubeproxy}
+\begin{figure}[H]
+\caption{Kubernetes architecture}
+\centering
+\includegraphics[width=0.8\textwidth]{chapter-background/kubernetes-architecture-diagram.pdf}
+\label{fig:kubarch}
+\end{figure}
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ \section{Performance evaluation}
+As discussed in previous sections, SaaS providers employ multi-tenancy to improve  cost efficiency and offer several performance guarantees to their customers in the form of SLOs. An unavoidable consequence of multi-tenancy is the need to support a growing number of users in a single system. Providers need to have a clear insight into the \textit{scalability} of their systems. However, scalability is a difficult thing to define, let alone quantify. Citing the words of  Dr. Neil J. Gunther:  \textit{"if you can't quantify it, you can't guarantee it"}.~\cite{perfdynamics}
+
+\subsection{The Universal Scalability Law}
+\label{section-USL}
+Dr. Neil J. Gunther provides a formal definition of scalability: \textit{"scalability can be defined as a mathematical function, a relationship between independent and dependent variables (input and output)"~\cite{perfdynamics}}. The Universal Scalability Law (USL) by Dr. Neil J. Gunther is presented in Equation~\ref{USL}. It computes the relative capacity $C(N)$ at a load of $N$ users. Relative capacity is the normalized throughput.
+\begin{equation}
+\label{USL}
+C(N) = \frac{\gamma~N}{1 + \alpha~(N-1) + \beta~N~(N-1)}
+\end{equation}
+
+The Universal Scalability Law incorporates factors that contribute to the sublinearly scalability of most systems. Namely, \textbf{concurrency} ($\gamma$), \textbf{contention} ($\alpha$) and \textbf{coherency} ($\beta$) as explained below. Their impact is visualized in Figure~\ref{fig:usl-impact}.
+
+\begin{itemize}
+    \item \textbf{Concurrency}($\gamma$): $\gamma$ defines the slope if the system was linearly scaling i.e., $C(N) = \gamma N$. It has been referred to as the \textit{coefficient of performance} by~\cite{schwarz2015practical}.
+    \item \textbf{Contention} ($ \alpha $) : When scaling most systems parallelism while be limited at some point by contention (i.e., waiting or queuing for shared resources). The maximum speedup by parallelism is limited by the serialized portion ($\alpha$) of the work~\cite{schwarz2015practical}. 
+    \item \textbf{Coherency} ($\beta$): created by crosstalk between components. Because crosstalk is possible between each pair of components in the system, the penalty grows quadratic $N(N-1)$.~\cite{schwarz2015practical}
+    
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1.1\textwidth]{chapter-evaluation/usl-impact}
+    \caption{The impact of different USL coefficients on scalability.~\cite{perfdynamics}}
+    \label{fig:usl-impact}
+\end{figure}
+
+\subsubsection{USL in practice}
+USL can provide insights into a system's scalability pains via  values of the concurrency, contention and coherency coefficients. These can be obtained by collecting a dataset of measurements of the system, system load $N$ and corresponding throughput, and using a statistical technique such as nonlinear least square regression which fits the USL to the dataset.~\cite{schwarz2015practical,heyman2014scalability}
+
+\subsection{Little's law}
+\label{sec:little}
+The Universal Law of Scalability serves as an alternative for the often less intuitive queuing models frequently used for modeling scalability. It omits the need to know the service time for every queue in the performance model in order to predict the response time or latency~\cite{perfdynamics}. Nevertheless, queuing theorem and its lemmas such as Little's Law can provide useful insights into performance modeling.\\\\
+John D.C Little's Law~\cite{little2008little} states the following for stable systems: 
+\begin{displayquote}
+\textit{"The average number of items in a queuing system equals the average rate at which items arrive multiplied by the average time that an item spends in the system.\cite{little2008little}"}
+\end{displayquote}
+\begin{equation}
+\label{littleslaw}
+L = \lambda~W
+\end{equation}
+\begin{equation}
+\label{llsys}
+N = X~Rt
+\end{equation}
+Equation~\ref{littleslaw} shows Little's law, below its terms and its applicability to web services (Equation~\ref{llsys}) are explained:
+\begin{itemize}
+    \item \textbf{$L$}:  Average number of items in the system. For a web service this is represented by the average number of concurrent users in the system $N$.
+    \item \textbf{$\lambda$}: Long-term average arrival rate of items in the system per time unit. Little's law assumes a stable system for which the arrival rate and exit rate are identical. In a web service this is represented by the throughput $X$.
+    \item \textbf{$W$}: Average waiting time of an item in the system, queuing time and service time combined. This is represented by the response time $Rt$ or latency of a request in a web service. When dealing with a system involving think time (e.g., after the response from a web service, a user needs time to think about his/her next request), $(Rt + Zt)$ is used. 
+\end{itemize}
+
+\subsubsection{Workload generator validation}
+Developers employ software tools (JMeter~\cite{jmeter}, Locust~\cite{locust}, etc.)  to simulate a workload and test the performance of a system. A workload is a set of actions that represent the behavior of a client in the system. It is part of the test plan stating the number of concurrent users $N$ executing the workload for a specified period of time.\\\\
+The results of a performance test are typically expressed in throughput $X$ and response time $Rt$. Using Little's law it is possible to validate these results. For example, a test plan of 1000 concurrent users $N$ results in a throughput of 50 requests per second and an average response time of 15 seconds. Following Little's law, a concurrence of only 750 users was reached, instead of the specified 1000. Little's law can thus be used to check if a workload generator works as specified.\\\\
+Alternatively, if the average throughput and response time for a production system are known, Little's law can be used to correctly draw up a test plan.
+
+\subsubsection{Response time or latency?}
+Performance can either be measured in throughput or latency, both are correct but offer a different point of view. System performance is typically expressed in throughput: "The system can handle a million operations per second". However, users care more about their personal experience with a system which is influenced by the average latency of their request.~\cite{schwarz2015practical} \\\\
+Figure~\ref{fig:ls_vs_tp} shows the relation between the average latency and throughput of a database under increasing load $N$. In this case, latency is kept stable by increasing the throughput with the increasing load up to a certain point.  A bottleneck caps the throughput of the systems and by Little's law for an increasing load and constant throughput, the latency must increase.~\cite{latvsthrough} \\\\
+However in other systems, as discussed in Section~\ref{section-USL}, an increasing load might induce a diminishing result on the system's throughput. Following Little's law a decreasing throughput results in a higher latency under the same load. \\\\
+Thus, for stable systems by Little's law,  the USL can be reformulated in terms of latency instead of throughput. Equation~\ref{USL-2} shows this reformulation.~\cite{schwarz2015practical}
+\begin{equation}
+\label{USL-2}
+Latency(N) = \frac{1 + \alpha~(N-1) + \beta~N~(N-1)}{\gamma}
+\end{equation}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{chapter-evaluation/ls_vs_th}
+    \caption{Relation average latency vs. throughput for database benchmark with increasing load.~\cite{latvsthrough}}
+    \label{fig:ls_vs_tp}
+\end{figure}

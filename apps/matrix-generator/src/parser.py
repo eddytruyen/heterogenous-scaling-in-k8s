@@ -1,4 +1,4 @@
-import utils
+from . import utils
 
 class ConfigParser:
 	def __init__(self, optimizer, util_func, slas, chart_dir, samples, output, prev_results=None):

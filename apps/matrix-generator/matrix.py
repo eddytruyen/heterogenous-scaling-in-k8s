@@ -1,12 +1,6 @@
-import sys
 import argparse
 import textwrap
-import os.path
 import yaml
-import time
-import requests
-import socket
-import atexit
 from src.generator import generate_matrix as _generate_matrix
 
 

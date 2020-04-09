@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+namespace: {{.Values.namespace}}
+metadata:
+  name: demo
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+      - name: demo
+        image: arguez/java-demo:latest
+        imagePullPolicy: Always
+        env:
+        - name: RABBIT_MQ_HOST
+          value: "rabbitmq.scaler"
+        - name: RABBIT_MQ_PORT
+          value: "5672"
+        - name: RABBIT_MQ_USER
+          value: "guest"
+        - name: RABBIT_MQ_PASS
+          value: "guest"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace       
+        resources:
+          requests:
+            cpu: {{.Values.demoCPU}}
+          limits:
+            cpu: {{.Values.demoCPU}}
+      priorityClassName: {{.Values.priorityClass}}
+
+
+       

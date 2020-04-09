@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: k8-resource-optimizer
+  namespace: default
+spec:
+  replicas: 1
+  
+  template:
+    metadata:
+      labels:
+        app: k8-resource-optimizer
+    spec:
+      serviceAccountName: k8-resource-optimizer
+      containers:
+      - name: k8-resource-optimizer
+        image: matthijskaminski/k8-resource-optimizer:latest
