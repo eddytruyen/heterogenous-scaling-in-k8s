@@ -191,7 +191,7 @@ The metrics of graphite are available under performance.gold
 * Choose as Panel data source: Locust
 * Left click add query
 * Add the following queries: ![ImageOfMetrics](images/graphite-metrics-editor.PNG)
-* The metrics need to be displayed at different scales. To do this, click in Legend of the planel on the colored line besides the metric that needs to move to the right Y-axis: ![Y-axis](images/Y-axis.PNG) !(Y-axis-2](images/Y-axis-2.PNG)
+* The metrics need to be displayed at different scales. To do this, click in Legend of the planel on the colored line besides the metric that needs to move to the right Y-axis: ![Y-axis](images/Y-axis.PNG) ![Y-axis-2](images/Y-axis-2.PNG)
 
 
 * Go to the Pods dashboard, but first save the changes to the GraphiteMetrics dashboard
