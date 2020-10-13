@@ -40,16 +40,16 @@ chmod +x get_helm.sh
 
 ```
 #install golden SLA-class
-$ helm install charts/exp2app
+$ helm install charts/exp2app --generate-name
 
 #install bronzen SLA-class
-$ helm install charts/bronze
+$ helm install charts/bronze --generate-name
 ```
 
 # Install the scaler
 
 ```
-helm install charts/scaler-controller
+helm install charts/scaler-controller --generate-name
 
 ```
 Set the appropriate matrix in the resource planner pod
