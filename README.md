@@ -28,18 +28,13 @@ export PATH=$PATH:$HOME/.local/bin
 
 # Install helm
 
+
+Install helm
+
 ```bash
-# Install Helm client, 
-$ curl -LO https://kubernetes-helm.storage.googleapis.com/helm-v2.8.0-linux-amd64.tar.gz && tar xvzf helm-v2.8.0-linux-amd64.tar.gz && chmod +x ./linux-amd64/helm && sudo mv ./linux-amd64/helm /usr/local/bin/helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod +x get_helm.sh
 ```
-
-To install helm in distributed cluster, you'll first need to first create a [service-account for Helm](http://jayunit100.blogspot.be/2017/07/helm-on.html) and initiate helm with this service account. Short, you have to execute the following commands
-
-
-```
-$ kubectl create -f helm.yaml
-$ helm init --service-account helm
-``` 
 
 # Install the python-based application
 
