@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 namespace: {{.Values.namespace}}
 metadata:
@@ -6,6 +6,9 @@ metadata:
   namespace: {{.Values.namespace}}
 spec:
   replicas: {{.Values.worker1Replicas}}
+  selector:
+    matchLabels:
+      app: consumer
   template:
     metadata:
       labels:

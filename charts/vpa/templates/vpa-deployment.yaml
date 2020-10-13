@@ -1,11 +1,11 @@
-apiVersion: "autoscaling.k8s.io/v1beta2"
+apiVersion: "autoscaling.k8s.io/v1"
 kind: VerticalPodAutoscaler
 metadata:
   name: {{.Values.namespace}}-vpa    
   namespace: {{.Values.namespace}}
 spec:
   targetRef:
-    apiVersion: "extensions/v1beta1"
+    apiVersion: "apps/v1"
     kind: Deployment
     name: consumer1
   updatePolicy:
