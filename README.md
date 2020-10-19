@@ -74,7 +74,7 @@ config_data = yaml.safe_load(open('data/matrix.yaml'))^M
 # Install graphite
 
 ```
-$ helm install charts/graphite --name graphite
+$ helm install graphite charts/graphite 
 ```
 It logs the results of the experiments. To push metrics, two different endpoints are available, one for discrete data and the other for aggregated data.
 
@@ -84,7 +84,7 @@ In order for graphite to store the results it expects a directory `Results` at t
 # Install Heapster, Grafana and InfluxDB
 
 ```
-$ helm install charts/heapster-grafana-influxdb --name heapster
+$ helm install heapster charts/heapster-grafana-influxdb 
 ```
 
 To display graphite metrics on Grafana dashboard, log into the dashboard and [add graphite as data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). This deployment does not implement any persistance mechanism, so all data is going to be lost on cluster failure. [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
