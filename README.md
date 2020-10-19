@@ -87,7 +87,11 @@ In order for graphite to store the results it expects a directory `Results` at t
 $ helm install heapster charts/heapster-grafana-influxdb 
 ```
 
-To display graphite metrics on Grafana dashboard, log into the dashboard and [add graphite as data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). This deployment does not implement any persistance mechanism, so all data is going to be lost on cluster failure. [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+To display graphite metrics on Grafana dashboard, log into the dashboard and [add graphite as data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). Just replace localhost with the ClusterIP of the graphite service, and select the Proxy mechanism. 
+![AddingGraphiteAsDataSource](images/graphite.png)
+
+
+This deployment does not implement any persistance mechanism, so all data is going to be lost on cluster failure. [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 can be used to avoid this (see charts/graphite/templates/volume.yaml)
 
 
