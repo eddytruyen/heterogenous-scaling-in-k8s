@@ -57,8 +57,9 @@ class MyUser(HttpUser):
 
     def hook_request_fail(self, request_type, name, response_time, exception):
         self.request_fail_stats.append([name, request_type, response_time, exception])
-
-    def exit_handler(self):
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
+    
+    @events.test_stop.add_listener
+    def exit_handler(**kw):
+        MyUser.sock.shutdown(socket.SHUT_RDWR)
+        MyUser.sock.close()
 
