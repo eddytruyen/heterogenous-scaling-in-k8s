@@ -135,7 +135,14 @@ First check your python3 version
 ```
 readlink -f $(which python3) | xargs -I % sh -c 'echo -n "%: "; % -V'
 ```
-If the installed python version is 3.5 or less, install python3.6:
+If  the installed pyton version is 3.6 or more, just install the missing package, run metrics.py and skip the rest of the instructions and go directly:
+
+```
+pip3 install aiohttp
+python3 metrics.py
+```
+
+If the installed python version is 3.5 or less, install python3.6 as follows:
 
 ```
 sudo apt update
@@ -143,7 +150,6 @@ sudo apt install software-properties-common
 sudo add-apt-repository ppa:deadsnakes/ppa  
 sudo apt update
 sudo apt install python3.6
-
 ```
 
 Then install a separate pip3 version in a virtual environement:
