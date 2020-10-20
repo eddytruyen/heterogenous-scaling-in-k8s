@@ -8,7 +8,7 @@ import socket
 import atexit
 
 
-GRAPHITE_HOST = '172.17.13.106'
+GRAPHITE_HOST = '172.17.13.119'
 GRAPHITE_PORT = 30688
 SLA='gold'
 
@@ -59,7 +59,7 @@ def abort(msg):
 
 def set_user_count(count):
 	url=LOCUST_HOST+'/swarm'
-	r = requests.post(url, data = {'locust_count':count,'hatch_rate':count})
+	r = requests.post(url, data = {'user_count':count,'spawn_rate':count})
 	
 	if(r.status_code==200 and STORE_METRICS):
 		data_request="%s %d %d\n" % ("performance."+SLA+".users", count,  time.time())
