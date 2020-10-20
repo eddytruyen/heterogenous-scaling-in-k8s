@@ -95,7 +95,7 @@ can be used to avoid this (see charts/graphite/templates/volume.yaml)
 
 # Start the locust server
 
-Edit `Locust/locustfile-exp1.py' to replace the IP of the queue host on the HttpLocust class for your queue endpoint. For generating local files with throughput and turnaround time, Locust/locustfile-exp.py can be used instead. In both cases, the socket connection (self.sock.connect(IP, port)) needs to match the graphite aggregator service (running by default on nodePort 30688).
+For generating local files with throughput and turnaround time, `Locust/locustfile-exp.py` can be used. The socket connection (self.sock.connect(IP, port)) needs to match the graphite aggregator service (running by default on nodePort 30688).
 
 
 ```
@@ -112,6 +112,7 @@ Open browser at `http://ip of locust node:8089` and check Locust is up.
 
 # To get metrics of the locust test into the graphite server ...
 instead of a local `Results` directory:
+ * Edit `Locust/locustfile-exp1.py` to replace the IP of the queue host on the HttpLocust class for your queue endpoint.
  * Update the IP-address of the Locust service and the graphite service in `metrics.py`
  * Run in a separate terminal run:
 
