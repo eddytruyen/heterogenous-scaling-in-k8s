@@ -78,9 +78,6 @@ $ helm install graphite charts/graphite
 ```
 It logs the results of the experiments. To push metrics, two different endpoints are available, one for discrete data and the other for aggregated data.
 
-In order for graphite to store the results it expects a directory `Results` at the current directory.
-
-
 # Install Heapster, Grafana and InfluxDB
 
 ```
@@ -90,6 +87,7 @@ $ helm install heapster charts/heapster-grafana-influxdb
 To display graphite metrics on Grafana dashboard, log into the dashboard and [add graphite as data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). Just replace localhost with the ClusterIP of the graphite service, and select the Proxy mechanism. 
 ![AddingGraphiteAsDataSource](images/graphite.png)
 
+Then you have to import the Carbon Graphite daskboard by clicking on the Import dashboard button.
 
 This deployment does not implement any persistance mechanism, so all data is going to be lost on cluster failure. [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 can be used to avoid this (see charts/graphite/templates/volume.yaml)
@@ -135,7 +133,7 @@ First check your python3 version
 ```
 readlink -f $(which python3) | xargs -I % sh -c 'echo -n "%: "; % -V'
 ```
-If  the installed pyton version is 3.6 or more, just install the missing package, run metrics.py and skip the rest of the instructions and go directly:
+If  the installed pyton version is 3.6 or more, just install the missing package, run metrics.py and skip the rest of the instructions and go directly to the [workload generation](#start-the-workload-generator):
 
 ```
 pip3 install aiohttp
@@ -180,7 +178,9 @@ The above tests a seasonal workload.
 ## Prerequisites
 * You have started locust with the file [Locust/locustfile-exp1.py](Locust/locustfile-exp1.py).
 
-* You have [added graphite as a data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). Just replace localhost with the ClusterIP of the graphite service, and select the Proxy mechanism.
+* You have [added graphite as a data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). Just replace localhost with the ClusterIP of the graphite service, and select the Proxy mechanism. 
+
+* You have imported the Carbon graphite dashboard  
 
 The metrics of graphite are available under performance.gold
 
