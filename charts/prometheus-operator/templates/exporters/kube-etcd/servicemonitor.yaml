@@ -12,7 +12,6 @@ spec:
     matchLabels:
       app: {{ template "prometheus-operator.name" . }}-kube-etcd
       release: {{ .Release.Name | quote }}
-  namespaceSelector:
     matchNames:
       - "kube-system"
   endpoints:

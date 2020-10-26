@@ -4,7 +4,6 @@ metadata:
   labels:
     app: resource-planner
   name: testsvc
-  namespace: {{.Values.namespace}}
 spec:
   ports:
   - nodePort: 30681

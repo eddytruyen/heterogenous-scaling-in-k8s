@@ -40,15 +40,18 @@ chmod +x get_helm.sh
 
 ```
 #install golden SLA-class
+$ kubectl create ns gold
 $ helm install charts/exp2app --generate-name
 
 #install bronzen SLA-class
+$ kubectl create ns bronze
 $ helm install charts/bronze --generate-name
 ```
 
 # Install the scaler
 
 ```
+kubectl create ns scaler
 helm install charts/scaler-controller --generate-name
 
 ```

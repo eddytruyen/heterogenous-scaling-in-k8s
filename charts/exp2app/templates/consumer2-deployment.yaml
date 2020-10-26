@@ -1,9 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
-namespace: {{.Values.namespace}}
 metadata:
   name: consumer2
-  namespace: {{.Values.namespace}}
 spec:
   selector:
     matchLabels:

@@ -9,7 +9,6 @@ metadata:
     # kubernetes.io/cluster-service: 'true'
     # kubernetes.io/name: monitoring-grafana
   name: grafana-ext
-  namespace: monitoring
 spec:
   # In a production setup, we recommend accessing Grafana through an external Loadbalancer
   # or through a public IP.

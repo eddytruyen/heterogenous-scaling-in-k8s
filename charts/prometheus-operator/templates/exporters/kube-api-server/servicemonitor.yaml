@@ -27,7 +27,6 @@ spec:
       serverName: {{ .Values.kubeApiServer.tlsConfig.serverName }}
       insecureSkipVerify: {{ .Values.kubeApiServer.tlsConfig.insecureSkipVerify }}
   jobLabel: {{ .Values.kubeApiServer.serviceMonitor.jobLabel }}
-  namespaceSelector:
     matchNames:
     - default
   selector:

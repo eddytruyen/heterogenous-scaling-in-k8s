@@ -8,7 +8,6 @@ metadata:
     kubernetes.io/cluster-service: 'true'
     kubernetes.io/name: monitoring-influxdb
   name: monitoring-influxdb
-  namespace: kube-system
 spec:
   ports:
   - port: 8086

@@ -4,7 +4,6 @@ metadata:
   labels:
     app: graphite
   name: testsvc1
-  namespace: {{.Values.namespace}}
 spec:
   ports:
   - nodePort: 30689

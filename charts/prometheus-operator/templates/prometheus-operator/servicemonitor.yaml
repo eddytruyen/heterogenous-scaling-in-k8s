@@ -25,7 +25,6 @@ spec:
     matchLabels:
       app: {{ template "prometheus-operator.name" . }}-operator
       release: {{ .Release.Name | quote }}
-  namespaceSelector:
     matchNames:
       - {{ .Release.Namespace | quote }}
 {{- end }}

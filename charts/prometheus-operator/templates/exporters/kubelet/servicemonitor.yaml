@@ -76,7 +76,6 @@ spec:
 {{- end }}
   {{- end }}
   jobLabel: k8s-app
-  namespaceSelector:
     matchNames:
     - {{ .Values.kubelet.namespace }}
   selector:
