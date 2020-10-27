@@ -1,16 +1,16 @@
 load:
   - trace:
     - segment: stable
-      initialCount: 1
-      endCount: 1
+      initialCount: 2
+      endCount: 2
       duration: 170
     - segment: stable
       initialCount: 4
       endCount: 4
       duration: 170
     - segment: stable
-      initialCount: 7
-      endCount: 7
+      initialCount: 8
+      endCount: 8
       duration: 170
     - segment: stable
       initialCount: 9
