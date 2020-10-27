@@ -84,7 +84,7 @@ It logs the results of the experiments. To push metrics, two different endpoints
 # Install Heapster, Grafana and InfluxDB
 
 ```
-$ helm install heapster charts/heapster-grafana-influxdb 
+$  helm install heapster heapster-grafana-influxdb/ -n kube-system
 ```
 
 To display graphite metrics on Grafana dashboard, log into the dashboard and [add graphite as data source](https://grafana.com/docs/grafana/latest/features/datasources/graphite/). Just replace localhost with the ClusterIP of the graphite service, and select the Proxy mechanism. 
