@@ -211,6 +211,24 @@ The metrics of graphite are available under performance.gold
 
 # Running golden and bronze application concurrently
 
+Set the appropriate matrix in the resource planner
+
+```
+$ kubectl get pods -n scaler
+NAME                              READY   STATUS    RESTARTS   AGE
+go-deployer-58bb7c4c49-tg5c9      1/1     Running   6          61m
+rabbitmq-7b944bfdf4-wsltc         1/1     Running   0          61m
+resource-planner-589d79bf-sh6pp   1/1     Running   0          61m
+$ kubectl exec -it resource-planner-589d79bf-sh6pp -n scaler -- sh
+/ # vi server.py
+```
+
+Edit in server.py the following line:
+```
+config_data = yaml.safe_load(open('data/bronze.yaml'))
+```
+
+
 Start the locus server with another file
 
 ```
