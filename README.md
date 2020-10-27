@@ -41,18 +41,18 @@ chmod +x get_helm.sh
 ```
 #install golden SLA-class
 $ kubectl create ns gold
-$ helm install charts/exp2app --generate-name -n gold
+$ helm install gold-app charts/exp2app -n gold
 
 #install bronzen SLA-class
 $ kubectl create ns bronze
-$ helm install charts/bronze --generate-name -n bronze
+$ helm install bronze-app charts/bronze -n bronze
 ```
 
 # Install the scaler
 
 ```
 kubectl create ns scaler
-helm install charts/scaler-controller --generate-name -n scaler
+helm install scaler-app charts/scaler-controller -n scaler
 
 ```
 Set the appropriate matrix in the resource planner pod
