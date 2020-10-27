@@ -102,25 +102,21 @@ can be used to avoid this (see charts/graphite/templates/volume.yaml)
 
 # Start the locust server
 
-For generating local files with throughput and turnaround time, `Locust/locustfile-exp.py` can be used. The socket connection (self.sock.connect(IP, port)) needs to match the graphite aggregator service (running by default on nodePort 30688).
+For generating local files with throughput and turnaround time, `Locust/locustfile-exp1.py` can be used. The socket connection (self.sock.connect(IP, port)) needs to match the graphite aggregator service (running by default on nodePort 30688).
 
+To get metrics of the locust test into the graphite server ...
 
-```
-$cd Locust
-# In order for graphite to store the results it expects a directory `Results` at the current directory.
-$mkdir Results
-$locust -f locustfile-exp.py
-[2020-03-19 17:58:18,258] k8-test-1/INFO/locust.main: Starting web monitor at http://*:8089
-[2020-03-19 17:58:18,259] k8-test-1/INFO/locust.main: Starting Locust 0.14.5
-```
-
-Open browser at `http://ip of locust node:8089` and check Locust is up. 
-
-
-# To get metrics of the locust test into the graphite server ...
-instead of a local `Results` directory:
  * Edit `Locust/locustfile-exp1.py` to replace the IP of the queue host on the HttpLocust class for your queue endpoint.
  * Update the IP-address of the Locust service and the graphite service in `metrics.py`
+ * Run:
+
+```
+locust -f Locust/locustfile-exp1.py
+```
+
+ * Open the browser at http://127.0.0.1:8089
+
+
  * Run in a separate terminal run:
 
 ```
@@ -177,9 +173,7 @@ cd ../apps/workload-generator
 python3 generator.py start -f thesis/seasonal.yaml --host=http://172.17.13.106:8089
 ```
 
-The above tests a seasonal workload.
-
-
+The above tests a seasonal workload
 
 # Visualize the Graphite metrics in Grafana
 
@@ -215,8 +209,19 @@ The metrics of graphite are available under performance.gold
 * Use the Display menu to customize the printing of the lines: ![Display](images/Display.PNG)
 * Use the Legends menu to add averages to the legend's items: ![Legend](images/Legend-avg.PNG)
 
+# Running golden and bronze application concurrently
 
-More information:
+Start the locus server with another file
+
+```
+locust -f Locust/locustfile-exp2.py
+```
+
+And run the `generate.py` program with a file from the `apps/workload-generator/exp2/` directory
+
+For adding the Graphite metrics of the bronze app to Grafana, repeat the same steps for the Pod panel of the bronze namespace.
+
+# More information:
 * https://grafana.com/docs/grafana/latest/features/panels/graph/
 * https://community.grafana.com/t/consolidate-data-from-multiple-datasources-sites-on-same-graph-panel/2496/2
 * https://community.grafana.com/t/can-i-have-two-different-units-for-y-axis/696
