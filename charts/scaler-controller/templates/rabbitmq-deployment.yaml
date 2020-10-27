@@ -12,11 +12,14 @@ spec:
       labels:
         app: rabbitmq
     spec:
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "rabbitmq-server"
       nodeSelector: 
         workerNode: "yes"
       containers:
       - name: rabbitmq
-        hostname: rabbitmq-server
         image: rabbitmq:3-alpine
         ports:
         - containerPort: 15672

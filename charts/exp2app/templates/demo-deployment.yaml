@@ -39,6 +39,7 @@ spec:
           limits:
             cpu: {{.Values.demoCPU}}
       priorityClassName: {{.Values.priorityClass}}
-
+      nodeSelector:
+        workerNode: "yes"
 
        

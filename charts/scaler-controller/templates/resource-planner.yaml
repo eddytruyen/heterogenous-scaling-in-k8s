@@ -1,11 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
-namespace: {{.Values.namespace}}
 metadata:
   name: resource-planner
-  namespace: {{.Values.namespace}}
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: resource-planner
   template:
     metadata:
       labels:

@@ -29,4 +29,5 @@ spec:
         - name: POOL_SIZE
           value: "{{.Values.poolSize1}}"
       priorityClassName: {{.Values.priorityClass}}
-          
+      nodeSelector:
+        workerNode: "yes"   
