@@ -10,9 +10,9 @@ k8-test-3   Ready    <none>   56d   v1.14.1   beta.kubernetes.io/arch=amd64,beta
 
 Note the following node labels:
 * On the monitoringNode heapster, grafana, influxdb and graphite are deployed
-* On the workerNode the scaler-controller, exp2app and bronze charts are deployed. It should have at least 8 CPU cores.
+* On the workerNode the scaler-controller, exp2app and bronze charts are deployed. It should have at least 8 CPU cores. Otherwise add the `workerNode="yes"` label to other nodes as well
 
-# Install locust on the master using pip3
+# Install locust on the master node using pip3
 
 pip3 requires python3
 
@@ -47,6 +47,7 @@ $ helm install gold-app charts/exp2app -n gold
 $ kubectl create ns bronze
 $ helm install bronze-app charts/bronze -n bronze
 ```
+You need to install both the golden and bronze SLA class even if you only want to do an experiment with only one of these. This is due to some bad coding in the current prototype
 
 # Install the scaler
 
@@ -71,7 +72,8 @@ Edit in server.py the following line
 ```
 config_data = yaml.safe_load(open('data/matrix.yaml'))^M
 ```
-`/data/matrix.yaml` is the matrix for heterogeneous scaling, while `/data/single-replica.yaml` is for homogeneous scaling. The values in the matrix have been determined for the workload sent out in the workload-generator app
+`/data/matrix.yaml` is the matrix for heterogeneous scaling of the gold namespace while `/data/single-replica.yaml` is for homogeneous scaling. `/data/bronze.yaml` is the matrix for heterogeneous scaling of the golden and bronze namespace.
+The values in the matrix have been determined by the resource planner using the k8s-resource-optimizer tool.
 
 
 # Install graphite
@@ -83,7 +85,9 @@ It logs the results of the experiments. To push metrics, two different endpoints
 
 # Install Heapster, Grafana and InfluxDB
 
+
 ```
+$  kubectl delete sa system:heapster -n kube-system
 $  helm install heapster heapster-grafana-influxdb/ -n kube-system
 ```
 
