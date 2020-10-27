@@ -211,6 +211,12 @@ The metrics of graphite are available under performance.gold
 
 # Running golden and bronze application concurrently
 
+First check if the nodes with label `workerNode=yes` have in total 8 CPU. If not you should add this label to other nodes as well:
+
+```
+kubectl label <node-name> workerNode="yes"
+```
+
 Set the appropriate matrix in the resource planner
 
 ```
