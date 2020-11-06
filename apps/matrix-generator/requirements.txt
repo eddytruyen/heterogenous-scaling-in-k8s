@@ -1,4 +1,4 @@
 flask
 pyyaml
 jinja2
-locust
+
