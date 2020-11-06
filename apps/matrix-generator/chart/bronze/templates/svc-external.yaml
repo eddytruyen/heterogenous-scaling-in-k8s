@@ -6,7 +6,7 @@ metadata:
   name: testsvc
 spec:
   ports:
-  - nodePort: 30698
+  - nodePort: 30598
     port: 8080
     protocol: TCP
     targetPort: 8080

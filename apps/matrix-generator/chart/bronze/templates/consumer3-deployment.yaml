@@ -3,10 +3,10 @@ kind: Deployment
 metadata:
   name: consumer3
 spec:
-  replicas: {{.Values.worker3Replicas}}
   selector:
     matchLabels:
       app: consumer
+  replicas: {{.Values.worker3Replicas}}
   template:
     metadata:
       labels:

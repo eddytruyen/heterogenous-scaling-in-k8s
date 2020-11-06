@@ -1,6 +1,5 @@
 apiVersion: apps/v1
 kind: Deployment
-namespace: {{.Values.namespace}}
 metadata:
   name: resource-planner
   namespace: {{.Values.namespace}}
