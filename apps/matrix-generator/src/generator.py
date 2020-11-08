@@ -104,7 +104,7 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	# 	slas=slas)
 		
 	conf_op=ConfigParser(
-		optimizer='bestconfig',
+		optimizer='mtbestconfig',
 		chart_dir=chart_dir,
 		util_func= util_func,
 		samples= samples,

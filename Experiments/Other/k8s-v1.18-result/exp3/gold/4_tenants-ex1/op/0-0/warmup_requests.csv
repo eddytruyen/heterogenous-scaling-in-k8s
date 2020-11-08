@@ -1,0 +1,6 @@
+"Method","Name","# requests","# failures","Median response time","Average response time","Min response time","Max response time","Average Content Size","Requests/s"
+"GET","gold-0",13,0,2300,2287,1439,3046,19,0.45
+"GET","gold-1",12,0,2100,2219,891,3098,19,0.41
+"GET","gold-2",11,0,2300,2390,1840,3444,19,0.38
+"GET","gold-3",11,0,2100,2481,1702,3999,19,0.38
+"None","Total",47,0,2300,2339,891,3999,19,1.61

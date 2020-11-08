@@ -1,0 +1,66 @@
+nbOfIterations: 1
+nbOfSamplesPerIteration: 2
+charts:
+  - name: my-app
+    chartdir: /chart/exp2app
+slas:
+  - name : silver
+    chartName: my-app
+    slos: 
+      jobsize: 10
+      throughput: 0.1
+    nbOfTenants: 1
+    parameters:
+      - name: worker1CPU
+        searchspace:
+          min: 740
+          max: 740
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker1Replicas
+        searchspace:
+          min: 0
+          max: 0
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: worker2CPU
+        searchspace:
+          min: 240
+          max: 240
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker2Replicas
+        searchspace:
+          min: 0
+          max: 0
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: worker3CPU
+        searchspace:
+          min: 80
+          max: 80
+          granularity: 1
+        prefix: 
+        suffix: m
+      - name: worker3Replicas
+        searchspace:
+          min: 1
+          max: 2
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: demoCPU
+        searchspace:
+          min: 800
+          max: 800
+          granularity: 100
+        prefix: 
+        suffix: m
+namespaceStrategy: NSPSLA
+optimizer: mtbestconfig
+utilFunc: alphabetBased
+outputDir: Results/exp3/silver/1_tenants-ex0/op/
