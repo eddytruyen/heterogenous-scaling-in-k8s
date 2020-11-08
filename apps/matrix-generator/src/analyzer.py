@@ -10,9 +10,8 @@ class ExperimentAnalizer:
 	def analyzeExperiment(self):
 		content=utils.readFile(self.exp_path+ '/report.csv')
 		results=[line.replace('#','') for line in content.split('\n') if line.strip() != '']
-		header=results[1]
-                print(header)
-		runs=results[2:]
+		header=results[0]
+		runs=results[1:]
 		values=[]
 		score_index=header.index('score')
 
