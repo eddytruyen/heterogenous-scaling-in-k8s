@@ -14,7 +14,7 @@ class SLAConfigExperiment:
 	def runExperiment(self):
 		exp_template=SLAConfigTemplate(self.exp_config)
 		exp_template.saveTemplate(self.exp_path+'conf.yaml')
-		exit_code=utils.call_cmd(self.bin_path+ ' -e locustbatch' + ' -p exhaustive' + ' -c '+self.exp_path+'conf.yaml')
+		exit_code=utils.call_cmd(self.bin_path+ ' -e locustbatch' + ' -p bestconfig' + ' -c '+self.exp_path+'conf.yaml')
 		print('Generating new experiment. Saving results on '+self.exp_path)
 		try:
 			assert exit_code==0
