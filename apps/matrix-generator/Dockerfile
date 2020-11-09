@@ -1,4 +1,4 @@
-FROM decomads/k8-resource-optimizer:k8s-v1.18-ground-zero
+FROM decomads/k8-resource-optimizer:1.0
 COPY requirements.txt /
 RUN apt-get update
 RUN pip3 install -r /requirements.txt
