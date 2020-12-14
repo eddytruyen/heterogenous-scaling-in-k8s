@@ -1,0 +1,44 @@
+image:
+  tag: 2.4.6-debian-10-r14
+worker:
+  replicacount: 5
+  securityContext:
+    enabled: true
+    runAsUser: 0
+    fsGroup: 0
+  autoscaling:
+    ## Enable replica autoscaling depending on CPU
+    enabled: true
+    CpuTargetPercentage: 10
+    ## Max number of workers when using autoscaling
+    replicasMax: 5
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+master:
+  securityContext:
+    enabled: true
+    runAsUser: 0
+    fsGroup: 0
+
+  autoscaling:
+    ## Enable replica autoscaling depending on CPU
+    enabled: false
+    CpuTargetPercentage: 50
+    ## Max number of workers when using autoscaling
+    replicasMax: 5
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+service:
+  type: ClusterIP
+storage:
+  gi: 30Gi
