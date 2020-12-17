@@ -1,7 +1,7 @@
 image:
   tag: 2.4.6-debian-10-r14
 worker:
-  replicacount: 5
+  replicaCount: 5
   securityContext:
     enabled: true
     runAsUser: 0
@@ -11,7 +11,7 @@ worker:
     enabled: true
     CpuTargetPercentage: 10
     ## Max number of workers when using autoscaling
-    replicasMax: 5
+    replicasMax: 15
   resources:
     requests:
       cpu: 1
@@ -19,6 +19,10 @@ worker:
     limits:
       cpu: 2
       memory: 2Gi
+  javaOptions: "-XX:+UseContainerSupport"
+  extraEnvVars:
+    - name: SPARK_DAEMON_MEMORY
+      value: 2g
 master:
   securityContext:
     enabled: true
@@ -39,6 +43,9 @@ master:
       cpu: 2
       memory: 2Gi
 service:
-  type: ClusterIP
+  type: NodePort
+  nodePorts:
+    cluster: 31934
+    web: 31748 
 storage:
   gi: 30Gi
