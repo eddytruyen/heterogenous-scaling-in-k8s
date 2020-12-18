@@ -25,8 +25,8 @@ metadata:
 data:
   storageClassMap: |
     local-storage:
-      hostDir: /mnt/nfs-disk-2
-      mountDir: /mnt/nfs-disk-2
+      hostDir: /mnt/nfs-disk2
+      mountDir: /mnt/nfs-disk2
       volumeMode: Filesystem
       fsType: ext4
       namePattern: "*"
@@ -135,7 +135,7 @@ spec:
             - name: provisioner-dev
               mountPath: /dev
             - name: local-storage
-              mountPath: /mnt/nfs-disk-2
+              mountPath: /mnt/nfs-disk2
               mountPropagation: HostToContainer
       volumes:
         - name: provisioner-config
@@ -146,4 +146,4 @@ spec:
             path: /dev
         - name: local-storage
           hostPath:
-            path: /mnt/nfs-disk-2
+            path: /mnt/nfs-disk2

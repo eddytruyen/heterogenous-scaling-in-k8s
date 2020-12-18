@@ -16,13 +16,15 @@ worker:
     requests:
       cpu: 1
       memory: 1Gi
-    limits:
-      cpu: 2
-      memory: 2Gi
+      #    limits:
+      #  cpu: 2
+      #   memory: 2Gi
   javaOptions: "-XX:+UseContainerSupport"
   extraEnvVars:
     - name: SPARK_DAEMON_MEMORY
       value: 2g
+  nodeSelector: 
+    workerNode: "yes"
 master:
   securityContext:
     enabled: true
@@ -39,9 +41,9 @@ master:
     requests:
       cpu: 1
       memory: 1Gi
-    limits:
-      cpu: 2
-      memory: 2Gi
+      #  limits:
+      #  cpu: 2
+      #   memory: 2Gi
 service:
   type: NodePort
   nodePorts:
