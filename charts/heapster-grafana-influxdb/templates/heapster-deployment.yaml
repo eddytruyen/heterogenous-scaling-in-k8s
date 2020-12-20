@@ -16,14 +16,13 @@ spec:
       serviceAccountName: heapster
       containers:
       - name: heapster
-        image: gcr.io/google_containers/heapster-amd64:v1.5.4
+        image: kubernets/heapster-amd64
         imagePullPolicy: IfNotPresent
         command:
         - /heapster
         - --source=kubernetes.summary_api:https://kubernetes.default?kubeletHttps=true&kubeletPort=10250&insecure=true
-        - --metric-resolution=15s
+        - --metric-resolution=5s
         - --sink=influxdb:http://monitoring-influxdb:8086
-        - --sink=riemann:http://riemann:5555?batchsize=1
         - --v=8
       nodeSelector:
         monitoringNode: "yes"

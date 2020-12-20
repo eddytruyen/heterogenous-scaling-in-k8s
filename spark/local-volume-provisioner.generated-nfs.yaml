@@ -1,0 +1,143 @@
+---
+# Source: provisioner/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-provisioner
+  namespace: default
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+---
+# Source: provisioner/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-release-provisioner-config
+  namespace: default
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+data:
+  storageClassMap: |
+    local-storage:
+      hostDir: /mnt/nfs-disk2
+      mountDir: /mnt/nfs-disk2
+      volumeMode: Filesystem
+      fsType: ext4
+      namePattern: "*"
+---
+# Source: provisioner/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: my-release-provisioner-node-clusterrole
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get"]
+---
+# Source: provisioner/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: my-release-provisioner-pv-binding
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+subjects:
+- kind: ServiceAccount
+  name: my-release-provisioner
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: system:persistent-volume-provisioner
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: provisioner/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: my-release-provisioner-node-binding
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+subjects:
+- kind: ServiceAccount
+  name: my-release-provisioner
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: my-release-provisioner-node-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: provisioner/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: my-release-provisioner
+  namespace: default
+  labels:
+    helm.sh/chart: provisioner-2.4.0
+    app.kubernetes.io/name: provisioner
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: my-release
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: provisioner
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: provisioner
+        app.kubernetes.io/instance: my-release
+      annotations:
+        checksum/config: 85bf63562c3879dcf2634f5a67babd8e14abdcc8e8f6b551d144f39eed3812e9
+    spec:
+      serviceAccountName: my-release-provisioner
+      containers:
+        - name: provisioner
+          image: k8s.gcr.io/sig-storage/local-volume-provisioner:v2.4.0
+          securityContext:
+            privileged: true
+          env:
+          - name: MY_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: JOB_CONTAINER_IMAGE
+            value: k8s.gcr.io/sig-storage/local-volume-provisioner:v2.4.0
+          ports:
+          - name: metrics
+            containerPort: 8080
+          volumeMounts:
+            - name: provisioner-config
+              mountPath: /etc/provisioner/config
+              readOnly: true
+            - name: provisioner-dev
+              mountPath: /dev
+      volumes:
+        - name: provisioner-config
+          configMap:
+            name: my-release-provisioner-config
+        - name: provisioner-dev
+          hostPath:
+            path: /dev

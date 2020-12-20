@@ -11,11 +11,11 @@ worker:
     enabled: true
     CpuTargetPercentage: 10
     ## Max number of workers when using autoscaling
-    replicasMax: 15
+    replicasMax: 6
   resources:
     requests:
-      cpu: 1
-      memory: 1Gi
+      cpu: 3
+      memory: 4Gi
       #    limits:
       #  cpu: 2
       #   memory: 2Gi
