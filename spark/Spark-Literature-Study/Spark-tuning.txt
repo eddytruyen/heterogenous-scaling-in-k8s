@@ -1,0 +1,67 @@
+* Tuneful (see png)
+
+* BestConfig
+
+
+KMeans
+@relation SamplesByGridding
+
+@attribute spark.executor.cores numeric
+@attribute spark.shuffle.sort.bypassMergeThreshold numeric
+@attribute performance numeric
+
+@data
+9.510318,57,262
+
+Pagerank
+
+27885,4065733,741317,0.134764,10234601,14547627,289179,9146,107,4992,19617,1390,904996,498,16120,0.605532,818197,572192,388319,661,286,1310953370,0.664366,0.195825,12.740486,9343,1.316558,0.056113,0.413487,0.672768,138
+
+3956,2932909,100368,0.452468,5145527,12723328,28539,2928,253,9907,26693,8098,288008,42,23488,0.526235,195914,267668,354529,568,179,1119272311,0.71552,0.483287,13.222704,5809,1.98809,0.60565,0.616656,0.060236,139
+
+3000,1048576,49152,0.2,0,1048576,4096,1024,120000,100,10000,1000,32,200,3000,0.75,2048,60000,60000,128,120000,134217728,0.8,0.6,1,1000,1,0.6,0.5,0.2,33
+
+@relation InitialSetByLHS
+
+@attribute Time.spark.rpc.retry.wait numeric
+@attribute Size.spark.driver.memory numeric
+@attribute Size.spark.reducer.maxSizeInFlight numeric
+@attribute spark.shuffle.memoryFraction numeric
+@attribute Size.spark.memory.offHeap.size numeric
+@attribute Size.spark.executor.memory numeric
+@attribute Size.spark.broadcast.blockSize numeric
+@attribute spark.shuffle.service.index.cache.entries numeric
+@attribute Time.spark.rpc.lookupTimeout numeric
+@attribute Time.spark.speculation.interval numeric
+@attribute Time.spark.executor.heartbeatInterval numeric
+@attribute Time.spark.dynamicAllocation.schedulerBacklogTimeout numeric
+@attribute Size.spark.shuffle.file.buffer numeric
+@attribute spark.shuffle.sort.bypassMergeThreshold numeric
+@attribute Time.spark.locality.wait numeric
+@attribute spark.speculation.quantile numeric
+@attribute Size.spark.storage.memoryMapThreshold numeric
+@attribute Time.spark.dynamicAllocation.executorIdleTimeout numeric
+@attribute Time.spark.files.fetchTimeout numeric
+@attribute spark.rpc.message.maxSize numeric
+@attribute Time.spark.network.timeout numeric
+@attribute spark.files.maxPartitionBytes numeric
+@attribute spark.scheduler.minRegisteredResourcesRatio numeric
+@attribute spark.storage.memoryFraction numeric
+@attribute spark.executor.cores numeric
+@attribute Time.spark.scheduler.revive.interval numeric
+@attribute spark.task.cpus numeric
+@attribute spark.memory.fraction numeric
+@attribute spark.memory.storageFraction numeric
+@attribute spark.storage.unrollFraction numeric
+@attribute performance numeric
+
+
+* Zhibin Yu, Zhendong Bei, and Xuehai Qian. Datasize-aware high dimensional
+configurations auto-tuning of in-memory cluster computing. In Proceedings
+of the Twenty-Third International Conference on Architectural Support for Pro-
+gramming Languages and Operating Systems, pages 564–577. ACM, 2018.
+
+
+
+* https://databricks.com/session/tuning-apache-spark-for-large-scale-workloads
+https://www.slideshare.net/databricks/tuning-apache-spark-for-largescale-workloads-gaoxiang-liu-and-sital-kedia

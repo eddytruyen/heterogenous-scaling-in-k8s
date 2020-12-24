@@ -1,0 +1,86 @@
+Large data sizes on Kubernetes
+=================================
+https://www.slideshare.net/databricks/apache-spark-on-k8s-best-practice-and-performance-in-the-cloud, page 20
+ Possible Solutions 
+• mount emptyDir with RAM backed volumes. spark.kubernetes.local.dirs.tmpfs= true 
+• Extend disk capacity of kubelet workspace
+
+
+
+Dynamic allocation limitation in Spark on Kubernetes caused by the shuffle architecture
+=======================================================================================
+https://www.datamechanics.co/blog-post/pros-and-cons-of-running-apache-spark-on-kubernetes
+
+https://towardsdatascience.com/how-to-guide-set-up-manage-monitor-spark-on-kubernetes-with-code-examples-c5364ad3aba2
+https://www.iteblog.com/ppt/sparkaisummit-north-america-2020-iteblog/running-apache-spark-on-kubernetes-best-practices-and-pitfalls-iteblog.com.pdf , page 17
+
+This is an absolute must-have if you’re running in the cloud and want to make your data infrastructure reactive and cost efficient. There are two level of dynamic scaling:
+App-level dynamic allocation. This is the ability for each Spark application to request Spark executors at runtime (when there are pending tasks) and delete them (when they’re idle). 
+
+
+Spark Shuffles Read and Write
+How Shuffles Work in Spark
+
+Shuffles are the expensive all-to-all communication steps that take place in Spark. Executors (on the map side) produce shuffle files on local disk that will later be fetched by other executors (on the reduce side). If a mapper executor is lost, the associated shuffle files are lost and the map task will be need to be recomputed.
+
+Using YARN, shuffle files can be stored in an external shuffle service, such that when dynamic allocation is enabled, the mapper executor can be safely removed on a downscaling event without losing the precious shuffle files. On Kubernetes, an external shuffle service does not exist yet. As a result, dynamic allocation must operate with one additional constraint: executors holding active shuffle files are exempt from downscaling. This mechanism is called "Dynamic Allocation With Shuffle Tracking", and it has been working really well since Spark 3.0. Learn more in our guide Setting up, Managing & Monitoring Spark on Kubernetes.
+
+So:
+
+-Full dynamic allocation is not available. When killing an exec pod, you may lose shuffle files that are expensive to recompute. There is ongoing work to enable it (JIRA: SPARK-24432).
+-In the meantime, a soft dynamic allocation is available from Spark 3.0
+Only executors which do not hold active shuffle files can be scaled down.
+
+This shuffle tracking feature dynamic allocation is available on Kubernetes since Spark 3.0 by setting the following configurations:
+‍spark.dynamicAllocation.enabled=true
+spark.dynamicAllocation.shuffleTracking.enabled=true
+
+
+Update (November 2020): With the upcoming version of Spark (Spark 3.1, to be released in December 2020), a new mechanism will let Spark move shuffle files when an executor is going away due to dynamic allocation. This means the constraint described here will be removed. In fact this feature is much more powerful, as it will Spark resilient to Spot kills as well (Spark will be able to use the 30 seconds termination notice sent by the cloud provider before a spot kill happens, to move the shuffle file around). So stay tuned!
+
+
+Dynamic Resource Allocation (DRA) mechanism of Spark
+====================================================
+https://spark.apache.org/docs/latest/job-scheduling.html#dynamic-resource-allocation
+
+
+RDD concepts for scaling partitions
+===================================
+https://aws.amazon.com/blogs/big-data/best-practices-to-scale-apache-spark-jobs-and-partition-data-with-aws-glue/
+RDD programming guide: parallelism -> increase parallelism -> increase number of partitions by means of shuffling (repartition API) -> increase number of executors to execute partitions in parallel. 
+
+However: data is never evenly distributed across partitions: https://blog.scottlogic.com/2018/03/22/apache-spark-performance.html  
+  -> heterogeneous executors needed for  SLO conformance?
+  -> The simplest solution to the above problems is to increase the number of partitions used for computations. This will reduce the effect of skew into a single partition and will also allow better matching of scheduling to CPUs.
+
+
+CERN thesis: Scaling cloud-native Apache Spark in Kubernetes for workloads in external storage
+==============================================================================================
+
+OOM: In order to avoid Spark Tasks being killed with OOMKilled due to Node Out Of Memory
+or Kubelet observing MemoryPressure, proper parameter values for Memory Overhead
+Fraction, Spark Executor Allocated Memory, Shuffle Memory Fraction and Storage Memory
+Fraction has to be set (CERN thesis, page 30-31)
+
+Data reduction use case (CERN thesis, page 5-6) is CPU/memory intensive without shuffling. Scaling executors is expected to offer linear decreased job execution time
+  * Additional references
+    * https://en.wikipedia.org/wiki/Data_reduction
+    * https://arxiv.org/abs/1703.04171
+
+Conclusion of CERN thesis, p44: 
+  * Kubernetes/Spark is only suitable for CPU/Memory-intensive batch/streaming applications with remote storage (not interactive applications) and when cost- effectiveness is important. 
+  * In all cases a high bandwith network connections between compute clusters and storage services is necessary. 
+  * Also applications that are shuffle intensive (a lot of reduce phases, limited in size) are matching use cases. 
+  * However large shuffle writes are not a matching case because large shuffle writes may exceed storate space allocated to virtual machines (which are compute optimized, as they are not used to run persistent storage systems)
+  * Tuning Spark with a decreased ReadAhead parameter is important for reducing the read data rate  from the storage system so it does not becomes the bottleneck. 
+  * Similary the CPU / RAM ratio of executors is important
+  * Scaling towards 200 executors gives linear decreased job-time. Non-linear decrease of job execution time is predicted for more executors if dataset size (nr of files) is too small for the executors to process.
+
+ Best-Trade-off point paper introduces Spark
+ ============================================
+ RDD Lineage is used to build dependencies between stages
+ RDD Lineage is transformed into a DAG for scheduling tasks. 
+
+ MEER
+ =====
+ The memory usage of a task is stable (gaussian distribution (u,sd/sqrt(number of samples) with small sd). So, the sum of the co-located tasks in one executor is also stable and a confidence interval [-z,z] of 95% will ensure that if you go a little bit higher than u+z gives optimal memory reservation 

@@ -1,0 +1,26 @@
+TPC-DS:
+  * M. Poess, R. Nambiar, and D. Walrath, Why you should run TPC-DS: A Workload Analysis, pp. 1138-1149, 2007.
+  * M. Barata, J. Bernardino, and P. Furtado, An overview of decision support benchmarks: TPC-DS, TPC-H and SSB, vol. 353, pp. 619, 2015.
+
+HiBench (https://github.com/Intel-bigdata/HiBench)
+  * Don't cry over spilled records: Memory elasticity of data-parallel applications and its application to cluster scheduling, ATC 2017 
+  For  Hadoop  we  profiled  18  jobs  across  8  different  ap-plications, most belonging to the popular HiBench big-data benchmarking suite [4]. The jobs range from graphprocessing (Connected Components, PageRank) to web-indexing  (Nutch),  machine  learning  (Bayesian  Classi-fication,  Item-Based  Recommender),  database  queries(TPC-DS) and simple jobs (WordCount, TeraSort).  ForSpark we profiled TeraSort and WordCount, for Tez weprofiled  WordCount  and  SortMerge  Join  and  for  Flink we profiled WordCount.  We used Hadoop 2.6.3, Spark2.0.0,  Tez  0.7.0  and  Flink  1.0.2.   However,  the  samebehavior  appears  in  Spark  versions  prior  to  2.0.0  andHadoop versions at least as old as 2.4.1 (June 2014).For accurate profiling we made sure that the profiledtask is not collocated with any other task.  To measurethe worst case penalties for under-sized tasks we ensurethat disk I/O operations for spills actually go to the driveand not to the OS buffer cache. For this, we ran each taskin a separate Linux cgroups container.  We minimize theamount of buffer cache available to a task by setting thecgroups limits as close to the JVM heap size as possible.As an alternative, we also modified Hadoop to performdisk spills using direct I/O thus bypassing completely theOS buffer cache.  The two approaches gave consistentlysimilar results.
+ * Shengsheng Huang, Jie Huang, Jinquan Dai, Tao Xie, and Bo Huang. The Hi-
+ Bench benchmark suite: Characterization of the MapReduce-based data analysis.
+ In Data Engineering Workshops (ICDEW), 2010 IEEE 26th International Con-
+ ference on, pages 4 
+ 
+ 
+SparkBench: M. Li, J. Tan, Y. Wang, L. Zhang, and V. Salapura. Sparkbench: a
+comprehensive benchmarking suite for in memory data analytic platform
+spark. In Proc. of the 12th ACM ICCF, 2015, https://codait.github.io/spark-bench/ 
+ * V. S. Marco, B. Taylor, B. Porter, and Z. Wang, “Improving spark application throughput via memory aware task co-location: A mixture of experts approach,” Middlew. 2017 - Proc. 2017 Int. Middlew. Conf., pp. 95–108, 2017.
+
+
+
+Wanling Gao, Yuqing Zhu, Zhen Jia, Chunjie Luo, and Lei Wang. 2013. Bigdatabench:
+a big data benchmark suite from web search engines. 1–7.
+ * V. S. Marco, B. Taylor, B. Porter, and Z. Wang, “Improving spark application throughput via memory aware task co-location: A mixture of experts approach,” Middlew. 2017 - Proc. 2017 Int. Middlew. Conf., pp. 95–108, 2017.
+
+Databricks. 2016. Spark-Perf. (2016). https://github.com/databricks/spark-perf
+ * V. S. Marco, B. Taylor, B. Porter, and Z. Wang, “Improving spark application throughput via memory aware task co-location: A mixture of experts approach,” Middlew. 2017 - Proc. 2017 Int. Middlew. Conf., pp. 95–108, 2017.
