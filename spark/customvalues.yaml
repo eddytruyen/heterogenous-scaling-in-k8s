@@ -15,11 +15,8 @@ worker:
   resources:
     requests:
       cpu: 3
-      memory: 21Gi
-    limits:
-      cpu: 3
-      memory: 21Gi       
-  javaOptions: "-XX:+UseContainerSupport"
+      memory: 30Gi
+  javaOptions: "-XX:+UseContainerSupport -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
   extraEnvVars:
     - name: SPARK_DAEMON_MEMORY
       value: 2g
