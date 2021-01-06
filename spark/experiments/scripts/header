@@ -5,19 +5,18 @@ spark-bench = {
       master = "spark://172.17.13.105:31934"
       executor-memory = "28G"
       driver-memory = "21G"
-      //deploy-mode = "cluster"
+      deploy-mode = "cluster"
       //num-executors = 2
     }
     conf = {
      //spark.memory.fraction = 0.75
      //spark.memory.storageFraction = 0.90
-     spark.executor.memoryOverhead = 1000
+     spark.executor.memoryOverhead = "1000"
      spark.driver.memoryOverhead = 3000
      //spark.sql.shuffle.partitions = 500
      //spark.default.parallelism = 500
       //spark.executor.extraJavaOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
       //spark.driver.extraJavaOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-      // Any configuration you need for your setup goes here, like:
       //spark.dynamicAllocation.enabled = "true"
     }
     suites-parallel = true
@@ -31,7 +30,7 @@ spark-bench = {
         workloads = [
           {
             name = "sql"
-            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data.csv", "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g2-1.parquet"]
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data1.csv", "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g2-1.parquet"]
             query = ["select * from input", "select c0, c6 from input where c0 < -0.9"]
             cache = false
             //partitions = p
