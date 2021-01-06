@@ -1,21 +1,30 @@
 #!/bin/bash
 
 nrOfTenants=$1
-outputFile=$2
+partitions=${2:-0}
+tenantGroup=${3:-2}
+outputFile=${4:-output.conf}
 
-if [ -d "$outputFile" ]
+if [ -f "$outputFile" ]
 then
  rm $outputFile
 fi
 
-for i in `seq $nrOfTenants`
+iterations=$(($nrOfTenants - 1))
+cat header >> tmp
+for i in `seq $iterations`
 do
-  cat header >> tmp
-  if [ $i -lt 1 ]
-  then	  
-    sed -i '$ s/\}/\},/g' tmp
-  fi    
+#  if [ $i -lt $nrOfTenants ]
+#  then	  
+  sed -i '$s/\}/\}\,/g' tmp
+  tenantId=$(($i + 1))
+#  fi
+  sed "s/x/$tenantGroup/g" fragment | sed "s/y\./$tenantId\./g" >> tmp  
 done
 cat footer >> tmp
+if [ $partitions -gt 0 ]
+then
+ sed -i "s/\/\/partitions = p/partitions = $partitions/g" tmp
+fi	
 mv tmp $outputFile
 
