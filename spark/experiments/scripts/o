@@ -1,4 +1,0 @@
-spark-bench takes exactly ONE argument.
-Usage: spark-bench.sh <PATH_TO_CONFIGURATION_FILE>
-i.e.: ./bin/spark-bench.sh ./examples/minimal-example.conf
-(https://github.com/SparkTC/spark-bench#running-the-examples-from-the-distribution)
