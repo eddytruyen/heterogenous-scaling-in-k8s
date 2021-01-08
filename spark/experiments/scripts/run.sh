@@ -4,7 +4,7 @@ nrofTenants=$1
 startingTenantId=${2:-1}
 executorMemory=${3:-0}
 
-lastTenantId=$(((2 * $nrofTenants) - $startingTenantId))
+lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
 tenantGroup=2
 clientmode=`grep '\/\/deploy' header | wc -l` 
 for i in `seq $startingTenantId $lastTenantId`
