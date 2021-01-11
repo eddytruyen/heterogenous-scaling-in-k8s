@@ -10,7 +10,7 @@ clientmode=`grep '\/\/deploy' header | wc -l`
 for i in `seq $startingTenantId $lastTenantId`
 do
   #nrOfPartitions=$(($i * 2))
-  nrOfPartitions=2
+  nrOfPartitions=0
   #2 cores per tenant
   if [ $clientmode -eq 0 ]
   then
