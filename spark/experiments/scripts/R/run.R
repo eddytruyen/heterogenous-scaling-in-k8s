@@ -1,5 +1,6 @@
 rm(list=ls())
 
+
 library("reshape2")
 library("ggplot2")
 library("gridExtra")
@@ -35,19 +36,16 @@ allocateWorkloadsVector <- function() {
     workloads.names = append(workloads.names, tmp.names)
     workloads = append(workloads, tmp)
     names(workloads) = workloads.names
-    workloads[[workload]]$operations <- vector("list", 0)
-    workloads[[workload]]$operations.names <-  c()
-    names(workloads[[workload]]$operations) = workloads[[workload]]$operations.names
+    names(workloads[[workload]]) <-  c()
   }
-  print(workloads)
+  print(names(workloads[[workload]]))
   tmp.names = operations
   tmp <- vector("list", length(tmp.names))
   names(tmp) <- tmp.names
-  wl_operations=workloads[[workload]]$operations
+  wl_operations=workloads[[workload]]
   #workloads[[workload]]$operations.names = append(wl_operations.names, tmp.names)
-  workloads[[workload]]$operations = append(wl_operations, tmp)
+  workloads[[workload]] = append(wl_operations, tmp)
   #names(workloads[[workload]]$operations) = workloads[[workload]]$operations.names
-  print(workloads)
   return (workloads)
 }
 
@@ -55,16 +53,20 @@ workloads=allocateWorkloadsVector()
 
 files = get_files(directory)
 
-for (j in names(workloads[[workload]]$operations)) {
+for (j in names(workloads[[workload]])) {
   for (i in names(files)) {
-    print(i)
     rundata <- unlist(files[i])
     for (r in rundata) {
       filename=paste(directory,"/",r,sep="")
       data = readLines(filename)
-      number <- unlist(strsplit(data[startsWith(data,j)][2],split=",")) #[2]only retrieve metric s
-      print(number[3]) # the number of seconds is stored in the 3rd field
-      workloads[[workload]]$operations[[j]]$raw$deployment[[deployment]][[paste("tenant-",i,sep="")]] <- append(workloads[[workload]]$operations[[j]]$raw$deployment[[deployment]][[paste("tenant-",i,sep="")]], number[3])
+      number <- unlist(strsplit(data[startsWith(data,j)][1],split=",")) #[2]only retrieve metric ns
+      sec=as.numeric(number[3])/1000000000 # the number of nanoseconds is stored in the 3rd field
+      workloads[[workload]][[j]]$raw[[deployment]][[paste(i,"-tenants",sep="")]] <- append(workloads[[workload]][[j]]$raw[[deployment]][[paste(i,"-tenants",sep="")]], sec)
     }
+    rawdata = workloads[[workload]][[j]]$raw[[deployment]][[paste(i,"-tenants",sep="")]]
+    workloads[[workload]][[j]]$mean[[deployment]][[paste(i,"-tenants",sep="")]] <- mean.default(rawdata)
+    workloads[[workload]][[j]]$median[[deployment]][[paste(i,"-tenants",sep="")]] <- median(rawdata)
+    workloads[[workload]][[j]]$stdev[[deployment]][[paste(i,"-tenants",sep="")]] <- sd(rawdata)
+    
   }
 }
