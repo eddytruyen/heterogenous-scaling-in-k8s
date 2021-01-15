@@ -1,6 +1,6 @@
 
 
-get_files <- function(directory) {
+get_sorted_runs <- function(directory) {
   #all_files=list.files(path=directory, recursive=TRUE)
   files.names <- seq(1,10)
   files <- vector("list", length(files.names))
