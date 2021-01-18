@@ -43,9 +43,9 @@ allocateWorkloadsVector <- function() {
   return (workloads)
 }
 
-ggplotHighestDeployment<-function(workload, operation, metric, deployment, cropLength, title, xl, yl, extend_y_lim=FALSE, y_lim_addition = 0, scalefactor=5, pc, lt, color="black",  fittedPoints = TRUE)  {
-  data=get(metric, get(operation, get(workload, workloads)))
-  z=unlist(get(deployment, data))
+ggplotHighestDeployment<-function(workload, deployment, metric, operation, cropLength, title, xl, yl, extend_y_lim=FALSE, y_lim_addition = 0, scalefactor=5, pc, lt, color="black",  fittedPoints = TRUE)  {
+  data=get(metric, get(deployment, get(workload, workloads)))
+  z=unlist(get(operation, data))
   z=z[1:cropLength]
   m1 <- matrix(c(z), ncol=cropLength, byrow=FALSE)
   d1 <- as.data.frame(m1, stringsAsFactors=FALSE)
@@ -56,15 +56,15 @@ ggplotHighestDeployment<-function(workload, operation, metric, deployment, cropL
   return(d1)
 }
 
-plotHighestDeployment<-function(workload, operation, metric, deployment, cropLength, title, xl, yl, extend_y_lim=FALSE, y_lim_addition = 0, scalefactor=5, pc, lt, color="black")  {
-  data=get(metric, get(operation, get(workload, workloads)))
-  z=unlist(get(deployment, data))
+plotHighestDeployment<-function(workload, deployment, metric, operation, cropLength, title, xl, yl, extend_y_lim=FALSE, y_lim_addition = 0, scalefactor=5, pc, lt, color="black")  {
+  data=get(metric, get(deployment, get(workload, workloads)))
+  z=unlist(get(operation, data))
   z=z[1:cropLength]
   x=(1:cropLength)*scalefactor
   #fit <- lm(z ~ x + I(x^2))
   if (extend_y_lim == TRUE) { 
     y_lim=min(unlist(z))-y_lim_addition
-    plot(z~x, main=title, xlab=xl,ylab=yl, pch=pc, lty=lt, col=color, ylim=c(0, y_lim))
+    plot(z~x, main=title, xlab=xl,ylab=yl, xaxp  = c(1,length(x),length(x)-1),pch=pc, lty=lt, col=color, ylim=c(0, y_lim))
   } else {
     plot(z~x, main=title, xlab=xl,ylab=yl, pch=pc, lty=lt, col=color)
   }
@@ -72,8 +72,8 @@ plotHighestDeployment<-function(workload, operation, metric, deployment, cropLen
   return(data)
 }
 
-plotOtherDeploymentasLine<-function(workloaddata, deployment, cropLength, pc, lt, scalefactor=5, color="black") {
-  z=unlist(get(deployment, workloaddata))
+plotOtherDeploymentasLine<-function(workloaddata, operation, cropLength, pc, lt, scalefactor=5, color="black") {
+  z=unlist(get(operation, workloaddata))
   z=z[1:cropLength]
   x=(1:cropLength)*scalefactor
   #fit <- lm(z ~ x + I(x^2))
@@ -81,9 +81,9 @@ plotOtherDeploymentasLine<-function(workloaddata, deployment, cropLength, pc, lt
   lines(x,z, pch=pc, lty=lt, col=color)
 }
 
-plotOtherasLine<-function(workload, operation, metric, deployment, cropLength, pc, lt, scalefactor=5, color="black") {
-  data=get(metric, get(operation, get(workload, workloads)))
-  z=unlist(get(deployment, data))
+plotOtherasLine<-function(workload, deployment, metric, operation, cropLength, pc, lt, scalefactor=5, color="black") {
+  data=get(metric, get(deployment, get(workload, workloads)))
+  z=unlist(get(operation, data))
   z=z[1:cropLength]
   x=(1:cropLength)*scalefactor
   #fit <- lm(z ~ x + I(x^2))
@@ -122,40 +122,44 @@ for (j in operations) {
 
 
 L=10
-metric="median"
+metric="mean"
 #workload
-operation="hpa-no-part"
-deployment=operations[1]
+deployment="hpa-no-part"
+operation=operations[1]
 title="Linear horizontal scaling"
 xl="Number of tenants"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
 yl=paste("0.95 quantile", " of job completion time (s)", sep="");
 
+pch1 = c(9,19,18,2) 
+lty1 = c(1,6,25,29) 
+col1 = c(25,134,450,25)
 
 
-data=plotHighestDeployment(workload, operation, metric, deployment, L, title, xl, yl, pc=9, lt=1, 
-                           color=25, extend_y_lim = TRUE, y_lim_addition = -80, scalefactor = 1)
+data=plotHighestDeployment(workload, deployment, metric, operation, L, title, xl, yl, pc=pch1[1], lt=lty1[1], 
+                           color=col1[1], extend_y_lim = TRUE, y_lim_addition = -80, scalefactor = 1)
 #redish
 
-plotOtherDeploymentasLine(data, operations[2], L, 19, 6, color=134, scalefactor = 1)
+plotOtherDeploymentasLine(data, operations[2], L, pch1[2], lty1[2], color=col1[2], scalefactor = 1)
 #magenta
 
 
-plotOtherDeploymentasLine(data, operations[3], L, 18, 25, color=450, scalefactor=1)
+plotOtherDeploymentasLine(data, operations[3], L, pch1[3], lty1[3], color=col1[3], scalefactor=1)
 #black
 
-plotOtherDeploymentasLine(data,  operations[4], L, 2, 29, color=25, scalefactor=1)
+plotOtherDeploymentasLine(data,  operations[4], L, pch1[4], lty1[4], color=col1[4], scalefactor=1)
 #azur blue
 
 
 legend(x="topright", legend=operations, 
-       pch = c(9,19,18,2), lty = c(1,6,25,29), 
-       col = c(25,134,450,25), bty="n")
+       pch = pch1, lty = lty1, 
+       col = col1, bty="n")
 
-for (i in c(3)) {
-  print(operations[i])
- foo <- data.frame(mean=unlist(workloads[[workload]][[operation]]$mean[[operations[i]]]),
-                   sd=unlist(workloads[[workload]][[operation]]$stdev[[operations[i]]]))
- 
- lines(rbind(1:10,1:10,NA),rbind(foo$mean - foo$sd,foo$mean + foo$sd,NA))
+for (i in c(1:4)) {
+  foo <- data.frame(mean=unlist(workloads[[workload]][[deployment]]$mean[[operations[i]]]),
+                    sd=unlist(workloads[[workload]][[deployment]]$stdev[[operations[i]]]))
+  
+  segments(rbind(1:10),rbind(foo$mean - foo$sd),rbind(1:10), rbind(foo$mean + foo$sd), col=col1[i], lty=lty1[i])
+  segments(rbind(0.9:9.9,0.9:9.9),rbind(foo$mean + foo$sd, foo$mean - foo$sd), rbind(1.1:10.1,1.1:10.1), rbind(foo$mean + foo$sd, foo$mean - foo$sd), col=col1[i])
+  
 }
