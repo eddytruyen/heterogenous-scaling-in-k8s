@@ -9,15 +9,14 @@ library("plyr")
 source(file="get_files.R")
 
 options(scipen = 999)
-directory="../../hpa-no-part"
+directory="../../hpa-no-part-dwl2"
 workload="spark-bench"
 operations=c("select * from csv", "select * from parquet", "select c from csv", "select c from parquet")
-metrics=c("raw", "median", "mean", "quant")
-deployment="hpa-no-part"
-workloadfile="../workloaddata.rdf"
+deployment="hpa-no-part-dwl2"
+workloadfile="./workloads-spark.rds"
 
 
-allocateWorkloadsVector <- function() { 
+checkInputWorkloads <- function() { 
   workloads.names <- c()
   workloads <- vector("list", 0)
   names(workloads) <- workloads.names
@@ -26,19 +25,11 @@ allocateWorkloadsVector <- function() {
   }
   if (workload %in% names(workloads)) {
     if (deployment %in% names(workloads[[workload]])) {
-      wl_operations=workloads[[workload]][[deployment]]$raw
+      wl_operations=names(workloads[[workload]][[deployment]]$raw)
       if ( length(Reduce(intersect,list(wl_operations,operations)))>0) {
-        quit(paste("Workload file", workload, "already has operations for deployment", deployment, "that overlap with", operations))
+        stop(paste("Workload file", workload, "already has operations for deployment", deployment, "that overlap with the given operations variable"))
       }
     }
-  } else {
-    tmp.names <- c(workload)
-    tmp <- vector("list", 1)
-    names(tmp) <- tmp.names
-    workloads.names = append(workloads.names, tmp.names)
-    workloads = append(workloads, tmp)
-    names(workloads) = workloads.names
-    names(workloads[[workload]]) <-  c()
   }
   return (workloads)
 }
@@ -91,7 +82,8 @@ plotOtherasLine<-function(workload, deployment, metric, operation, cropLength, p
   lines(x,z, pch=pc, lty=lt, col=color)
 }
 
-workloads=allocateWorkloadsVector()
+workloads=checkInputWorkloads()
+
 
 runs = get_sorted_runs(directory)
 
@@ -124,7 +116,7 @@ for (j in operations) {
 L=10
 metric="mean"
 #workload
-deployment="hpa-no-part"
+deployment="hpa-no-part-dwl2"
 operation=operations[1]
 title="Linear horizontal scaling"
 xl="Number of tenants"
@@ -163,3 +155,6 @@ for (i in c(1:4)) {
   segments(rbind(0.9:9.9,0.9:9.9),rbind(foo$mean + foo$sd, foo$mean - foo$sd), rbind(1.1:10.1,1.1:10.1), rbind(foo$mean + foo$sd, foo$mean - foo$sd), col=col1[i])
   
 }
+
+
+saveRDS(workloads,"workloads-spark.rds")
