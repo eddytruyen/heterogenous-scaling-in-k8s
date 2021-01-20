@@ -1,0 +1,8 @@
+spec:
+  maxReplicas: 12
+  minReplicas: 2
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: statefulset
+    name: my-release-spark-worker
+  targetCPUUtilizationPercentage: 80
