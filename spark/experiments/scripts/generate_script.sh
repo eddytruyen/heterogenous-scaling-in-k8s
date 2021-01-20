@@ -26,11 +26,11 @@ do
   sed -i '$s/\}/\}\,/g' tmp
   tenantId=$(($i + 1))
 #  fi
-#  str="c0, " 
-#  str2="c0 < -0.9"
-#  for j in `seq $i`; do str1="$str"; str3="$str2"; k="c$(($j + 6))"; str="$str1$k, "; str2="$str3 and $k < -0.9"; done 
-#  sed "s/x/$tenantGroup/g" fragment | sed "s/y\./$tenantId\./g" | sed "s/c0\, /$str/g" | sed "s/c0 < -0.9/$str2/g" >> tmp  
-  sed "s/x/$tenantGroup/g" fragment | sed "s/y\./$tenantId\./g" >> tmp
+  str="c0, " 
+  str2="c0 < -0.9"
+  for j in `seq $i`; do str1="$str"; str3="$str2"; k="c$(($j + 6))"; str="$str1$k, "; str2="$str3 and $k < -0.9"; done 
+  sed "s/x/$tenantGroup/g" fragment | sed "s/y\./$tenantId\./g" | sed "s/c0\, /$str/g" | sed "s/c0 < -0.9/$str2/g" >> tmp  
+#  sed "s/x/$tenantGroup/g" fragment | sed "s/y\./$tenantId\./g" >> tmp
 
 done
 cat footer >> tmp
