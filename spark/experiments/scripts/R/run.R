@@ -9,10 +9,10 @@ library("plyr")
 source(file="get_files.R")
 
 options(scipen = 999)
-directory="../../hpa-no-part-dwl2"
+directory="../../auto-hpa-80cpu-nop-dwl2"
 workload="spark-bench"
 operations=c("select * from csv", "select * from parquet", "select c from csv", "select c from parquet")
-deployment="hpa-no-part-dwl2"
+deployment="hpa-80cpu"
 workloadfile="./workloads-spark.rds"
 
 
@@ -63,7 +63,26 @@ plotHighestDeployment<-function(workload, deployment, metric, operation, cropLen
   return(data)
 }
 
-plotOtherDeploymentasLine<-function(workloaddata, operation, cropLength, pc, lt, scalefactor=5, color="black") {
+plotHighestVpaDeployment<-function(workload, deployment, metric, operation, cropLength, title, xl, yl, extend_y_lim=FALSE, y_lim_addition = 0, scalefactor=5, pc, lt, color="black")  {
+  data=get(metric, get(deployment, get(workload, workloads)))
+  z=unlist(get(operation, data))
+  z=z[1:cropLength]
+  x=(1:cropLength)*scalefactor
+  x2=names(get("raw", get(deployment, get(workload, workloads))))
+  x3=rbind(x,x2)
+  #fit <- lm(z ~ x + I(x^2))
+  if (extend_y_lim == TRUE) { 
+    y_lim=min(unlist(z))-y_lim_addition
+    plot(z~x3, main=title, xlab=xl,ylab=yl, xaxp  = c(1,length(x),length(x)-1),pch=pc, lty=lt, col=color, ylim=c(0, y_lim))
+  } else {
+    plot(z~x3, main=title, xlab=xl,ylab=yl, pch=pc, lty=lt, col=color)
+  }
+  lines(x, z, pch=pc, lty=lt, col=color)
+  return(data)
+}
+
+
+plotOtherDeploymentasLine<-function(workloaddata, operation, cropLength, pc, lt, scalefactor=5, color= "black") {
   z=unlist(get(operation, workloaddata))
   z=z[1:cropLength]
   x=(1:cropLength)*scalefactor
@@ -75,6 +94,16 @@ plotOtherDeploymentasLine<-function(workloaddata, operation, cropLength, pc, lt,
 plotOtherasLine<-function(workload, deployment, metric, operation, cropLength, pc, lt, scalefactor=5, color="black") {
   data=get(metric, get(deployment, get(workload, workloads)))
   z=unlist(get(operation, data))
+  z=z[1:cropLength]
+  x=(1:cropLength)*scalefactor
+  #fit <- lm(z ~ x + I(x^2))
+  points(x,z, pch=pc, lty=lt, col=color)
+  lines(x,z, pch=pc, lty=lt, col=color)
+}
+
+plotReplicas<-function(workload, deployment, cropLength, pc, lt, scalefactor=5, color="black") {
+  replicas=get("pod_replicas", get(deployment, get(workload, workloads)))
+  z=unlist(replicas)
   z=z[1:cropLength]
   x=(1:cropLength)*scalefactor
   #fit <- lm(z ~ x + I(x^2))
@@ -116,20 +145,20 @@ for (j in operations) {
 L=10
 metric="mean"
 #workload
-deployment="hpa-no-part-dwl2"
+deployment="hpa-80cpu"
 operation=operations[1]
-title="Linear horizontal scaling"
+title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
 yl=paste("0.95 quantile", " of job completion time (s)", sep="");
 
-pch1 = c(9,19,18,2) 
-lty1 = c(1,6,25,29) 
-col1 = c(25,134,450,25)
+pch1 = c(9,19,18,2,25) 
+lty1 = c(1,6,25,29,134) 
+col1 = c(25,134,450,25,6)
 
 
 data=plotHighestDeployment(workload, deployment, metric, operation, L, title, xl, yl, pc=pch1[1], lt=lty1[1], 
-                           color=col1[1], extend_y_lim = TRUE, y_lim_addition = -80, scalefactor = 1)
+                           color=col1[1], extend_y_lim = TRUE, y_lim_addition = -40, scalefactor = 1)
 #redish
 
 plotOtherDeploymentasLine(data, operations[2], L, pch1[2], lty1[2], color=col1[2], scalefactor = 1)
@@ -142,8 +171,10 @@ plotOtherDeploymentasLine(data, operations[3], L, pch1[3], lty1[3], color=col1[3
 plotOtherDeploymentasLine(data,  operations[4], L, pch1[4], lty1[4], color=col1[4], scalefactor=1)
 #azur blue
 
+plotReplicas(workload,  deployment, L, pch1[5], lty1[5], color=col1[5], scalefactor=1)
 
-legend(x="topright", legend=operations, 
+
+legend(x="topright", legend=c(operations,"number of pods"), 
        pch = pch1, lty = lty1, 
        col = col1, bty="n")
 
@@ -157,4 +188,4 @@ for (i in c(1:4)) {
 }
 
 
-saveRDS(workloads,"workloads-spark.rds")
+#saveRDS(workloads,"workloads-spark.rds")
