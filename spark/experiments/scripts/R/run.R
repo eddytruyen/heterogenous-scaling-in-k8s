@@ -9,10 +9,10 @@ library("plyr")
 source(file="get_files.R")
 
 options(scipen = 999)
-directory="../../auto-hpa-80cpu-nop-dwl2"
+directory="../../auto-hpa-150cpu-nop-dwl2"
 workload="spark-bench"
 operations=c("select * from csv", "select * from parquet", "select c from csv", "select c from parquet")
-deployment="hpa-80cpu"
+deployment="hpa-100cpu"
 workloadfile="./workloads-spark.rds"
 
 
@@ -139,13 +139,13 @@ for (j in operations) {
   workloads[[workload]][[deployment]]$stdev[[j]]<- lapply(rawdata,sd)
 }
 
-
-
+replicas <- c(2,3,3,4,4,4,5,5,5,5) #auto-hpa-cpu100
+workloads$`spark-bench`$`hpa-100cpu`$pod_replicas <- replicas
 
 L=10
 metric="mean"
 #workload
-deployment="hpa-80cpu"
+deployment="hpa-100cpu"
 operation=operations[1]
 title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
