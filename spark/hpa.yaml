@@ -1,0 +1,24 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app.kubernetes.io/component: worker-autoscaler
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: spark
+  name: my-release-spark-auto-mem-scaler
+  namespace: default
+spec:
+  maxReplicas: 11
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: statefulset
+    name: my-release-spark-worker
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: AverageValue
+        averageValue: 1300Mi
