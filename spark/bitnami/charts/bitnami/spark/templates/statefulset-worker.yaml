@@ -182,6 +182,29 @@ spec:
         {{- if .Values.worker.extraVolumes }}
         {{- tpl (toYaml .Values.worker.extraVolumes) $ | nindent 8 }}
         {{- end }}
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "cpu_limit"
+                resourceFieldRef:
+                containerName: spark-worker
+                resource: limits.cpu
+                divisor: 1m
+              - path: "cpu_request"
+                resourceFieldRef:
+                containerName: spark-worker
+                resource: requests.cpu
+                divisor: 1m
+              - path: "mem_limit"
+                resourceFieldRef:
+                containerName: spark-worker
+                resource: limits.memory
+                divisor: 1Gi
+              - path: "mem_request"
+                resourceFieldRef:
+                containerName: spark-worker
+                resource: requests.memory
+                divisor: 1Gi
   volumeClaimTemplates:
   - metadata:
       name: spark-data
