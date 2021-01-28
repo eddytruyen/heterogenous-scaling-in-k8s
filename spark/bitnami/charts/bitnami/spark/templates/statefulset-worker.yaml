@@ -49,6 +49,8 @@ spec:
               containerPort: {{ .Values.worker.clusterPort }}
             {{- end }}
           volumeMounts:
+            - name: podinfo
+              mountPath: /etc/podinfo
             - name: spark-data
               mountPath: '/opt/bitnami/spark/spark_data'     
             {{- if .Values.worker.configurationConfigMap }}
