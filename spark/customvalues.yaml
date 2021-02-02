@@ -1,7 +1,7 @@
 image:
   tag: 2.4.6-debian-10-r14
 worker:
-  replicaCount: 4
+  replicaCount: 2
   securityContext:
     enabled: true
     runAsUser: 0
@@ -9,13 +9,13 @@ worker:
   autoscaling:
     ## Enable replica autoscaling depending on CPU
     enabled: true
-    CpuTargetPercentage: 10
+    CpuTargetPercentage: 80
     ## Max number of workers when using autoscaling
-    replicasMax: 4
+    replicasMax: 10
   resources:
     requests:
-      cpu: 7
-      memory: 30Gi
+      cpu: 2
+      memory: 15Gi
       #  javaOptions: "-XX:+UseContainerSupport -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
   javaOptions: "-XX:+UseContainerSupport"
   extraEnvVars:
@@ -44,8 +44,8 @@ master:
       #   memory: 2Gi
 service:
   type: NodePort
-  nodePorts:
-    cluster: 31934
-    web: 31748 
+  # nodePorts:
+  #  cluster: 31934
+  #  web: 31748 
 storage:
   gi: 30Gi
