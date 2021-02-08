@@ -5,8 +5,6 @@ cd "$scriptdir"
 namespace=${1:-default}
 release=${2:-my-release}
 min_nodes=${3:-1}
-echo $namespace
-echo $release
 kubectl delete -f storageclass.yaml -n $namespace
 count=`kubectl get nodes | wc -l`
 nodes=$(( $count - ( $min_nodes + 1)))

@@ -1,4 +1,7 @@
 #!/bin/bash
+current_dir=`pwd`
+scriptdir="$(dirname "$0")"
+cd "$scriptdir"
 
 nrOfTenants=$1
 executorMemory=${2:-0}
@@ -39,4 +42,4 @@ then
  sed -i "s/\/\/partitions = p/partitions = $partitions/g" tmp
 fi	
 mv tmp $outputFile
-
+cd "$current_dir"

@@ -2,7 +2,7 @@
         descr = "Run two different SQL queries over the dataset in two different formats"
         benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-gx-t-y.csv"
         parallel = false
-        repeat = 10
+        repeat = 1
         save-mode = "append"
         workloads = [
           {
