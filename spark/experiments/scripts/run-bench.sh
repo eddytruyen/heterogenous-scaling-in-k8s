@@ -15,5 +15,9 @@ sed "s/executor-memory = \".*G\"/executor-memory = \"${exec_mem}G\"/g" output.co
 exec_overhead_mb=$((${exec_overhead_gb} * 1024))
 sed  -i "s/spark.executor.memoryOverhead = \".*\"/spark.executor.memoryOverhead = \"${exec_overhead_mb}\"/g" tmp.conf
 ./bin/spark-bench.sh tmp.conf  2> run.log
+if [ ! -d $outputDir ] 
+then
+	mkdir $outputDir
+fi
 cp -r results-$workload-g$tenantgroup-t-*.csv $outputdir
 cd "$current_dir"
