@@ -15,6 +15,7 @@ SparkBench: M. Li, J. Tan, Y. Wang, L. Zhang, and V. Salapura. Sparkbench: a
 comprehensive benchmarking suite for in memory data analytic platform
 spark. In Proc. of the 12th ACM ICCF, 2015, https://codait.github.io/spark-bench/ 
  * V. S. Marco, B. Taylor, B. Porter, and Z. Wang, “Improving spark application throughput via memory aware task co-location: A mixture of experts approach,” Middlew. 2017 - Proc. 2017 Int. Middlew. Conf., pp. 95–108, 2017.
+* N. Garg and D. Janakiram, “Sparker: Optimizing spark for heterogeneous clusters,” Proc. Int. Conf. Cloud Comput. Technol. Sci. CloudCom, vol. 2018-Decem, pp. 1–8, 2018.
 
 
 
