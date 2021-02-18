@@ -142,6 +142,10 @@ for (j in operations) {
 replicas <- c(2,3,3,4,4,4,5,5,5,5) #auto-hpa-cpu100
 workloads$`spark-bench`$`hpa-100cpu`$pod_replicas <- replicas
 
+replicas <- c(1,1,1,1,2,3,4,5,7,9) #auto-hpa-11Gimem
+workloads$`spark-bench`$`hpa-11Gimem`$pod_replicas <- replicas
+
+
 L=10
 metric="mean"
 #workload
