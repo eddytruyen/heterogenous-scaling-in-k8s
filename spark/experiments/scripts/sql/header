@@ -30,7 +30,7 @@ spark-bench = {
         workloads = [
           {
             name = "sql"
-            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g2-1.parquet"]
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data1.csv", "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g2-1.parquet"]
             query = ["select * from input", "select c0, c6 from input where c0 < -0.9"]
             cache = false
             //partitions = p
