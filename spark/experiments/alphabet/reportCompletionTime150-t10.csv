@@ -1,0 +1,11 @@
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,
+0,6,1,7,8,-1.78816E+16,-1.78816E+16,silver,2.68224E+11,
+1,7,2,6,24,-1.05039E+16,-1.05039E+16,silver,1.57559E+11,
+2,4,2,7,24,-0.937,-0.937,silver,1.37404E+11,
+3,4,1,6,24,-1.84882E+15,-0.937,silver,2.77324E+11,
+4,6,1,6,16,-1.95524E+16,-0.937,silver,2.93286E+11,
+5,6,2,7,16,-0.718,-0.718,silver,1.27616E+11,<-
+6,6,1,7,12,-1.7088E+16,-0.718,silver,2.56319E+11,
+7,7,1,7,4,-1.81905E+11,-0.718,silver,2.72858E+11,
+8,7,1,7,20,-1.46587E+16,-0.718,silver,21988110053,
+9,7,2,7,16,-0.734,-0.718,silver,1.34556E+11,
