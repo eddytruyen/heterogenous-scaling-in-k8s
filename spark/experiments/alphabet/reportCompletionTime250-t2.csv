@@ -1,0 +1,47 @@
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,
+0,5,2,7,3,-0.168,-0.168,silver,1.08E+16,
+1,4,3,4,6,-0.719,-0.168,silver,12483844323,
+2,6,3,7,3,-0.517,-0.168,silver,8137781011,
+3,4,2,7,3,-0.115,-0.115,silver,1.08E+16,
+4,4,2,7,6,-0.436,-0.115,silver,1.04E+16,
+5,5,2,4,3,-0.053,-0.053,silver,1.60E+16,
+6,4,2,5,3,-0.038,-0.038,silver,1.36E+16,
+7,5,2,5,3,-0.092,-0.038,silver,1.37E+15,
+8,4,2,4,3,0,0,silver,1.59E+16,<-
+9,4,3,4,3,-0.237,0,silver,1.21E+16,
+,,,,,,,,,
+,,,,,,,,,
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,
+0,5,2,5,1,-0.251,-0.251,silver,1.00E+16,err
+1,4,3,4,4,-0.816,-0.251,silver,1.21E+16,
+2,5,2,5,3,-0.482,-0.251,silver,13870872953,
+3,6,1,5,1,-0.138,-0.138,silver,85361285067,err
+4,6,3,5,1,-0.48,-0.138,silver,1.47E+16,err
+5,4,1,5,1,-0.022,-0.022,silver,1.27E+16,err
+6,4,1,4,1,-1.24E+17,-0.022,silver,3.09E+15,err
+7,6,1,5,4,-0.311,-0.022,silver,2.15E+16,
+8,4,1,5,4,-0.195,-0.022,silver,2.41E+16,
+9,4,1,5,2,-0.08,-0.022,silver,23674857645,<-
+,,,,,,,,,
+,,,,,,,,,
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,
+0,6,7,1000,1536,-0.264,-0.264,silver,2.30E+16,
+1,5,6,750,2048,-1.51E+21,-0.264,silver,37763081331,
+2,7,6,1000,1536,-0.083,-0.083,silver,2.40E+16,
+3,7,9,1000,1536,-0.625,-0.083,silver,1.97E+16,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,
+0,5,6,1000,1536,-0.15,-0.15,silver,23.499.086.025,
+1,4,6,750,2048,-1.353.191.975.956,-0.15,silver,338.297.993.989,
+2,5,7,750,1536,-1.222.895.137.244,-0.15,silver,305.723.784.311,
+3,5,6,1000,2048,-0.6,-0.15,silver,224.919.864.524,
+4,5,7,1000,1536,-0.475,-0.15,silver,204.205.879.675,
+5,4,7,750,2048,-1.280.138.370.832,-0.15,silver,320.034.592.708,
+6,4,6,1000,2048,-0.599,-0.15,silver,224.270.255.189,
+7,5,6,750,1536,-1.320.055.603.668,-0.15,silver,330.013.900.917,
+8,4,6,1000,1536,-0.15,-0.15,silver,227.185.922.262,<- smallest transition
+9,4,7,1000,2048,-0.999,-0.15,silver,212.790.836.855,

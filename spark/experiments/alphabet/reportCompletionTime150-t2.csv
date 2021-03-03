@@ -1,0 +1,11 @@
+config #,driverMem,worker.replicaCount,worker.resources.requests.cpu,worker.resources.requests.memory,score,best score,SLAName,CompletionTime,,
+0,5,3,4,2,-0.416,-0.416,silver,1.2424E+11,,
+1,4,4,2,4,-1.16581E+16,-0.416,silver,1.74871E+11,,
+2,4,3,4,2,-0.333,-0.333,silver,1.30642E+11,,
+3,5,4,4,2,-0.666,-0.333,silver,1.1062E+11,,
+4,4,2,4,4,-1.05798E+16,-0.333,silver,1.58697E+11,,
+5,5,2,2,2,-1.80667E+15,-0.333,silver,2.71001E+11,,
+6,4,4,4,4,-1.25,-0.333,silver,98760240399,,
+7,4,3,3,2,-0.27,-0.27,silver,1.37716E+11,<-,smallest unit of transition seems to be c1m2
+8,5,3,3,4,-0.854,-0.27,silver,1.40627E+11,,
+9,4,4,2,2,-1.09184E+16,-0.27,silver,1.63777E+11,,
