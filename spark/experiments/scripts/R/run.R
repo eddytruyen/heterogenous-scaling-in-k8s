@@ -5,6 +5,10 @@ library("reshape2")
 library("ggplot2")
 library("gridExtra")
 library("plyr")
+library(mosaic)
+library(mosaicCore)
+library(mosaicData)
+library(mosaicCalc)
 
 source(file="get_files.R")
 
@@ -146,23 +150,50 @@ replicas <- c(1,1,1,1,2,3,4,5,7,9) #auto-hpa-11Gimem
 workloads$`spark-bench`$`hpa-11Gimem`$pod_replicas <- replicas
 
 
+workloads = readRDS(file=workloadfile)
 L=10
 metric="mean"
-#workload
-deployment="hpa-100cpu"
+workload="spark-bench"
+deployment="hps"
 operation=operations[1]
 title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
 yl=paste("0.95 quantile", " of job completion time (s)", sep="");
 
+data=(get(metric, get(deployment, get(workload, workloads))))
+y=unlist(get(operation, data))
+y=unname(y[1:L])
+print(y)
+z = (1:L)
+frame=data.frame(z,y)
+
+computeFunction <- function(y,z,frame) {
+  f = fitModel(y~(1-A*z - B*log(z))/C, data = frame)
+  return(f)
+}
+
+f <- computeFunction(y,z,frame)
+
+plotPoints(y~z)
+coef(f)
+plotFun(f(z)~z, z.lim = range(1:L),add=TRUE, col="blue")
+
+d=D(f(z)~z)
+soln=integrateODE(dz~f(z),z=1,tdur=10)
+plotFun(soln$z, tlim=range(1,10))
+
+
+d(1)
+d(2)
+f(1)-(d(2)-d(1))
 pch1 = c(9,19,18,2,25) 
 lty1 = c(1,6,25,29,134) 
 col1 = c(25,134,450,25,6)
 
 
 data=plotHighestDeployment(workload, deployment, metric, operation, L, title, xl, yl, pc=pch1[1], lt=lty1[1], 
-                           color=col1[1], extend_y_lim = TRUE, y_lim_addition = -40, scalefactor = 1)
+                           color=col1[1], extend_y_lim = TRUE, y_lim_addition = -80, scalefactor = 1)
 #redish
 
 plotOtherDeploymentasLine(data, operations[2], L, pch1[2], lty1[2], color=col1[2], scalefactor = 1)
