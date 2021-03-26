@@ -23,14 +23,14 @@ class ConfigParser:
 				{
 					'tenants': sla.tenants,
 					'class': sla.sla_class,
-					'demoCPU': sla.demo_cpu,
 					'slos': {
-						'jobsize': sla.slos['jobsize'],
-						'throughput': sla.slos['throughput']
+						'workload': sla.slos['workload'],
+						'benchPath': sla.slos['benchPath'],
+                                                'tenantGroup': sla.slos['tenantGroup'],
+                                                'completionTime': sla.slos['completionTime']
 					},
 					'workers': [{
 						'id': worker.worker_id,
-						'cpu': worker.cpu,
 						'replicas':{
 							'min':worker.min_replicas,
 							'max':worker.max_replicas

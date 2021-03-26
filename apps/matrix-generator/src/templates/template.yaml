@@ -1,26 +1,21 @@
 nbOfIterations: 1
 nbOfSamplesPerIteration: {{samples}}
 charts:
-  - name: my-app
+  - name: spark
     chartdir: {{chart_dir}}
 slas:
 {% for sla in slas %}
   - name : {{sla.class}}
-    chartName: my-app
+    chartName: spark
     slos: 
-      jobsize: {{sla.slos.jobsize}}
-      throughput: {{sla.slos.throughput}}
+      workload: {{sla.slos.workload}}
+      benchPath: {{sla.slos.benchPath}}
+      tenantGroup: "{{sla.slos.tenantGroup}}"
+      completionTime: {{sla.slos.completionTime}}
     nbOfTenants: {{sla.tenants}}
     parameters:
     {% for worker in sla.workers %}
-      - name: worker{{worker.id}}CPU
-        searchspace:
-          min: {{worker.cpu}}
-          max: {{worker.cpu}}
-          granularity: 1
-        prefix: 
-        suffix: m
-      - name: worker{{worker.id}}Replicas
+      - name: worker{{worker.id}}.replicaCount
         searchspace:
           min: {{worker.replicas.min}}
           max: {{worker.replicas.max}}
@@ -28,13 +23,6 @@ slas:
         prefix: 
         suffix:
        {% endfor %}
-      - name: demoCPU
-        searchspace:
-          min: {{sla.demoCPU}}
-          max: {{sla.demoCPU}}
-          granularity: 100
-        prefix: 
-        suffix: m
 {% endfor %}
 namespaceStrategy: NSPSLA
 optimizer: {{optimizer}}
