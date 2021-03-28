@@ -31,7 +31,6 @@ def generate_matrix(initial_conf):
 		d[sla['name']]={}
 		tenant_nb=1
 		while tenant_nb <= sla['maxTenants']+1:
-			print('TENANTNR: ' + str(tenant_nb))
 			results=[]
 			for i,ws in enumerate(next_exp):
 				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws])
@@ -47,9 +46,8 @@ def generate_matrix(initial_conf):
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 def find_optimal_conf(results):
-	scores=[result['score'] for result in results]
+	scores=[float(result['score']) for result in results]
 	index=scores.index(max(scores))
-	print(results[index])
 	return results[index]
 
 def _find_next_exp(workers, results, base, window):
