@@ -5,6 +5,7 @@ class SLAConf:
 		self.workers = workers
 		self.slos = slos
 
+
 class WorkerConf:
 	def __init__(self, worker_id, cpu, memory, min_replicas,max_replicas):
 		self.worker_id = worker_id

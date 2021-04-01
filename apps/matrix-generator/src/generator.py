@@ -26,8 +26,9 @@ def generate_matrix(initial_conf):
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
 		workers[2].setReplicas(min_replicas=0,max_replicas=0)
 		workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
+		dict=_sort(workers,base)
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=[workers]
+		next_exp=_find_next_exp(dict,workers,[],base,window)
 		d[sla['name']]={}
 		tenant_nb=1
 		while tenant_nb <= sla['maxTenants']+1:
@@ -42,7 +43,7 @@ def generate_matrix(initial_conf):
 				tenant_nb+=1
 			else : 
 				print("NO RESULT")
-			next_exp=_find_next_exp(workers,result, base, window)
+			next_exp=_find_next_exp(dict,workers,result, base, window)
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 def find_optimal_conf(results):
@@ -50,12 +51,69 @@ def find_optimal_conf(results):
 	index=scores.index(max(scores))
 	return results[index]
 
-def _find_next_exp(workers, results, base, window):
+
+def generate_matrix2(initial_conf):
+        bin_path=initial_conf['bin']['path']
+        chart_dir=initial_conf['charts']['chartdir']
+        exp_path=initial_conf['output']
+        util_func=initial_conf['utilFunc']
+        slas=initial_conf['slas']
+
+
+        for sla in slas:
+                alphabet=sla['alphabet']
+                window=alphabet['searchWindow']
+                base=alphabet['base']
+                workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+                # HARDCODED => make more generic by putting workers into an array
+                workers[0].setReplicas(min_replicas=0,max_replicas=0)
+                workers[1].setReplicas(min_replicas=0,max_replicas=0)
+                workers[2].setReplicas(min_replicas=0,max_replicas=0)
+                workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
+                dict=_sort(workers,base)
+                print(dict)
+                next_exp=_find_next_exp(dict,workers,[], base, window)
+                for exp in next_exp:
+                          for w in exp:
+                                print(w.min_replicas, w.max_replicas)
+
+def _sort(workers,base):
+	def cost_for_sort(elem):
+		return _cost(workers,elem)
+
+	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
+	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
+	print(initial_conf)
+	print(max_conf)
+	index=range(initial_conf,max_conf+1)
+	comb=[utils.number_to_base(c,base) for c in index]
+        #comb=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
+	for c1 in comb:
+		while len(c1) < len(workers):
+			c1.insert(0,0)
+	sorted_list=sorted(comb,key=cost_for_sort)
+	return dict(zip(index,sorted_list))
+
+
+
+def _cost(workers, conf):
+        cost=0
+        for w,c in zip(workers,conf):
+            cost+=c*w.cpu+c*w.memory
+        return cost
+
+
+
+
+def _find_next_exp(sorted_combinations, workers, results, base, window):
 	workers_exp=[]
-	optimal_conf=[results['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-	min_conf=utils.array_to_str(optimal_conf)
-	include_min_conf=bool(float(results["score"]) > THRESHOLD)
-	intervals=_split_exp_intervals(include_min_conf, min_conf, window, base)
+	min_conf=utils.array_to_str([worker.min_replicas for worker in workers])
+	include_min_conf=True
+	if results:
+		optimal_conf=[results['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+		min_conf=utils.array_to_str(optimal_conf)
+		include_min_conf=bool(float(results["score"]) > THRESHOLD)
+	intervals=_split_exp_intervals(sorted_combinations,include_min_conf, min_conf, window, base)
 	print(intervals)
 	for k, v in intervals.items():
 		constant_ws_replicas=map(lambda a: int(a),list(k))
@@ -76,18 +134,18 @@ def _find_next_exp(workers, results, base, window):
 
 
 
-def _split_exp_intervals(include_min_conf, min_conf, window, base):
+def _split_exp_intervals(sorted_combinations,include_min_conf, min_conf, window, base):
 	min_conf_dec=int(min_conf,base)
 	if not include_min_conf :
-		min_conf_dec+=1	
+		min_conf_dec+=1
+		min_conf=utils.array_to_str(utils.number_to_base(min_conf_dec,base))
 	max_conf_dec=min_conf_dec+window
 
-	combinations=[]
-	comb=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
-	for c in comb:
-		while len(c) < len(min_conf):
-			c='0'+c
-		combinations.append(c)	
+	combinations=[utils.array_to_str(sorted_combinations[c]) for c in range(min_conf_dec,max_conf_dec)]
+#	for c in comb:
+#		while len(c) < len(min_conf):
+#			c='0'+c
+#		combinations.append(c)	
 	exp={}
 
 	for c in combinations:
