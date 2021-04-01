@@ -4,7 +4,9 @@
 
 x=`pwd`
 cd Results/$1/$2/
-for i in `seq $3`; do for j in 0 1; do cat ${i}_tenants-ex${j}/op/results.json >> results1.json; done; done
+rm results1.json
+rm results2.json
+for i in `seq $3`; do for j in 0 1 2; do cat ${i}_tenants-ex${j}/op/results.json >> results1.json; done; done
 sed "s/false}}\]\[{\"bench/false}},{\"bench/g" results1.json | sed "s/true}}\]\[{\"bench/true}},{\"bench/g"  > results2.json
 cd $x
 
