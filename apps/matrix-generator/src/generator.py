@@ -29,28 +29,54 @@ def generate_matrix(initial_conf):
 		dict=_sort(workers,base)
 		print(dict)
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=_find_next_exp(dict,workers,[],base,window)
+		next_exp=_find_next_exp(dict,workers,[],base,window,True)
 		d[sla['name']]={}
 		tenant_nb=1
-		while tenant_nb <= sla['maxTenants']+1:
+		retry_attempt=0
+		while tenant_nb <= sla['maxTenants']:
 			results=[]
+			maximum_conf=find_maximum(workers,next_exp)
 			for i,ws in enumerate(next_exp):
 				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws,sla['slos'])
-				results.append(_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i)))
-			result=find_optimal_conf(results)
-			if float(result["score"]) > THRESHOLD :
+				results.append(_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt)))
+			result=find_optimal_conf(results,d[sla['name']][str(tenant_nb-1)])
+			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
-			else : 
+				retry_attempt=0
+			else: 
 				print("NO RESULT")
-			next_exp=_find_next_exp(dict,workers,result, base, window)
+				retry_attempt+=1
+			next_exp=_find_next_exp(dict,workers,result,maximum_conf,base,window,False)
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
-def find_optimal_conf(results):
-	scores=[float(result['score']) for result in results]
-	index=scores.index(max(scores))
-	return results[index]
+def find_optimal_conf(workers,results,previous_result):
+	print(results)
+	print(previous_result)
+	results=[result for result in results if float(result['score']) > THRESHOLD]
+	if results:
+		index=-1
+		if previous_result:
+			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+			transition_costs=[_pairwise_transition_cost(previous_conf,conf) for conf in results]
+			index=transition_costs.index(min(transition_costs))
+		else:
+			scores=[float(result['score']) for result in results] 
+			index=scores.index(max(scores))
+		return results[index]
+	else:
+		return {}
+
+
+def find_maximum(workers,experiments):
+	configs=[]
+	for exp in experiments:
+		conf=[c.max_replicas for c in exp]
+		configs.append(conf)
+	resource_costs=[_resource_cost(workers, c) for c in configs]
+	index=resource_costs.index(max(resource_costs))
+	return configs[index]
 
 
 def generate_matrix2(initial_conf):
@@ -72,15 +98,19 @@ def generate_matrix2(initial_conf):
                 workers[2].setReplicas(min_replicas=0,max_replicas=0)
                 workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
                 dict=_sort(workers,base)
+                print("=======================================================")
                 print(dict)
-                next_exp=_find_next_exp(dict,workers,[], base, window)
+                next_exp=_find_next_exp(dict,workers,[], base, window,True)
                 for exp in next_exp:
                           for w in exp:
                                 print(w.min_replicas, w.max_replicas)
+                print(find_previous_maximum(workers,next_exp))
+
+
 
 def _sort(workers,base):
 	def cost_for_sort(elem):
-		return _cost(workers,elem)
+		return _resource_cost(workers,elem)
 
 	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
 	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
@@ -96,29 +126,81 @@ def _sort(workers,base):
 	return [utils.array_to_str(c) for c in sorted_list]
 
 
+def _sort_and_add_metadata(workers,base):
+	def cost_for_sort(elem):
+		return _resource_cost(workers,elem)
 
-def _cost(workers, conf):
+	def second(elem):
+		return elem[2]
+
+	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
+	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
+	print(initial_conf)
+	print(max_conf)
+	index=range(initial_conf,max_conf+1)
+	comb=[[c,utils.number_to_base(c,base)] for c in index]
+        #comb=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
+	for c1 in comb:
+		while len(c1[1]) < len(workers):
+			c1[1].insert(0,0)
+		c1.insert(2,cost_for_sort(c1[1]))
+	print(comb)
+	sorted_list=sorted(comb,key=second)
+	return sorted_list
+
+
+
+def _resource_cost(workers, conf):
         cost=0
         for w,c in zip(workers,conf):
             cost+=c*w.cpu+c*w.memory
         return cost
 
 
+#def _transition_cost(workers, sorted_per_resource_cost, scope, conf):
+#    neighbours=[]
+#    index=sorted_per_resource_cost.index(conf)
+#    resource_cost=_resource_cost(worker,sconf)
+#    costvector=dict()
+#    for i in range(index-scope, index+scope):
+#            if i!=index:
+#		conf2=sorted_per_resource_cost[i]
+#                costvector[i]=_resource_cost(workers, conf2))
+#                if costvector[i]==resource_cost:
+#			if _pairwise_transition_cost(workers,conf,conf2) <= 2:
+#
+#    for i in range(index-scope, index+scope):
+#            if i!=index:
+# 
+#                if _transition(,costvector[i])
+#    for  j in costvector:
+#            if _transition(conf,j) <= 1:
+#
+
+def _pairwise_transition_cost(previous_conf,conf):
+        cost=0
+        for c1,c2 in zip(conf,previous_conf):
+               if c1 > c2:
+                       cost+=c1-c2
+        return cost
 
 
-def _find_next_exp(sorted_combinations, workers, results, base, window):
+
+
+def _find_next_exp(sorted_combinations, workers, results, previous_maximum_conf, base, window, first_tenant):
 	workers_exp=[]
 	min_conf=utils.array_to_str([worker.min_replicas for worker in workers])
-	include_min_conf=True
-	if results:
+	if not first_tenant:
 		print("Processing previous worker results")
-		optimal_conf=[results['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-		print("Optimal conf....")
-		print(optimal_conf)
-		min_conf=utils.array_to_str(optimal_conf)
-		include_min_conf=bool(float(results["score"]) > THRESHOLD)
+		if results:
+			optimal_conf=[results['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+			print("Optimal conf....")
+			print(optimal_conf)
+			min_conf=utils.array_to_str(optimal_conf)
+		else:
+			min_conf=sorted_combinations[sorted_combinations.index(utils.array_to_str(previous_maximum_conf))+1]
 	print("min_conf: " + min_conf)
-	intervals=_split_exp_intervals(sorted_combinations,include_min_conf, min_conf, window, base)
+	intervals=_split_exp_intervals(sorted_combinations, min_conf, window, base)
 	print("The following experiments are scheduled:")
 	print(intervals)
 	for k, v in intervals.items():
@@ -140,18 +222,17 @@ def _find_next_exp(sorted_combinations, workers, results, base, window):
 
 
 
-def _split_exp_intervals(sorted_combinations,include_min_conf, min_conf, window, base):
+def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 	min_conf_dec=sorted_combinations.index(min_conf)
-	#min_conf_dec=int(min_conf_index,base)
-	print("min_conf_dec: " + str(min_conf_dec))
-	if not include_min_conf :
-		min_conf_dec+=1
-		min_conf=utils.array_to_str(utils.number_to_base(min_conf_dec,base))
-	max_conf_dec=min_conf_dec+window
+        #min_conf_dec=int(min_conf_index,base)
+        print("min_conf_dec: " + str(min_conf_dec))
+
+	max_conf_dec=min_conf_dec+window-1
+
+	combinations=[sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]
 	for c in range(min_conf_dec,max_conf_dec):
-		print(c)
-		print(sorted_combinations[c])
-	combinations=[utils.array_to_str(sorted_combinations[c]) for c in range(min_conf_dec,max_conf_dec)]
+                print(c)
+                print(sorted_combinations[c])
 #	for c in comb:
 #		while len(c) < len(min_conf):
 #			c='0'+c
@@ -165,6 +246,34 @@ def _split_exp_intervals(sorted_combinations,include_min_conf, min_conf, window,
 		exp[c[:-1]].append(c[-1])		
 
 	return exp
+
+
+#def _split_exp_intervals_with_metadata(sorted_combinations, include_min_conf, min_conf, window, base):#
+	#min_conf_dec=sorted_combinations.index([int(min_conf,base),min_conf,_resource_cost(workers,min_conf))
+#	min_conf=sorted_combinations.index(min_conf)
+	#min_conf_dec=int(min_conf_index,base)
+#	print("min_conf_dec: " + str(min_conf_dec))
+#	if not include_min_conf :
+		#rollover maximum conf of previous experiments
+#		min_conf=utils.array_to_str(utils.number_to_base(min_conf_dec[1],base))
+#	max_conf_dec=min_conf_dec[1]+window
+#	for c in range(min_conf_dec[1],max_conf_dec):
+#		print(c)
+#		print(sorted_combinations[c])
+#	combinations=[utils.array_to_str(sorted_combinations[c]) for c in range(min_conf_dec[1],max_conf_dec)]
+#	for c in comb:
+#		while len(c) < len(min_conf):
+#			c='0'+c
+#		combinations.append(c)	
+#	exp={}
+#
+#	for c in combinations:
+#		exp[c[:-1]]=[]
+#
+#	for c in combinations:
+#		exp[c[:-1]].append(c[-1])		
+#
+#	return exp
 
 
 def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path):
