@@ -3,6 +3,7 @@ from .parser import ConfigParser
 from .experiment import SLAConfigExperiment
 from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
+from .searchwindow import ScalingFunction
 from functools import reduce
 
 THRESHOLD = -1
@@ -29,13 +30,15 @@ def generate_matrix(initial_conf):
 		dict=_sort(workers,base)
 		print(dict)
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=_find_next_exp(dict,workers,[],[0,0,0,2],base,window,True)
+		next_exp=_find_next_exp(dict,workers,[],[],base,window,True)
 		d[sla['name']]={}
 		tenant_nb=1
 		retry_attempt=0
 		while tenant_nb <= sla['maxTenants']:
 			results=[]
 			maximum_conf=find_maximum(workers,next_exp)
+			nr_of_experiments=len(next_exp)
+			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
 				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws,sla['slos'])
@@ -50,19 +53,24 @@ def generate_matrix(initial_conf):
 				retry_attempt=0
 			else: 
 				print("NO RESULT")
-				retry_attempt+=1
+				retry_attempt+=nr_of_experiments
 			next_exp=_find_next_exp(dict,workers,result,maximum_conf,base,window,False)
+	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 def find_optimal_conf(workers,results,previous_result):
+	print("Results")
 	print(results)
+	print("Previous results")
 	print(previous_result)
 	results=[result for result in results if float(result['score']) > THRESHOLD]
+	print("Filtered results")
+	print(results)
 	if results:
 		index=-1
 		if previous_result:
 			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-			transition_costs=[_pairwise_transition_cost(previous_conf,conf) for conf in results]
+			transition_costs=[_pairwise_transition_cost(previous_conf,[result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]) for result in results]
 			index=transition_costs.index(min(transition_costs))
 		else:
 			scores=[float(result['score']) for result in results] 
@@ -77,6 +85,8 @@ def find_maximum(workers,experiments):
 	for exp in experiments:
 		conf=[c.max_replicas for c in exp]
 		configs.append(conf)
+		print(conf)
+	configs.reverse()
 	resource_costs=[_resource_cost(workers, c) for c in configs]
 	index=resource_costs.index(max(resource_costs))
 	return configs[index]
@@ -92,6 +102,12 @@ def generate_matrix2(initial_conf):
 
         for sla in slas:
                 alphabet=sla['alphabet']
+                nodes=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
+                f=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,True,nodes,alphabet)
+                slo=sla['slos']['completionTime']
+                for i in range(1,10,1):
+                        print(i)
+                        print(f.target(slo,i,4))
                 window=alphabet['searchWindow']
                 base=alphabet['base']
                 workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
@@ -103,7 +119,7 @@ def generate_matrix2(initial_conf):
                 dict=_sort(workers,base)
                 print("=======================================================")
                 print(dict)
-                next_exp=_find_next_exp(dict,workers,[], base, window,True)
+                next_exp=_find_next_exp(dict,workers,[],[],base, window,True)
                 for exp in next_exp:
                           for w in exp:
                                 print(w.min_replicas, w.max_replicas)
@@ -185,7 +201,7 @@ def _pairwise_transition_cost(previous_conf,conf):
         for c1,c2 in zip(conf,previous_conf):
                print(c1)
                print(c2)
-               if int(c1) > int(c2):
+               if  int(c1) > int(c2):
                        cost+=int(c1)-int(c2)
         return cost
 
@@ -206,7 +222,7 @@ def _find_next_exp(sorted_combinations, workers, results, previous_maximum_conf,
 			min_conf=sorted_combinations[sorted_combinations.index(utils.array_to_str(previous_maximum_conf))+1]
 	print("min_conf: " + min_conf)
 	intervals=_split_exp_intervals(sorted_combinations, min_conf, window, base)
-	print("The following experiments are scheduled:")
+	print("Next possible experiments for next nb of tenants")
 	print(intervals)
 	for k, v in intervals.items():
 		constant_ws_replicas=map(lambda a: int(a),list(k))
