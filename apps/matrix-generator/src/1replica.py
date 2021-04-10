@@ -73,7 +73,7 @@ def _split_exp_intervals(min_conf, window, base):
 	min_conf_dec=int(min_conf,base)	
 	max_conf_dec=min_conf_dec+window
 
-	combinations=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
+	combinations=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec)]
 
 	exp={}
 

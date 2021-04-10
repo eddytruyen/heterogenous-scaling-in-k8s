@@ -105,7 +105,7 @@ def generate_matrix2(initial_conf):
                 nodes=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
                 f=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,True,nodes,alphabet)
                 slo=sla['slos']['completionTime']
-                for i in range(1,10,1):
+                for i in range(1,10+1,1):
                         print(i)
                         print(f.target(slo,i,4))
                 window=alphabet['searchWindow']
@@ -181,14 +181,14 @@ def _resource_cost(workers, conf):
 #    index=sorted_per_resource_cost.index(conf)
 #    resource_cost=_resource_cost(worker,sconf)
 #    costvector=dict()
-#    for i in range(index-scope, index+scope):
+#    for i in range(index-scope, index+scope+1):
 #            if i!=index:
 #		conf2=sorted_per_resource_cost[i]
 #                costvector[i]=_resource_cost(workers, conf2))
 #                if costvector[i]==resource_cost:
 #			if _pairwise_transition_cost(workers,conf,conf2) <= 2:
 #
-#    for i in range(index-scope, index+scope):
+#    for i in range(index-scope, index+scope+1):
 #            if i!=index:
 # 
 #                if _transition(,costvector[i])
