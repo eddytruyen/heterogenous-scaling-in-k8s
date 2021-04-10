@@ -1,0 +1,24 @@
+2021/02/18 10:44:52 mtbestconfig
+2021/02/18 10:44:52 executing :false
+2021/02/18 10:44:52 BestConfig: initializing with 4 parameters
+2021/02/18 10:44:52 Generating script for workload sql and 10 tenants in dir /tmp/sparkbenchwrap/silver
+2021/02/18 10:44:52 Error: fork/exec sql/generate_script.sh: no such file or directory
+panic: Error: fork/exec sql/generate_script.sh: no such file or directory
+
+goroutine 6 [running]:
+log.Panicf(0x93adb8, 0x9, 0xc000187640, 0x1, 0x1)
+	/usr/local/go/src/log/log.go:358 +0xc5
+k8-resource-optimizer/pkg/sparkbenchwrap.check(0x9ccf80, 0xc00019e060)
+	/home/ubuntu/go/src/k8-resource-optimizer/pkg/sparkbenchwrap/sparkbenchwrap.go:39 +0xb0
+k8-resource-optimizer/pkg/sparkbenchwrap.CreateRunScript(0xc000178280, 0x6, 0xc0001782b8, 0x3, 0xa, 0x0, 0x0, 0x0, 0x0, 0xbf5f30, ...)
+	/home/ubuntu/go/src/k8-resource-optimizer/pkg/sparkbenchwrap/sparkbenchwrap.go:50 +0x2ec
+k8-resource-optimizer/pkg/experiments/sparkbenchbatch.CreateSparkBenchExperiment(0xc000066230, 0x1, 0x1, 0xa, 0xc000178298)
+	/home/ubuntu/go/src/k8-resource-optimizer/pkg/experiments/sparkbenchbatch/sparkbenchbatchexperiment.go:81 +0x465
+k8-resource-optimizer/pkg/experiments.ExperimentBuilder(0x7ffed90dc5d8, 0xf, 0xc000066230, 0x1, 0x1, 0xc0001786a8, 0x5, 0xc000187a80)
+	/home/ubuntu/go/src/k8-resource-optimizer/pkg/experiments/experimentbuilder.go:32 +0x2f2
+k8-resource-optimizer/pkg/decomposer.(*Decomposer).Execute(0xc00013e2a0, 0x0)
+	/home/ubuntu/go/src/k8-resource-optimizer/pkg/decomposer/decomposer.go:123 +0x137
+k8-resource-optimizer/cmd.glob..func1.1(0x0)
+	/home/ubuntu/go/src/k8-resource-optimizer/cmd/root.go:87 +0xfa
+created by k8-resource-optimizer/cmd.glob..func1
+	/home/ubuntu/go/src/k8-resource-optimizer/cmd/root.go:36 +0x68
