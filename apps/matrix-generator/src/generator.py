@@ -31,11 +31,10 @@ def generate_matrix(initial_conf):
 		lst=_sort(workers,base)
 		print(lst)
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=_find_next_exp(lst,workers,[],[],base,window,True)
+		next_exp=_find_next_exp(lst,workers,[],lst[0],base,window,True)
 		d[sla['name']]={}
 		tenant_nb=1
 		retry_attempt=0
-		No_Previous_Result=True
 		while tenant_nb <= sla['maxTenants']:
 			results=[]
 			nr_of_experiments=len(next_exp)
@@ -49,27 +48,18 @@ def generate_matrix(initial_conf):
 			if tenant_nb > 1:
 				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 			result=find_optimal_conf(workers,results,previous_tenant_result)
-			if result:
-				result_x=result["trans-optimal"]
-				d[sla['name']][str(tenant_nb)]=result_x
-				tenant_nb+=1
-				if result_x != result["optimal"]:
-					next_conf=get_conf(workers,result["optimal"])
-				else:
-					next_conf=lst[lst.index(utils.array_to_str(find_maximum(workers,next_exp)))+1]
-				retry_attempt=0
-				No_Previous_Result=False
-			else: 
-				print("NO RESULT")
-				if No_Previous_Result:
-					next_conf=lst[lst.index(utils.array_to_str(find_maximum(workers,next_exp)))+1]
-				else:
-					No_Previous_Result=True
-				retry_attempt+=nr_of_experiments
-				result_x={}
 			for failed_conf in return_failed_confs(workers,results):
 				lst.remove(utils.array_to_str(failed_conf))
-			next_exp=_find_next_exp(lst,workers,result_x,next_conf,base,window,False)
+			if result:
+				d[sla['name']][str(tenant_nb)]=result
+				tenant_nb+=1
+				retry_attempt=0
+				next_conf=utils.array_to_str(get_conf(workers, result))
+			else: 
+				print("NO RESULT")
+				retry_attempt+=nr_of_experiments
+				next_conf=lst[0]
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,window,False)
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
@@ -97,16 +87,15 @@ def find_optimal_conf(workers,results,previous_result):
 	print("Filtered results")
 	print(filtered_results)
 	if filtered_results:
-		scores=[float(result['score']) for result in filtered_results]
-		max_index=scores.index(max(scores))
 		index=-1
 		if previous_result:
 			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
 			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result)) for result in filtered_results]
 			index=transition_costs.index(min(transition_costs))
 		else:
-			index=max_index
-		return {"trans-optimal": filtered_results[index], "optimal": filtered_results[max_index]}
+			scores=[float(result['score']) for result in filtered_results]
+			index=scores.index(max(scores))
+		return filtered_results[index]
 	else:
 		return {}
 
@@ -200,17 +189,11 @@ def _pairwise_transition_cost(previous_conf,conf):
 def _find_next_exp(sorted_combinations, workers, results, next_conf, base, window, first_tenant):
 	workers_exp=[]
 	only_min_conf=False
-	min_conf=utils.array_to_str([worker.min_replicas for worker in workers])
+	min_conf=next_conf
 	if not first_tenant:
 		print("Processing previous worker results")
 		if results:
-			optimal_conf=get_conf(workers, results)
-			print("Optimal conf....")
-			print(optimal_conf)
-			min_conf=utils.array_to_str(optimal_conf)
 			only_min_conf=True
-		else:
-			min_conf=utils.array_to_str(next_conf)
 	print("min_conf: " + min_conf)
 	intervals=_split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base)
 	print("Next possible experiments for next nb of tenants")
