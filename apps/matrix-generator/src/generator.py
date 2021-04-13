@@ -53,7 +53,10 @@ def generate_matrix(initial_conf):
 				result_x=result["trans-optimal"]
 				d[sla['name']][str(tenant_nb)]=result_x
 				tenant_nb+=1
-				next_conf=get_conf(workers,result["optimal"])
+				if result_x != result["optimal"]:
+					next_conf=get_conf(workers,result["optimal"])
+				else:
+					next_conf=lst[lst.index(utils.array_to_str(find_maximum(workers,next_exp)))+1]
 				retry_attempt=0
 				No_Previous_Result=False
 			else: 
