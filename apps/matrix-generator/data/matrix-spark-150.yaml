@@ -24,9 +24,9 @@ silver:
     config: '0'
     score: '-0.2'
     worker1.replicaCount: '0'
-    worker2.replicaCount: '1'
-    worker3.replicaCount: '1'
-    worker4.replicaCount: '1'
+    worker2.replicaCount: '0'
+    worker3.replicaCount: '3'
+    worker4.replicaCount: '0'
   '4':
     config: '0'
     score: '-0.21333333333333335'
