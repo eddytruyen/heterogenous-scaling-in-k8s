@@ -1,0 +1,33 @@
+bin:
+  path: bin/k8-resource-optimizer-spark
+charts:
+  name: spark
+  chartdir: /home/ubuntu/go/src/k8-resource-optimizer/examples/charts/bitnami-heterogeneous/spark
+slas:
+  - name : silver
+    slos: 
+      workload: sql
+      benchPath: /mnt/nfs-disk-2/spark-bench
+      tenantGroup: "2"
+      completionTime: 150
+      #jobsize: 10
+      #throughput: 0.5
+    maxTenants: 10
+    alphabet:
+      searchWindow: 4
+      base: 4
+      elements:
+        - size:
+            cpu: 6
+            memory: 4
+        - size:
+            cpu: 4
+            memory: 2
+        - size: 
+            cpu: 3
+            memory: 2
+        - size:
+            cpu: 2
+            memory: 2
+utilFunc: sparkbenchalphabet
+output: Results/exp3
