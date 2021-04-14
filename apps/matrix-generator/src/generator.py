@@ -44,10 +44,7 @@ def generate_matrix(initial_conf):
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws,sla['slos'])
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt)):
 					results.append(res)
-			previous_tenant_result={}
-			if tenant_nb > 1:
-				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-			result=find_optimal_conf(workers,results,previous_tenant_result)
+			result=find_optimal_conf(workers,results)
 			for failed_conf in return_failed_confs(workers,results):
 				lst.remove(utils.array_to_str(failed_conf))
 			if result:
@@ -78,23 +75,15 @@ def return_failed_confs(workers,results):
 		return []
 
 
-def find_optimal_conf(workers,results,previous_result):
+def find_optimal_conf(workers,results):
 	print("Results")
 	print(results)
-	print("Previous results")
-	print(previous_result)
 	filtered_results=[result for result in results if float(result['score']) > THRESHOLD]
 	print("Filtered results")
 	print(filtered_results)
 	if filtered_results:
-		index=-1
-		if previous_result:
-			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result)) for result in filtered_results]
-			index=transition_costs.index(min(transition_costs))
-		else:
-			scores=[float(result['score']) for result in filtered_results]
-			index=scores.index(max(scores))
+		scores=[float(result['score']) for result in filtered_results]
+		index=scores.index(max(scores))
 		return filtered_results[index]
 	else:
 		return {}
@@ -172,16 +161,6 @@ def _resource_cost(workers, conf):
             cost+=c*w.cpu+c*w.memory
         return cost
 
-
-
-def _pairwise_transition_cost(previous_conf,conf):
-        cost=0
-        for c1,c2 in zip(conf,previous_conf):
-               print(c1)
-               print(c2)
-               if  int(c1) > int(c2):
-                       cost+=int(c1)-int(c2)
-        return cost
 
 
 
