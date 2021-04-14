@@ -7,6 +7,7 @@ from .searchwindow import ScalingFunction
 from functools import reduce
 
 THRESHOLD = -1
+DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -27,55 +28,74 @@ def generate_matrix(initial_conf):
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
 		workers[2].setReplicas(min_replicas=0,max_replicas=0)
 		workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
-		dict=_sort(workers,base)
-		print(dict)
+		lst=_sort(workers,base)
+		print(lst)
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=_find_next_exp(dict,workers,[],[],base,window,True)
+		next_exp=_find_next_exp(lst,workers,[],lst[0],base,window,True)
 		d[sla['name']]={}
 		tenant_nb=1
 		retry_attempt=0
 		while tenant_nb <= sla['maxTenants']:
 			results=[]
-			maximum_conf=find_maximum(workers,next_exp)
 			nr_of_experiments=len(next_exp)
 			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
 				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws,sla['slos'])
-				results.append(_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt)))
-			previous_result={}
+				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt)):
+					results.append(res)
+			previous_tenant_result={}
 			if tenant_nb > 1:
-				previous_result=d[sla['name']][str(tenant_nb-1)]
-			result=find_optimal_conf(workers,results,previous_result)
+				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+			result=find_optimal_conf(workers,results,previous_tenant_result)
+			for failed_conf in return_failed_confs(workers,results):
+				lst.remove(utils.array_to_str(failed_conf))
 			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
+				next_conf=utils.array_to_str(get_conf(workers, result))
 			else: 
 				print("NO RESULT")
 				retry_attempt+=nr_of_experiments
-			next_exp=_find_next_exp(dict,workers,result,maximum_conf,base,window,False)
+				next_conf=lst[0]
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,window,False)
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+
+
+def get_conf(workers, result):
+	return [result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+
+
+def return_failed_confs(workers,results):
+	if DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT:
+		failed_results=[result for result in results if float(result['score']) <= THRESHOLD]
+		print("Failed results")
+		print(failed_results)
+		return [get_conf(workers,failed_result) for failed_result in failed_results]
+	else:
+		return []
+
 
 def find_optimal_conf(workers,results,previous_result):
 	print("Results")
 	print(results)
 	print("Previous results")
 	print(previous_result)
-	results=[result for result in results if float(result['score']) > THRESHOLD]
+	filtered_results=[result for result in results if float(result['score']) > THRESHOLD]
 	print("Filtered results")
-	print(results)
-	if results:
+	print(filtered_results)
+	if filtered_results:
 		index=-1
 		if previous_result:
 			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-			transition_costs=[_pairwise_transition_cost(previous_conf,[result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]) for result in results]
+			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result)) for result in filtered_results]
 			index=transition_costs.index(min(transition_costs))
 		else:
-			scores=[float(result['score']) for result in results] 
+			scores=[float(result['score']) for result in filtered_results]
 			index=scores.index(max(scores))
-		return results[index]
+		return filtered_results[index]
 	else:
 		return {}
 
@@ -85,7 +105,6 @@ def find_maximum(workers,experiments):
 	for exp in experiments:
 		conf=[c.max_replicas for c in exp]
 		configs.append(conf)
-		print(conf)
 	configs.reverse()
 	resource_costs=[_resource_cost(workers, c) for c in configs]
 	index=resource_costs.index(max(resource_costs))
@@ -105,7 +124,7 @@ def generate_matrix2(initial_conf):
                 nodes=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
                 f=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,True,nodes,alphabet)
                 slo=sla['slos']['completionTime']
-                for i in range(1,10,1):
+                for i in range(1,10+1,1):
                         print(i)
                         print(f.target(slo,i,4))
                 window=alphabet['searchWindow']
@@ -116,10 +135,10 @@ def generate_matrix2(initial_conf):
                 workers[1].setReplicas(min_replicas=0,max_replicas=0)
                 workers[2].setReplicas(min_replicas=0,max_replicas=0)
                 workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
-                dict=_sort(workers,base)
+                lst=_sort(workers,base)
                 print("=======================================================")
-                print(dict)
-                next_exp=_find_next_exp(dict,workers,[],[],base, window,True)
+                print(lst)
+                next_exp=_find_next_exp(lst,workers,[],[],[],base, window,True)
                 for exp in next_exp:
                           for w in exp:
                                 print(w.min_replicas, w.max_replicas)
@@ -145,28 +164,6 @@ def _sort(workers,base):
 	return [utils.array_to_str(c) for c in sorted_list]
 
 
-def _sort_and_add_metadata(workers,base):
-	def cost_for_sort(elem):
-		return _resource_cost(workers,elem)
-
-	def second(elem):
-		return elem[2]
-
-	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
-	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
-	print(initial_conf)
-	print(max_conf)
-	index=range(initial_conf,max_conf+1)
-	comb=[[c,utils.number_to_base(c,base)] for c in index]
-        #comb=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
-	for c1 in comb:
-		while len(c1[1]) < len(workers):
-			c1[1].insert(0,0)
-		c1.insert(2,cost_for_sort(c1[1]))
-	print(comb)
-	sorted_list=sorted(comb,key=second)
-	return sorted_list
-
 
 
 def _resource_cost(workers, conf):
@@ -176,25 +173,6 @@ def _resource_cost(workers, conf):
         return cost
 
 
-#def _transition_cost(workers, sorted_per_resource_cost, scope, conf):
-#    neighbours=[]
-#    index=sorted_per_resource_cost.index(conf)
-#    resource_cost=_resource_cost(worker,sconf)
-#    costvector=dict()
-#    for i in range(index-scope, index+scope):
-#            if i!=index:
-#		conf2=sorted_per_resource_cost[i]
-#                costvector[i]=_resource_cost(workers, conf2))
-#                if costvector[i]==resource_cost:
-#			if _pairwise_transition_cost(workers,conf,conf2) <= 2:
-#
-#    for i in range(index-scope, index+scope):
-#            if i!=index:
-# 
-#                if _transition(,costvector[i])
-#    for  j in costvector:
-#            if _transition(conf,j) <= 1:
-#
 
 def _pairwise_transition_cost(previous_conf,conf):
         cost=0
@@ -208,20 +186,16 @@ def _pairwise_transition_cost(previous_conf,conf):
 
 
 
-def _find_next_exp(sorted_combinations, workers, results, previous_maximum_conf, base, window, first_tenant):
+def _find_next_exp(sorted_combinations, workers, results, next_conf, base, window, first_tenant):
 	workers_exp=[]
-	min_conf=utils.array_to_str([worker.min_replicas for worker in workers])
+	only_min_conf=False
+	min_conf=next_conf
 	if not first_tenant:
 		print("Processing previous worker results")
 		if results:
-			optimal_conf=[results['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
-			print("Optimal conf....")
-			print(optimal_conf)
-			min_conf=utils.array_to_str(optimal_conf)
-		else:
-			min_conf=sorted_combinations[sorted_combinations.index(utils.array_to_str(previous_maximum_conf))+1]
+			only_min_conf=True
 	print("min_conf: " + min_conf)
-	intervals=_split_exp_intervals(sorted_combinations, min_conf, window, base)
+	intervals=_split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base)
 	print("Next possible experiments for next nb of tenants")
 	print(intervals)
 	for k, v in intervals.items():
@@ -236,26 +210,24 @@ def _find_next_exp(sorted_combinations, workers, results, previous_maximum_conf,
 		new_worker=WorkerConf(workers[-1].worker_id,workers[-1].cpu,workers[-1].memory,min(map(lambda a: int(a),v)),max(map(lambda a: int(a),v)))
 		experiment.append(new_worker)
 
-		# print([w.max_replicas for w in experiment])
 		workers_exp.append(experiment)
 
 	return workers_exp	
 
 
 
-def _split_exp_intervals(sorted_combinations, min_conf, window, base):
+def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base):
 	min_conf_dec=sorted_combinations.index(min_conf)
         #min_conf_dec=int(min_conf_index,base)
 	print("min_conf_dec: " + str(min_conf_dec))
-	max_conf_dec=min_conf_dec+window
+	if only_min_conf:
+		max_conf_dec=min_conf_dec+1
+	else:
+		max_conf_dec=min_conf_dec+window
 	combinations=[sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]
 	for c in range(min_conf_dec,max_conf_dec):
-                print(c)
-                print(sorted_combinations[c])
-#	for c in comb:
-#		while len(c) < len(min_conf):
-#			c='0'+c
-#		combinations.append(c)	
+		print(c)
+		print(sorted_combinations[c])
 	exp={}
 
 	for c in combinations:
@@ -322,4 +294,5 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
 
 	return results
+
 

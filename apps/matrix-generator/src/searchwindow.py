@@ -14,10 +14,10 @@ class ScalingFunction:
 
 
 	def maximum(self,x1,x2):
-		return max([self.eval(x) for x in range(x1,x2,1)])
+		return max([self.eval(x) for x in range(x1,x2+1,1)])
 
 	def minimum(self,x1,x2):
-		return min([self.eval(x) for x in range(x1,x2,1)])
+		return min([self.eval(x) for x in range(x1,x2+1,1)])
 
 	def derivative(self,x1,x2):
 		return (self.eval(x2)-self.eval(x1))/(x2-x1)
