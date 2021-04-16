@@ -12,6 +12,7 @@ slas:
       benchPath: {{sla.slos.benchPath}}
       tenantGroup: "{{sla.slos.tenantGroup}}"
       completionTime: {{sla.slos.completionTime}}
+      maximumReplicas: {{sla.slos.maximumReplicas}}
     nbOfTenants: {{sla.tenants}}
     parameters:
     {% for worker in sla.workers %}

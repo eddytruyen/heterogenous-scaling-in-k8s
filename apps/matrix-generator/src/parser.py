@@ -1,7 +1,7 @@
 from . import utils
 
 class ConfigParser:
-	def __init__(self, optimizer, util_func, slas, chart_dir, samples, output, prev_results=None):
+	def __init__(self, optimizer, util_func, slas, chart_dir, samples, output,  maximum_replicas, prev_results=None):
 		self.optimizer = optimizer
 		self.prev_results = prev_results
 		self.util_func = util_func
@@ -9,6 +9,7 @@ class ConfigParser:
 		self.chart_dir = chart_dir
 		self.samples = samples
 		self.output = output
+		self.maximum_replicas = maximum_replicas
 
 
 	def parseConfig(self):
@@ -27,7 +28,8 @@ class ConfigParser:
 						'workload': sla.slos['workload'],
 						'benchPath': sla.slos['benchPath'],
                                                 'tenantGroup': sla.slos['tenantGroup'],
-                                                'completionTime': sla.slos['completionTime']
+                                                'completionTime': sla.slos['completionTime'],
+						'maximumReplicas': self.maximum_replicas
 					},
 					'workers': [{
 						'id': worker.worker_id,
