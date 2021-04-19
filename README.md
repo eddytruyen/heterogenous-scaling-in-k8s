@@ -112,7 +112,7 @@ For generating local files with throughput and turnaround time, `Locust/locustfi
 
 To get metrics of the locust test into the graphite server ...
 
- * Edit `Locust/locustfile-exp1.py` to replace the IP of the queue host on the HttpLocust class with the correct Kubernetes service IP of the rabbitmq service
+ * Edit `Locust/locustfile-exp1.py` to replace all instances of the `172.17.13.119` IP adres with the IP address of the VM on top of which the locust server runs. Leave the port `30698` as is.
  * Update the IP-address of the Locust service and the graphite service in `metrics.py`
  * Run:
 
