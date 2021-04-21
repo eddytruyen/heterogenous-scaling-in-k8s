@@ -7,7 +7,8 @@ class ConfigParser:
 		self.util_func = util_func
 		self.slas = slas
 		self.chart_dir = chart_dir
-		self.samples = samples
+		self.samples=samples
+		self.iterations=1
 		self.output = output
 		self.maximum_replicas = maximum_replicas
 		self.minimum_replicas = minimum_replicas
@@ -20,6 +21,7 @@ class ConfigParser:
 			'optimizer': self.optimizer,
 			'chart_dir': self.chart_dir,
 			'samples': self.samples,
+                        'iterations': self.iterations,
 			'util_func': self.util_func,
 			'output': self.output,
 			'slas': [

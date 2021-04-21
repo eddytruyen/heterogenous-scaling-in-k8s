@@ -1,4 +1,4 @@
-nbOfIterations: 1
+nbOfIterations: {{iterations}}
 nbOfSamplesPerIteration: {{samples}}
 charts:
   - name: spark

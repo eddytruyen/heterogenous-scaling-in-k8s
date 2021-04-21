@@ -123,26 +123,19 @@ def generate_matrix2(initial_conf):
         exp_path=initial_conf['output']
         util_func=initial_conf['utilFunc']
         slas=initial_conf['slas']
+        conf_op=ConfigParser(
+                optimizer='bestconfig',
+                chart_dir=chart_dir,
+                util_func=util_func,
+                samples=9,
+                output= '/op/',
+                # prev_results=exp_path+'/exh/results.json',
+                slas=slas,
+                maximum_replicas='"1 2 2 1"',
+                minimum_replicas='"0 0 0 0"',
+                configs=[])
+        print(conf_op.iterations)
 
-        d={}
-
-        for sla in slas:
-                alphabet=sla['alphabet']
-                window=alphabet['searchWindow']
-                base=alphabet['base']
-                workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
-                # HARDCODED => make more generic by putting workers into an array
-                workers[0].setReplicas(min_replicas=0,max_replicas=0)
-                workers[1].setReplicas(min_replicas=0,max_replicas=0)
-                workers[2].setReplicas(min_replicas=0,max_replicas=0)
-                workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
-                lst=_sort(workers,base)
-                print(lst)
-                exps_path=exp_path+'/'+sla['name']
-                intervals=_split_exp_intervals(lst,lst[0], False, window, base)
-                print("Next possible experiments for next nb of tenants")
-                print(intervals)
-                #next_exp=_find_next_exp(lst,workers,[],lst[0],base,window,True)
 
 
 def sort(results):
