@@ -13,6 +13,7 @@ slas:
       tenantGroup: "{{sla.slos.tenantGroup}}"
       completionTime: {{sla.slos.completionTime}}
       maximumReplicas: {{sla.slos.maximumReplicas}}
+      minimumReplicas: {{sla.slos.minimumReplicas}}
     nbOfTenants: {{sla.tenants}}
     parameters:
     {% for worker in sla.workers %}
@@ -23,6 +24,22 @@ slas:
           granularity: 1
         prefix: 
         suffix:
+      - name: worker{{worker.id}}.resources.requests.cpu
+        resource: CPU
+        searchspace:
+          min: {{worker.cpus}}
+          max: {{worker.cpus}}
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker{{worker.id}}.resources.requests.memory
+        resource: Mem
+        searchspace:
+          min: {{worker.mems}}
+          max: {{worker.mems}}
+          granularity: 1
+        prefix:
+        suffix: Gi
        {% endfor %}
 {% endfor %}
 namespaceStrategy: NSPSLA

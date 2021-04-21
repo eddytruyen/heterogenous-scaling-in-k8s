@@ -42,24 +42,24 @@ def generate_matrix(initial_conf):
 			nr_of_experiments=len(next_exp)
 			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
-				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
+				#wqsamples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1]):
+				for res in _generate_experiment(chart_dir,util_func,[sla_conf],ws[3],bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2]):
 					results.append(res)
 			previous_tenant_result={}
 			if tenant_nb > 1:
 				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 			result=find_optimal_conf(workers,results,previous_tenant_result)
 			for failed_conf in return_failed_confs(workers,results):
-				print(utils.array_to_str(failed_conf))
-				el=utils.array_to_str(failed_conf)
-				if el in lst:
-					lst.remove(el)
+				print(failed_conf)
+				if failed_conf in lst:
+					print("Removing failed conf!")
+					lst.remove(failed_conf)
 			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
-				next_conf=utils.array_to_str(get_conf(workers, result))
+				next_conf=get_conf(workers, result)
 			else: 
 				print("NO RESULT")
 				retry_attempt+=nr_of_experiments
@@ -70,7 +70,7 @@ def generate_matrix(initial_conf):
 
 
 def get_conf(workers, result):
-	return [result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+	return [int(result['worker'+str(worker.worker_id)+'.replicaCount']) for worker in workers]
 
 
 def return_failed_confs(workers,results):
@@ -86,15 +86,16 @@ def return_failed_confs(workers,results):
 def find_optimal_conf(workers,results,previous_result):
 	print("Results")
 	print(results)
-	print("Previous results")
+	print("Previous result")
 	print(previous_result)
 	filtered_results=[result for result in results if float(result['score']) > THRESHOLD]
 	print("Filtered results")
+	filtered_results=sort(filtered_results)
 	print(filtered_results)
 	if filtered_results:
 		index=-1
 		if previous_result:
-			previous_conf=[previous_result['worker'+str(worker.worker_id)+'.replicaCount'] for worker in workers]
+			previous_conf=get_conf(workers,previous_result)
 			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result)) for result in filtered_results]
 			index=transition_costs.index(min(transition_costs))
 		else:
@@ -144,6 +145,13 @@ def generate_matrix2(initial_conf):
                 #next_exp=_find_next_exp(lst,workers,[],lst[0],base,window,True)
 
 
+def sort(results):
+	def score_for_sort(result):
+		return  -1*float(result['score']) 
+
+	return sorted(results,key=score_for_sort)
+
+
 
 def _sort(workers,base):
 	def cost_for_sort(elem):
@@ -160,7 +168,7 @@ def _sort(workers,base):
 		while len(c1) < len(workers):
 			c1.insert(0,0)
 	sorted_list=sorted(comb,key=cost_for_sort)
-	return [utils.array_to_str(c) for c in sorted_list]
+	return sorted_list
 
 
 
@@ -176,10 +184,8 @@ def _resource_cost(workers, conf):
 def _pairwise_transition_cost(previous_conf,conf):
         cost=0
         for c1,c2 in zip(conf,previous_conf):
-               print(c1)
-               print(c2)
-               if  int(c1) > int(c2):
-                       cost+=int(c1)-int(c2)
+               if  c1 > c2:
+                       cost+=c1-c2
         return cost
 
 
@@ -193,7 +199,7 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 		print("Processing previous worker results")
 		if results:
 			only_min_conf=True
-	print("min_conf: " + min_conf)
+	print("min_conf: " + utils.array_to_delimited_str(min_conf, " "))
 	intervals=_split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base)
 	print("Next possible experiments for next nb of tenants")
 	print(intervals["exp"])
@@ -201,9 +207,20 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 	length=len(sorted_combinations[0])
 	nb_of_variable_workers=length-NB_OF_CONSTANT_WORKER_REPLICAS
 	for k, v in intervals["exp"].items():
-		constant_ws_replicas=map(lambda a: int(a),list(k))
-		replica_count=k+max(v)
-
+		const_workers=k.split(" ")
+		constant_ws_replicas=map(lambda a: int(a),const_workers)  
+		max_replica_count_index=0
+		min_replica_count_index=99999999
+		nb_of_samples=len(v)
+		for variable_workers in v:
+			back_shifted_conf=rightShift([int(el) for el in const_workers]+variable_workers,intervals["nbOfshiftsToLeft"])
+			index=sorted_combinations.index(back_shifted_conf)
+			if index > max_replica_count_index:
+				max_replica_count_index=index 
+			if index < min_replica_count_index:
+				min_replica_count_index=index
+		max_replica_count=utils.array_to_delimited_str(sorted_combinations[max_replica_count_index], " ")
+		min_replica_count=utils.array_to_delimited_str(sorted_combinations[min_replica_count_index], " ") 
 		experiment=[]
 		for replicas,worker in zip(constant_ws_replicas,tmp_workers[:-nb_of_variable_workers]):
 			new_worker=WorkerConf(worker.worker_id,worker.cpu,worker.memory,replicas,replicas)
@@ -212,20 +229,21 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 			l=i+1
 			worker_min=min(map(lambda a: int(a[-l]),v))
 			worker_max=max(map(lambda a: int(a[-l]),v))
-			#worker2_min=min(map(lambda a: int(a[-1]),v)
-			#worker2_max=max(map(lambda a: int(a[-1]),v))
 			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].cpu,tmp_workers[-l].memory,worker_min,worker_max)
-			#new_worker2=WorkerConf(tmp_workers[-1].worker_id,tmp_workers[-1].cpu,tmp_workers[-1].memory,worker2_min,worker2_max)
 			experiment.append(new_worker)
-			#experiment.append(new_worker2)
-		workers_exp.append([experiment,replica_count])
-		print("Max replicacount:" + replica_count)
+		workers_exp.append([experiment,min_replica_count,max_replica_count,nb_of_samples])
+		print("Min replicacount:" + min_replica_count)
+		print("Max replicacount:" + max_replica_count)
 
 	return workers_exp
 
 
 def leftShift(text,n):
         return text[n:] + text[:n]
+
+def rightShift(text,n):
+	return text[:n] + text[n:]
+
 
 
 def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base):
@@ -245,26 +263,26 @@ def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, b
 	list=[]
 	length=len(combinations[0])
 	rotated_combinations=[[leftShift(comb,i) for i in range(0,length)] for comb in combinations]
-	expMax=dict(zip(range(0,window+1), range(0,window+1)))
+	expMin=dict(zip(range(0,window+1), range(0,window+1)))
 	max=-1
 	nb_of_variable_workers=length-NB_OF_CONSTANT_WORKER_REPLICAS
 	for i in range(0, length):
 		exp={}
 		for c in rotated_combinations:
-			exp[c[i][:-nb_of_variable_workers]]=[]
+			exp[utils.array_to_delimited_str(c[i][:-nb_of_variable_workers]," ")]=[]
 
 		for c in rotated_combinations:
-			tmp_str=""
+			tmp_lst=[]
 			for j in range(0,nb_of_variable_workers):
 				l=j+1
-				tmp_str=c[i][-l]+tmp_str
-			exp[c[i][:-nb_of_variable_workers]].append(tmp_str)
+				tmp_lst.insert(0,c[i][-l])
+			exp[utils.array_to_delimited_str(c[i][:-nb_of_variable_workers]," ")].append(tmp_lst)
 		print(exp)
-		if len(exp.keys()) < len(expMax.keys()):
-			expMax=exp
+		if len(exp.keys()) < len(expMin.keys()):
+			expMin=exp
 			max=i
 
-	return {"exp":expMax, "nbOfshiftsToLeft": max}
+	return {"exp":expMin, "nbOfshiftsToLeft": max}
 
 
 #def _split_exp_intervals_with_metadata(sorted_combinations, include_min_conf, min_conf, window, base):#
@@ -295,7 +313,7 @@ def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, b
 #	return exp
 
 
-def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, maximum_repl):
+def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, minimum_repl, maximum_repl):
 	# conf_ex=ConfigParser(
 	# 	optimizer='exhaustive',
 	# 	chart_dir=chart_dir,
@@ -312,7 +330,8 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 		output= exp_path+'/op/',
 		# prev_results=exp_path+'/exh/results.json',
 		slas=slas,
-		maximum_replicas='"'+maximum_repl+'"')
+		maximum_replicas='"'+maximum_repl+'"',
+		minimum_replicas='"'+minimum_repl+'"')
 
 	# exp_ex=SLAConfigExperiment(conf_ex,bin_path,exp_path+'/exh')
 	exp_op=SLAConfigExperiment(conf_op,bin_path,exp_path+'/op/')

@@ -4,6 +4,7 @@ import yaml
 from src.generator import generate_matrix2 as generate_matrix2
 from src.searchwindow import ScalingFunction
 
+
 parser = argparse.ArgumentParser(
 
 description='Workload generator using Locust',
