@@ -14,6 +14,7 @@ slas:
       completionTime: {{sla.slos.completionTime}}
       maximumReplicas: {{sla.slos.maximumReplicas}}
       minimumReplicas: {{sla.slos.minimumReplicas}}
+      configs: {{sla.slos.configs}}
     nbOfTenants: {{sla.tenants}}
     parameters:
     {% for worker in sla.workers %}
