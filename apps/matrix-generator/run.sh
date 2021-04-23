@@ -1,5 +1,6 @@
-for i in `seq 10`
+for i in `seq 1 10`
  do 
+  rm -r Results/exp3/silver/*
   sed "s/indow: 1/indow: $i/g" conf/matrix-spark.yaml > conf.yaml
   #x=expr $i-1 
   #echo $x

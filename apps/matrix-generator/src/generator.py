@@ -9,7 +9,7 @@ from functools import reduce
 THRESHOLD = -1
 #DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-
+MAXIMUM_TRANSITION_COST=2
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -45,36 +45,42 @@ def generate_matrix(initial_conf):
 			for i,ws in enumerate(next_exp):
 				#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-				for res in _generate_experiment(chart_dir,util_func,[sla_conf],ws[4],bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+				for res in _generate_experiment(chart_dir,util_func,[sla_conf],int(ws[4]/2),bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
 
 			previous_tenant_result={}
 			if tenant_nb > 1:
 				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-			result=find_optimal_conf(workers,results,previous_tenant_result)
+			result=find_optimal_result(workers,results,previous_tenant_result)
 			#for failed_conf in return_failed_confs(workers,results):
 			#	print(failed_conf)
 			#	if failed_conf in lst:
 			#		print("Removing failed conf!")
 			#		lst.remove(failed_conf)
-			optimal_result=return_cost_optimal_conf(workers,results)
-			if optimal_result:
+			optimal_conf=return_cost_optimal_conf(workers,results)
+			if optimal_conf and (_pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) <= MAXIMUM_TRANSITION_COST):
 				print("Optimal Result")
-				print(optimal_result)
-				failed_range=lst.index(optimal_result)
+				print(optimal_conf)
+				failed_range=lst.index(optimal_conf)
 			else:
 				failed_range=adaptive_window.get_current_window()
 			for i in range(0,failed_range):
 				print("Removing failed conf")
 				print(lst[0])
 				lst.remove(lst[0])
-			if result:
+			for failed_conf in return_failed_confs(workers,results):
+				if failed_conf in lst:
+					print("Removing failed conf!")
+					print(failed_conf)
+					lst.remove(failed_conf)
+			if result and (_pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) <= MAXIMUM_TRANSITION_COST):
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
 				next_conf=get_conf(workers, result)
-			else: 
+			else:
 				print("NO RESULT")
+				result={}
 				retry_attempt+=nr_of_experiments
 				next_conf=lst[0]
 			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,window,False))
@@ -83,7 +89,10 @@ def generate_matrix(initial_conf):
 
 
 def get_conf(workers, result):
-	return [int(result['worker'+str(worker.worker_id)+'.replicaCount']) for worker in workers]
+	if result:
+		return [int(result['worker'+str(worker.worker_id)+'.replicaCount']) for worker in workers]
+	else:
+		return []
 
 
 def return_cost_optimal_conf(workers,results):
@@ -105,7 +114,7 @@ def return_failed_confs(workers,results):
 #		return []
 
 
-def find_optimal_conf(workers,results,previous_result):
+def find_optimal_result(workers,results,previous_result):
 	print("Results")
 	print(results)
 	print("Previous result")
@@ -197,6 +206,8 @@ def _resource_cost(workers, conf):
 
 
 def _pairwise_transition_cost(previous_conf,conf):
+        if not previous_conf:
+               return 0
         cost=0
         for c1,c2 in zip(conf,previous_conf):
                if  c1 > c2:
