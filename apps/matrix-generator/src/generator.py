@@ -3,7 +3,7 @@ from .parser import ConfigParser
 from .experiment import SLAConfigExperiment
 from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
-from .searchwindow import ScalingFunction
+from .searchwindow import AdaptiveWindow
 from functools import reduce
 
 THRESHOLD = -1
@@ -23,6 +23,7 @@ def generate_matrix(initial_conf):
 	for sla in slas:
 		alphabet=sla['alphabet']
 		window=alphabet['searchWindow']
+		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
@@ -31,9 +32,9 @@ def generate_matrix(initial_conf):
 		workers[2].setReplicas(min_replicas=0,max_replicas=0)
 		workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
 		lst=_sort(workers,base)
-		print(lst)
+		print([utils.array_to_str(el) for el in lst])
 		exps_path=exp_path+'/'+sla['name']
-		next_exp=_find_next_exp(lst,workers,[],lst[0],base,window,True)
+		next_exp=_find_next_exp(lst,workers,[],lst[0],base,window)
 		d[sla['name']]={}
 		tenant_nb=1
 		retry_attempt=0
@@ -42,19 +43,31 @@ def generate_matrix(initial_conf):
 			nr_of_experiments=len(next_exp)
 			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
-				#wqsamples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
+				#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],ws[4],bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
+
 			previous_tenant_result={}
 			if tenant_nb > 1:
 				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 			result=find_optimal_conf(workers,results,previous_tenant_result)
-			for failed_conf in return_failed_confs(workers,results):
-				print(failed_conf)
-				if failed_conf in lst:
-					print("Removing failed conf!")
-					lst.remove(failed_conf)
+			#for failed_conf in return_failed_confs(workers,results):
+			#	print(failed_conf)
+			#	if failed_conf in lst:
+			#		print("Removing failed conf!")
+			#		lst.remove(failed_conf)
+			optimal_result=return_cost_optimal_conf(workers,results)
+			if optimal_result:
+				print("Optimal Result")
+				print(optimal_result)
+				failed_range=lst.index(optimal_result)
+			else:
+				failed_range=adaptive_window.get_current_window()
+			for i in range(0,failed_range):
+				print("Removing failed conf")
+				print(lst[0])
+				lst.remove(lst[0])
 			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
@@ -64,13 +77,22 @@ def generate_matrix(initial_conf):
 				print("NO RESULT")
 				retry_attempt+=nr_of_experiments
 				next_conf=lst[0]
-			next_exp=_find_next_exp(lst,workers,result,next_conf,base,window,False)
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 
 def get_conf(workers, result):
 	return [int(result['worker'+str(worker.worker_id)+'.replicaCount']) for worker in workers]
+
+
+def return_cost_optimal_conf(workers,results):
+        optimal_results=sort([result for result in results if float(result['score']) > THRESHOLD])
+        if optimal_results:
+    	        return get_conf(workers,optimal_results[0])
+        else:
+                return []
+ 
 
 
 def return_failed_confs(workers,results):
@@ -184,16 +206,11 @@ def _pairwise_transition_cost(previous_conf,conf):
 
 
 
-def _find_next_exp(sorted_combinations, workers, results, next_conf, base, window, first_tenant):
+def _find_next_exp(sorted_combinations, workers, results, next_conf, base, window):
 	workers_exp=[]
-	only_min_conf=False
 	min_conf=next_conf
-	if not first_tenant:
-		print("Processing previous worker results")
-		if results:
-			only_min_conf=True
 	print("min_conf: " + utils.array_to_delimited_str(min_conf, " "))
-	intervals=_split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base)
+	intervals=_split_exp_intervals(sorted_combinations, min_conf, window, base)
 	print("Next possible experiments for next nb of tenants")
 	print(intervals["exp"])
 	tmp_workers=leftShift(workers, intervals["nbOfshiftsToLeft"])
@@ -240,21 +257,15 @@ def leftShift(text,n):
         return text[n:] + text[:n]
 
 def rightShift(text,n):
-	return text[:n] + text[n:]
+	return text[-n:] + text[:-n]
 
 
 
-def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base):
-
-
+def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 	min_conf_dec=sorted_combinations.index(min_conf)
-        #min_conf_dec=int(min_conf_index,base)
 	print("min_conf_dec: " + str(min_conf_dec))
-	if only_min_conf:
-		max_conf_dec=min_conf_dec+1
-	else:
-		max_conf_dec=min_conf_dec+window
-	combinations=[sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]
+	max_conf_dec=min_conf_dec+window
+	combinations=[sorted_combinations[c][:] for c in range(min_conf_dec,max_conf_dec)]
 	for c in range(min_conf_dec,max_conf_dec):
 		print(c)
 		print(sorted_combinations[c])
