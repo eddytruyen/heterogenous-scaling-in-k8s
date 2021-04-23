@@ -58,7 +58,7 @@ def generate_matrix(initial_conf):
 			#		print("Removing failed conf!")
 			#		lst.remove(failed_conf)
 			optimal_conf=return_cost_optimal_conf(workers,results)
-			if optimal_conf and (_pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) <= MAXIMUM_TRANSITION_COST):
+			if optimal_conf:
 				print("Optimal Result")
 				print(optimal_conf)
 				failed_range=lst.index(optimal_conf)
@@ -68,6 +68,8 @@ def generate_matrix(initial_conf):
 				print("Removing failed conf")
 				print(lst[0])
 				lst.remove(lst[0])
+			if _pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) > MAXIMUM_TRANSITION_COST:
+				lst.remove(lst[lst.index(get_conf(workers,result))])
 			for failed_conf in return_failed_confs(workers,results):
 				if failed_conf in lst:
 					print("Removing failed conf!")
