@@ -9,7 +9,7 @@ from functools import reduce
 THRESHOLD = -1
 #DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-MAXIMUM_TRANSITION_COST=2
+MAXIMUM_TRANSITION_COST=3
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -45,7 +45,10 @@ def generate_matrix(initial_conf):
 			for i,ws in enumerate(next_exp):
 				#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-				for res in _generate_experiment(chart_dir,util_func,[sla_conf],int(ws[4]/2),bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+				samples=int(ws[4]/2)
+				if samples == 0:
+					samples=1
+				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
 
 			previous_tenant_result={}
