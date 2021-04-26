@@ -1,6 +1,5 @@
 #$1 directory exp
 #$2 namespace/sla name
-#$3 number of tenants to be updated
 
 x=`pwd`
 cd Results/$1/$2/
@@ -18,4 +17,3 @@ sed  -z 's;false}}\]\n\[{"bench;false}},{"bench;g' results2.json |  sed -z 's;tr
 sed  -z 's;false}}\n\[{"bench;false}},{"bench;g' results3.json |  sed -z 's;true}}\n\[{"bench;true}},{"bench;g' > results2.json
 sed  -z 's;false}}\]\n{"bench;false}},{"bench;g' results2.json |  sed -z 's;true}}\]\n{"bench;true}},{"bench;g' > results3.json
 cd $x
-

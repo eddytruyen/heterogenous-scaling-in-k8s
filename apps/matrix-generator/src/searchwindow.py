@@ -40,4 +40,23 @@ class ScalingFunction:
 		self.Alphabet['elements'][element_nb-1]={'size': dict}
 		return dict
 
+class AdaptiveWindow:
+	def __init__(self, initial_window):
+		self.original_window=initial_window
 
+
+
+	def adapt_search_window(self,results, window, first_tenant):
+		if not first_tenant:
+			if results:
+				self.original_window=1
+				return self.original_window
+			else:
+				self.original_window=window
+				return window
+		else:
+			self.original_window=window
+			return window
+
+	def get_current_window(self):
+		return self.original_window

@@ -23,6 +23,13 @@ def array_to_str(arr):
     else:
         return str(arr[0])
 
+def array_to_delimited_str(arr, delimiter):
+    if len(arr)>1:
+        return reduce(lambda a, b: str(a)+ delimiter + str(b), arr)
+    else:
+        return str(arr[0])
+
+
 def abort(msg):
 	print(msg)
 	sys.exit(1)		
