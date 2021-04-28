@@ -4,7 +4,7 @@ spark-bench = {
     spark-args = {
       master = "spark://Release-master-svc.Namespace.svc.cluster.local:7077"
       executor-memory = "13G"
-      driver-memory = "14G"
+      driver-memory = "1G"
       //deploy-mode = "cluster"
       //num-executors = 2
     }
