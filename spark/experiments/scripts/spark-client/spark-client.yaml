@@ -6,6 +6,7 @@ metadata:
   name: spark-client
 spec:
   serviceName: spark-client-headless
+  podManagementPolicy: "Parallel"
   replicas: 1
   selector:
     matchLabels:
@@ -15,6 +16,9 @@ spec:
       labels:
         run: spark-client 
     spec: 
+      securityContext:
+        fsGroup: 0
+        runAsUser: 0
       containers:    
         - image: docker.io/bitnami/spark:2.4.6-debian-10-r14
           imagePullPolicy: IfNotPresent
@@ -31,9 +35,6 @@ spec:
               mountPath: /etc/podinfo
             - name: spark-data
               mountPath: '/opt/bitnami/spark/spark_data'
-          securityContext:
-            fsGroup: 0
-            runAsUser: 0
       volumes:
         - name: podinfo
           downwardAPI:
