@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    run: spark-client
+  name: spark-client
+spec:
+  serviceName: spark-client-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      run: spark-client
+  template:
+    metadata:
+      labels:
+        run: spark-client 
+    spec: 
+      containers:    
+        - image: docker.io/bitnami/spark:2.4.6-debian-10-r14
+          imagePullPolicy: IfNotPresent
+          name: spark-client
+          resources:
+            requests:
+              cpu: 2
+              memory: 2Gi
+            limits:
+              cpu: 2
+              memory: 2Gi
+          volumeMounts:
+            - name: podinfo
+              mountPath: /etc/podinfo
+            - name: spark-data
+              mountPath: '/opt/bitnami/spark/spark_data'
+      volumes:
+        - name: podinfo
+          downwardAPI:
+            items:
+              - path: "cpu_limit"
+                resourceFieldRef:
+                  containerName: spark-worker1
+                  resource: limits.cpu
+                  divisor: 1m
+              - path: "cpu_request"
+                resourceFieldRef:
+                  containerName: spark-worker1
+                  resource: requests.cpu
+                  divisor: 1m
+              - path: "mem_limit"
+                resourceFieldRef:
+                  containerName: spark-worker1
+                  resource: limits.memory
+                  divisor: 1Gi
+              - path: "mem_request"
+                resourceFieldRef:
+                  containerName: spark-worker1
+                  resource: requests.memory
+                  divisor: 1Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: spark-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "local-storage"
+      resources:
+        requests:
+          storage: 30Gi
+    
