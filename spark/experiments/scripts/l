@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-04-29T09:55:25Z"
+  generateName: silver-spark-worker2-
+  labels:
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/instance: silver-spark
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: spark
+    controller-revision-hash: silver-spark-worker2-c678dd75b
+    helm.sh/chart: spark-4.1.0
+    set: worker2
+    statefulset.kubernetes.io/pod-name: silver-spark-worker2-0
+  name: silver-spark-worker2-0
+  namespace: silver
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: StatefulSet
+    name: silver-spark-worker2
+    uid: 4bb1e7c3-864e-4744-89cc-84c5c02ff4ec
+  resourceVersion: "35676412"
+  selfLink: /api/v1/namespaces/silver/pods/silver-spark-worker2-0
+  uid: dfb11a27-7140-4803-ac6d-8480ddc2228b
+spec:
+  containers:
+  - env:
+    - name: SPARK_MODE
+      value: worker
+    - name: BASH_DEBUG
+      value: "0"
+    - name: SPARK_DAEMON_MEMORY
+    - name: SPARK_WORKER_WEBUI_PORT
+      value: "8081"
+    - name: SPARK_DAEMON_JAVA_OPTS
+      value: -XX:+UseContainerSupport
+    - name: SPARK_MASTER_URL
+      value: spark://silver-spark-master-svc:7077
+    - name: SPARK_WORKER_OPTS
+    - name: SPARK_DAEMON_MEMORY
+      value: 2g
+    image: docker.io/bitnami/spark:2.4.6-debian-10-r14
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: 8081
+        scheme: HTTP
+      initialDelaySeconds: 180
+      periodSeconds: 20
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: spark-worker2
+    ports:
+    - containerPort: 8081
+      name: http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 6
+      httpGet:
+        path: /
+        port: 8081
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      successThreshold: 1
+      timeoutSeconds: 5
+    resources:
+      limits:
+        cpu: "4"
+        memory: 2Gi
+      requests:
+        cpu: "4"
+        memory: 2Gi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/podinfo
+      name: podinfo
+    - mountPath: /opt/bitnami/spark/spark_data
+      name: spark-data
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-7t4wk
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: silver-spark-worker2-0
+  nodeName: "4"
+  nodeSelector:
+    worker13: "yes"
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext:
+    fsGroup: 0
+    runAsUser: 0
+  serviceAccount: default
+  serviceAccountName: default
+  subdomain: silver-spark-headless
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: spark-data
+    persistentVolumeClaim:
+      claimName: spark-data-silver-spark-worker2-0
+  - downwardAPI:
+      defaultMode: 420
+      items:
+      - path: cpu_limit
+        resourceFieldRef:
+          containerName: spark-worker2
+          divisor: 1m
+          resource: limits.cpu
+      - path: cpu_request
+        resourceFieldRef:
+          containerName: spark-worker2
+          divisor: 1m
+          resource: requests.cpu
+      - path: mem_limit
+        resourceFieldRef:
+          containerName: spark-worker2
+          divisor: 1Gi
+          resource: limits.memory
+      - path: mem_request
+        resourceFieldRef:
+          containerName: spark-worker2
+          divisor: 1Gi
+          resource: requests.memory
+    name: podinfo
+  - name: default-token-7t4wk
+    secret:
+      defaultMode: 420
+      secretName: default-token-7t4wk
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2021-04-29T09:55:25Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2021-04-29T09:56:23Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2021-04-29T09:56:23Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2021-04-29T09:55:25Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://7177b452a69c6074b98e1f5eed249fd4a4c81c984423b9f764111e14a9ee8dc0
+    image: bitnami/spark:2.4.6-debian-10-r14
+    imageID: docker-pullable://bitnami/spark@sha256:466bf61dd153c004d08fccf6f4e3ae9f560664736e4b867230d613d343d767e4
+    lastState: {}
+    name: spark-worker2
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2021-04-29T09:55:52Z"
+  hostIP: 172.17.13.103
+  phase: Running
+  podIP: 10.44.0.1
+  podIPs:
+  - ip: 10.44.0.1
+  qosClass: Guaranteed
+  startTime: "2021-04-29T09:55:25Z"
