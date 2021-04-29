@@ -37,9 +37,9 @@ do
   ./$workload/generate_script.sh $i $executorMemory $nrOfPartitions $tenantGroup "output.conf"
   sudo cp ./$workload/output.conf /mnt/nfs-disk-2/spark-bench/
   echo "executing script for $i tenants"
-  worker=`kubectl get pods -n silver | grep 'worker.-0.*1/1'  | cut  -d " " -f1 | head -1`
+  client=spark-client-0
   t1=`date +%s` 
-  kubectl exec -it -n $namespace $worker -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace silver-spark $workload $tenantGroup
+  kubectl exec -it -n $namespace $client -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace silver-spark $workload $tenantGroup
   t2=`date +%s`
   period=$(($t2 - $t1))
   #if [ $period -lt 120 ]; then echo "sleeping for 5400 sec"; sleep 5400; fi	 
