@@ -28,11 +28,11 @@ def generate_matrix(initial_conf):
 		base=alphabet['base']
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
-		workers[0].setReplicas(min_replicas=0,max_replicas=0)
-		workers[1].setReplicas(min_replicas=0,max_replicas=0)
-		workers[2].setReplicas(min_replicas=0,max_replicas=0)
-		workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
-	#	workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
+		#workers[0].setReplicas(min_replicas=0,max_replicas=0)
+		#workers[1].setReplicas(min_replicas=0,max_replicas=0)
+		#workers[2].setReplicas(min_replicas=0,max_replicas=0)
+		#workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
+		workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
 		lst=_sort(workers,base)
 		print([utils.array_to_str(el) for el in lst])
 		exps_path=exp_path+'/'+sla['name']
@@ -219,7 +219,12 @@ def _sort(workers,base):
 		return _resource_cost(workers,elem)
 
 	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
-	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
+	print(utils.array_to_str([base-1 for worker in workers]))
+	#REMARK: Only single replica allows for base higher than 10. This is because int(string,base) does not work properly for base > 10
+	if len(workers) == 1:
+		max_conf=int(utils.array_to_str([base-1 for worker in workers]))
+	else:
+	 	max_conf=int(utils.array_to_str([base-1 for worker in workers],base))
 	print(initial_conf)
 	print(max_conf)
 	index=range(initial_conf,max_conf+1)
@@ -237,6 +242,7 @@ def _sort(workers,base):
 def _resource_cost(workers, conf):
         cost=0
         for w,c in zip(workers,conf):
+            print(c)
             cost+=c*w.cpu+c*w.memory
         return cost
 
@@ -267,6 +273,21 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 	tmp_workers=leftShift(workers, intervals["nbOfshiftsToLeft"])
 	length=len(sorted_combinations[0])
 	nb_of_variable_workers=length-NB_OF_CONSTANT_WORKER_REPLICAS
+        #THIS IF BRANCH ONLY WORKS FOR SINGLE REPLICA!
+	if nb_of_variable_workers == 0:
+                samples=intervals["exp"]["None"]
+                nb_of_samples=len(samples)
+                worker_min=samples[0]
+                worker_max=samples[nb_of_samples-2]
+                new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,workers[0].memory,worker_min,worker_max)
+                elementstr="["
+                for sample in samples:
+                    elementstr=elementstr+"[" + utils.array_to_delimited_str(sample,",") + "];"
+                last_char_index=elementstr.rfind(";")
+                elementstr = elementstr[:last_char_index] + "]"
+                max_replica_count=utils.array_to_delimited_str(worker_max, " ")
+                min_replica_count=utils.array_to_delimited_str(worker_min, " ")
+                return [[[new_worker], elementstr, min_replica_count, max_replica_count, nb_of_samples]]
 	for k, v in intervals["exp"].items():
 		const_workers=k.split(" ")
 		constant_ws_replicas=map(lambda a: int(a),const_workers)  
@@ -326,6 +347,8 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 	expMin=dict(zip(range(0,window+1), range(0,window+1)))
 	max=-1
 	nb_of_variable_workers=length-NB_OF_CONSTANT_WORKER_REPLICAS
+	if nb_of_variable_workers ==  0:
+		return {"exp": {"None": [sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]}, "nbOfshiftsToLeft": 0}
 	for i in range(0, length):
 		exp={}
 		for c in rotated_combinations:
