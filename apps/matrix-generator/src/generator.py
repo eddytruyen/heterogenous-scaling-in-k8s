@@ -10,7 +10,7 @@ THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=1.0
+SAMPLING_RATE=0.2
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -278,13 +278,14 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
                 samples=intervals["exp"]["None"]
                 nb_of_samples=len(samples)
                 worker_min=samples[0]
-                worker_max=samples[nb_of_samples-2]
-                new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,workers[0].memory,worker_min,worker_max)
+                worker_max=samples[nb_of_samples-1]
+                new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,workers[0].memory,worker_min[0],worker_max[0])
                 elementstr="["
                 for sample in samples:
                     elementstr=elementstr+"[" + utils.array_to_delimited_str(sample,",") + "];"
                 last_char_index=elementstr.rfind(";")
                 elementstr = elementstr[:last_char_index] + "]"
+                print("Elementstr: " + elementstr)
                 max_replica_count=utils.array_to_delimited_str(worker_max, " ")
                 min_replica_count=utils.array_to_delimited_str(worker_min, " ")
                 return [[[new_worker], elementstr, min_replica_count, max_replica_count, nb_of_samples]]
