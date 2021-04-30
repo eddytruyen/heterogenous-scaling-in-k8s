@@ -46,17 +46,15 @@ class AdaptiveWindow:
 
 
 
-	def adapt_search_window(self,results, window, first_tenant):
+	def adapt_search_window(self, results, window, first_tenant):
 		if not first_tenant:
 			if results:
 				self.original_window=1
-				return self.original_window
 			else:
 				self.original_window=window
-				return window
 		else:
 			self.original_window=window
-			return window
+		return self.original_window
 
 	def get_current_window(self):
 		return self.original_window

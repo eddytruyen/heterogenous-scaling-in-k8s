@@ -7,10 +7,10 @@ from .searchwindow import AdaptiveWindow
 from functools import reduce
 
 THRESHOLD = -1
-#DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
+SAMPLING_RATE=1.0
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -32,6 +32,7 @@ def generate_matrix(initial_conf):
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
 		workers[2].setReplicas(min_replicas=0,max_replicas=0)
 		workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
+	#	workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
 		lst=_sort(workers,base)
 		print([utils.array_to_str(el) for el in lst])
 		exps_path=exp_path+'/'+sla['name']
@@ -40,65 +41,91 @@ def generate_matrix(initial_conf):
 		tenant_nb=1
 		retry_attempt=0
 		while tenant_nb <= sla['maxTenants']:
+			print([utils.array_to_str(el) for el in lst])
 			results=[]
 			nr_of_experiments=len(next_exp)
 			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
 				#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-				samples=int(ws[4])
-				#if samples == 0:
-				#	samples=1
+				samples=int(ws[4]*SAMPLING_RATE)
+				if samples == 0:
+					samples=1
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
-
-			previous_tenant_result={}
-			if tenant_nb > 1:
-				previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-			result=find_optimal_result(workers,results,previous_tenant_result)
-			#for failed_conf in return_failed_confs(workers,results):
-			#	print(failed_conf)
-			#	if failed_conf in lst:
-			#		print("Removing failed conf!")
-			#		lst.remove(failed_conf)
-			optimal_conf=return_cost_optimal_conf(workers,results)
-			if optimal_conf:
-				print("Optimal Result")
-				print(optimal_conf)
-				failed_range=lst.index(optimal_conf)
-			else:
-				failed_range=adaptive_window.get_current_window()
-			for i in range(0,failed_range):
-				print("Removing failed conf")
-				print(lst[0])
-				lst.remove(lst[0])
-			result_conf=get_conf(workers,result)
-			previous_tenant_conf=get_conf(workers,previous_tenant_result)
-			cost=_pairwise_transition_cost(previous_tenant_conf,result_conf)['cost']
-			nb_shrd_replicas=_pairwise_transition_cost(previous_tenant_conf,result_conf)['nb_shrd_repls']
-			if cost > MAXIMUM_TRANSITION_COST:
-				lst.remove(lst[lst.index(result_conf)])
-			if nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
-				if result_conf in lst:
-                                	lst.remove(lst[lst.index(result_conf)])
-			for failed_conf in return_failed_confs(workers,results):
-				if failed_conf in lst:
-					print("Removing failed conf!")
-					print(failed_conf)
-					lst.remove(failed_conf)
-			if result and cost <= MAXIMUM_TRANSITION_COST and nb_shrd_replicas >= MINIMUM_SHARED_REPLICAS:
+			result=find_optimal_result(workers,results)
+			remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
+			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
 				next_conf=get_conf(workers, result)
+				new_window=window
 			else:
 				print("NO RESULT")
 				result={}
 				retry_attempt+=nr_of_experiments
+				new_window=window
+				if tenant_nb > 1:
+					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+					print([utils.array_to_str(el) for el in lst])
+					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
 				next_conf=lst[0]
-			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,window,False))
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+
+def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, window):
+		if optimal_conf:
+			print("Optimal Result")
+			print(optimal_conf)
+			tmp_combinations=sort_configs(workers,sorted_combinations)
+			failed_range=tmp_combinations.index(optimal_conf)
+			for i in range(0, failed_range):
+				possible_removal=tmp_combinations[i]
+				if _resource_cost(workers, possible_removal) < (_resource_cost(workers, optimal_conf) ):
+					print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
+					print(possible_removal)
+					sorted_combinations.remove(possible_removal)
+		elif SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
+			failed_range=window
+			print("Removing all configs in window because no optimal config has been found at all")
+			for i in range(0,failed_range):
+				print(sorted_combinations[0])
+				sorted_combinations.remove(sorted_combinations[0])
+		for failed_conf in return_failed_confs(workers,results):
+			if failed_conf in sorted_combinations:
+				print("Removing failed conf")
+				print(failed_conf)
+				sorted_combinations.remove(failed_conf)
+
+
+
+def filter_samples(sorted_combinations, previous_tenant_conf, start, window):
+	print("Moving filtered samples in sorted combinations after the window")
+	new_window=window
+	for el in range(start, window):
+		already_moved=False
+		result_conf=sorted_combinations[el-(window-new_window)]
+		qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
+		cost=qualitiesOfSample['cost']
+		nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
+		if cost > MAXIMUM_TRANSITION_COST:
+			print(result_conf)
+			sorted_combinations.remove(result_conf)
+			sorted_combinations.insert(window+el-1,result_conf)
+			already_moved=True
+			new_window-=1
+		if nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
+			if not already_moved:
+				print(result_conf)
+				sorted_combinations.remove(result_conf)
+				sorted_combinations.insert(window+el-1,result_conf)
+				new_window-=1
+	if new_window == 0:
+		return filter_samples(sorted_combinations, previous_tenant_conf, window, window)
+	else:
+		return new_window
 
 
 def get_conf(workers, result):
@@ -108,13 +135,13 @@ def get_conf(workers, result):
 		return []
 
 
-def return_cost_optimal_conf(workers,results):
-        optimal_results=sort([result for result in results if float(result['score']) > THRESHOLD])
-        if optimal_results:
-    	        return get_conf(workers,optimal_results[0])
-        else:
-                return []
- 
+#def return_cost_optimal_conf(workers,results):
+#        optimal_results=sort([result for result in results if float(result['score']) > THRESHOLD])
+#        if optimal_results:
+#    	        return get_conf(workers,optimal_results[0])
+#        else:
+#                return []
+# 
 
 
 def return_failed_confs(workers,results):
@@ -127,38 +154,28 @@ def return_failed_confs(workers,results):
 #		return []
 
 
-def find_optimal_result(workers,results,previous_result):
+def find_optimal_result(workers,results):
 	print("Results")
 	print(results)
-	print("Previous result")
-	print(previous_result)
 	filtered_results=[result for result in results if float(result['score']) > THRESHOLD]
 	print("Filtered results")
-	filtered_results=sort(filtered_results)
-	print(filtered_results)
 	if filtered_results:
-		index=-1
-		if previous_result:
-			previous_conf=get_conf(workers,previous_result)
-			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result))['nb_shrd_repls'] for result in filtered_results]
-			index=transition_costs.index(max(transition_costs))
-		else:
-			scores=[float(result['score']) for result in filtered_results]
-			index=scores.index(max(scores))
-		return filtered_results[index]
+		filtered_results=sort_results(filtered_results)
+		print(filtered_results)
+		return filtered_results[0]
 	else:
 		return {}
 
 
-def find_maximum(workers,experiments):
-	configs=[]
-	for exp in experiments:
-		conf=[c.max_replicas for c in exp]
-		configs.append(conf)
-	configs.reverse()
-	resource_costs=[_resource_cost(workers, c) for c in configs]
-	index=resource_costs.index(max(resource_costs))
-	return configs[index]
+#def find_maximum(workers,experiments):
+#	configs=[]
+#	for exp in experiments:
+#		conf=[c.max_replicas for c in exp]
+#		configs.append(conf)
+#	configs.reverse()
+#	resource_costs=[_resource_cost(workers, c) for c in configs]
+#	index=resource_costs.index(max(resource_costs))
+#	return configs[index]
 
 
 def generate_matrix2(initial_conf):
@@ -182,12 +199,19 @@ def generate_matrix2(initial_conf):
 
 
 
-def sort(results):
+def sort_results(results):
 	def score_for_sort(result):
 		return  -1*float(result['score']) 
 
 	return sorted(results,key=score_for_sort)
 
+
+def sort_configs(workers,combinations):
+	def cost_for_sort(elem):
+                return _resource_cost(workers,elem)
+
+	sorted_list=sorted(combinations, key=cost_for_sort)
+	return sorted_list
 
 
 def _sort(workers,base):
@@ -320,33 +344,6 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 
 	return {"exp":expMin, "nbOfshiftsToLeft": max}
 
-
-#def _split_exp_intervals_with_metadata(sorted_combinations, include_min_conf, min_conf, window, base):#
-	#min_conf_dec=sorted_combinations.index([int(min_conf,base),min_conf,_resource_cost(workers,min_conf))
-#	min_conf=sorted_combinations.index(min_conf)
-	#min_conf_dec=int(min_conf_index,base)
-#	print("min_conf_dec: " + str(min_conf_dec))
-#	if not include_min_conf :
-		#rollover maximum conf of previous experiments
-#		min_conf=utils.array_to_str(utils.number_to_base(min_conf_dec[1],base))
-#	max_conf_dec=min_conf_dec[1]+window
-#	for c in range(min_conf_dec[1],max_conf_dec):
-#		print(c)
-#		print(sorted_combinations[c])
-#	combinations=[utils.array_to_str(sorted_combinations[c]) for c in range(min_conf_dec[1],max_conf_dec)]
-#	for c in comb:
-#		while len(c) < len(min_conf):
-#			c='0'+c
-#		combinations.append(c)	
-#	exp={}
-#
-#	for c in combinations:
-#		exp[c[:-1]]=[]
-#
-#	for c in combinations:
-#		exp[c[:-1]].append(c[-1])		
-#
-#	return exp
 
 
 def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, conf, minimum_repl, maximum_repl):
