@@ -200,10 +200,10 @@ workloads = readRDS(file=workloadfile)
 
 
 
-L=7
-metric="median"
+L=10
+metric="mean"
 workload="spark-bench"
-deployment="vps"
+deployment="hps"
 operation="total"
 title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
@@ -230,14 +230,11 @@ computeFunction <- function(y,z,frame) {
   return(f)
 }
 
-f <- computeFunction(y,z,frame)
 
 z=(1:L)
 plotPoints(y~z)
 coef(f)
 plotFun(f(z)~z, z.lim = range(1:L), add = TRUE, col="blue")
-z=(1:100)
-plotFun(f(z)~z, z.lim = range(1:100), add = FALSE, col="blue")
 
 d=D(f(z)~z)
 
