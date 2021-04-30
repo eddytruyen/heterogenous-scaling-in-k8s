@@ -9,12 +9,12 @@ class ConfigParser:
 		self.chart_dir = chart_dir
 		self.samples=samples
 		self.iterations=1
-		if samples%2 == 0:
-			self.samples=2
-			self.iterations=int(samples/2)
-		elif samples%3 == 0:
-			self.samples=3
-			self.iterations=int(samples/3)
+	#	if samples%2 == 0:
+	#		self.samples=2
+	#		self.iterations=int(samples/2)
+	#	elif samples%3 == 0:
+	#		self.samples=3
+	#		self.iterations=int(samples/3)
 		self.output = output
 		self.maximum_replicas = maximum_replicas
 		self.minimum_replicas = minimum_replicas

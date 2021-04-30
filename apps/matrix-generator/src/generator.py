@@ -10,6 +10,7 @@ THRESHOLD = -1
 #DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
+MINIMUM_SHARED_REPLICAS=2
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -71,14 +72,21 @@ def generate_matrix(initial_conf):
 				print("Removing failed conf")
 				print(lst[0])
 				lst.remove(lst[0])
-			if _pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) > MAXIMUM_TRANSITION_COST:
-				lst.remove(lst[lst.index(get_conf(workers,result))])
+			result_conf=get_conf(workers,result)
+			previous_tenant_conf=get_conf(workers,previous_tenant_result)
+			cost=_pairwise_transition_cost(previous_tenant_conf,result_conf)['cost']
+			nb_shrd_replicas=_pairwise_transition_cost(previous_tenant_conf,result_conf)['nb_shrd_repls']
+			if cost > MAXIMUM_TRANSITION_COST:
+				lst.remove(lst[lst.index(result_conf)])
+			if nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
+				if result_conf in lst:
+                                	lst.remove(lst[lst.index(result_conf)])
 			for failed_conf in return_failed_confs(workers,results):
 				if failed_conf in lst:
 					print("Removing failed conf!")
 					print(failed_conf)
 					lst.remove(failed_conf)
-			if result and (_pairwise_transition_cost(get_conf(workers,previous_tenant_result),get_conf(workers,result)) <= MAXIMUM_TRANSITION_COST):
+			if result and cost <= MAXIMUM_TRANSITION_COST and nb_shrd_replicas >= MINIMUM_SHARED_REPLICAS:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
@@ -132,8 +140,8 @@ def find_optimal_result(workers,results,previous_result):
 		index=-1
 		if previous_result:
 			previous_conf=get_conf(workers,previous_result)
-			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result)) for result in filtered_results]
-			index=transition_costs.index(min(transition_costs))
+			transition_costs=[_pairwise_transition_cost(previous_conf,get_conf(workers, result))['nb_shrd_repls'] for result in filtered_results]
+			index=transition_costs.index(max(transition_costs))
 		else:
 			scores=[float(result['score']) for result in filtered_results]
 			index=scores.index(max(scores))
@@ -212,18 +220,15 @@ def _resource_cost(workers, conf):
 
 def _pairwise_transition_cost(previous_conf,conf):
         if not previous_conf:
-               return 0
+               return {'cost': 0, 'nb_shrd_repls': MINIMUM_SHARED_REPLICAS}
         cost=0
-        no_shared_replica=True
+        shared_replicas=0
         for c1,c2 in zip(conf,previous_conf):
                if  c1 > c2:
                        cost+=c1-c2
                if c2 >= 1  and c1 >= 1:
-                       no_shared_replica=False
-        if no_shared_replica:
-               print("NO_SHARED_REPLICA")
-               return cost+MAXIMUM_TRANSITION_COST
-        return cost
+                       shared_replicas+=min(c1,c2)
+        return {'cost': cost, 'nb_shrd_repls': shared_replicas}
 
 
 
