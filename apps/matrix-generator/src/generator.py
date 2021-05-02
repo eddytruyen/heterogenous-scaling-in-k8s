@@ -12,7 +12,7 @@ MAXIMUM_TRANSITION_COST=20
 MINIMUM_SHARED_REPLICAS=0
 SAMPLING_RATE=1.0
 #Single Replica
-WORKER_ID=3
+WORKER_ID=2
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
