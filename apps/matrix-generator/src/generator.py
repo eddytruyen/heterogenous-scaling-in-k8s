@@ -8,9 +8,11 @@ from functools import reduce
 
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.2
+MAXIMUM_TRANSITION_COST=20
+MINIMUM_SHARED_REPLICAS=0
+SAMPLING_RATE=1.0
+#Single Replica
+WORKER_ID=3
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -26,7 +28,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+		workers=[WorkerConf(worker_id=WORKER_ID-i, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		#workers[0].setReplicas(min_replicas=0,max_replicas=0)
 		#workers[1].setReplicas(min_replicas=0,max_replicas=0)
@@ -103,6 +105,11 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 
 def filter_samples(sorted_combinations, previous_tenant_conf, start, window):
 	print("Moving filtered samples in sorted combinations after the window")
+	cap=len(sorted_combinations)
+	if cap == 0:
+		return 0
+	if cap-start <  window:
+		window=cap-start
 	new_window=window
 	for el in range(start, window):
 		already_moved=False
@@ -219,7 +226,6 @@ def _sort(workers,base):
 		return _resource_cost(workers,elem)
 
 	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
-	print(utils.array_to_str([base-1 for worker in workers]))
 	#REMARK: Only single replica allows for base higher than 10. This is because int(string,base) does not work properly for base > 10
 	if len(workers) == 1:
 		max_conf=int(utils.array_to_str([base-1 for worker in workers]))
@@ -242,7 +248,6 @@ def _sort(workers,base):
 def _resource_cost(workers, conf):
         cost=0
         for w,c in zip(workers,conf):
-            print(c)
             cost+=c*w.cpu+c*w.memory
         return cost
 
@@ -340,7 +345,6 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 	max_conf_dec=min_conf_dec+window
 	combinations=[sorted_combinations[c][:] for c in range(min_conf_dec,max_conf_dec)]
 	for c in range(min_conf_dec,max_conf_dec):
-		print(c)
 		print(sorted_combinations[c])
 	list=[]
 	length=len(combinations[0])
@@ -361,7 +365,6 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 				l=j+1
 				tmp_lst.insert(0,c[i][-l])
 			exp[utils.array_to_delimited_str(c[i][:-nb_of_variable_workers]," ")].append(tmp_lst)
-		print(exp)
 		if len(exp.keys()) < len(expMin.keys()):
 			expMin=exp
 			max=i
