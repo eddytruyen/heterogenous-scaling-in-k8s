@@ -230,7 +230,7 @@ def _sort(workers,base):
 	if len(workers) == 1:
 		max_conf=int(utils.array_to_str([base-1 for worker in workers]))
 	else:
-	 	max_conf=int(utils.array_to_str([base-1 for worker in workers],base))
+	 	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
 	print(initial_conf)
 	print(max_conf)
 	index=range(initial_conf,max_conf+1)
