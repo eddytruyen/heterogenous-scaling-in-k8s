@@ -1,0 +1,61 @@
+silver:
+  '1':
+    config: '1'
+    score: '-0.2857142857142857'
+    worker2.replicaCount: '2'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '10':
+    config: '0'
+    score: '-0.7142857142857143'
+    worker2.replicaCount: '5'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '2':
+    config: '0'
+    score: '-0.42857142857142855'
+    worker2.replicaCount: '3'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '3':
+    config: '0'
+    score: '-0.42857142857142855'
+    worker2.replicaCount: '3'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '4':
+    config: '0'
+    score: '-0.5714285714285714'
+    worker2.replicaCount: '4'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '5':
+    config: '0'
+    score: '-0.5714285714285714'
+    worker2.replicaCount: '4'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '6':
+    config: '0'
+    score: '-0.5714285714285714'
+    worker2.replicaCount: '4'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '7':
+    config: '0'
+    score: '-0.5714285714285714'
+    worker2.replicaCount: '4'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '8':
+    config: '0'
+    score: '-0.5714285714285714'
+    worker2.replicaCount: '4'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
+  '9':
+    config: '0'
+    score: '-0.7142857142857143'
+    worker2.replicaCount: '5'
+    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.memory: '2'
