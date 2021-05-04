@@ -28,7 +28,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,NODES,alphabet)
+		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,NODES)
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
@@ -57,37 +57,47 @@ def generate_matrix(initial_conf):
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
 			result=find_optimal_result(workers,results)
-			if sla.slos['completionTime'] >  result["completionTime"] * 1.20:
-				workerdict = scalingFunction.target(tenant_nb, 1)
+			remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
+			if result and sla.slos['completionTime'] >  result["completionTime"] * 1.20:
+				print("NO COST EFFECTIVE  RESULT")
+				workerdict = scalingFunction.target(tenant_nb)
 				worker[1].scale(workerdict['cpu'],workerdict['memory'])
 				lst=sort_configs(lst,combinations)
 				result={}
- 				retry_attempt+=nr_of_experiments
+				retry_attempt+=nr_of_experiments
 				new_window=window
 				if tenant_nb > 1:
 					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-                                        print([utils.array_to_str(el) for el in lst])
-                                        new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
-
-				next_conf=lst[0]
-			else:
-				remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
-				if result:
-					d[sla['name']][str(tenant_nb)]=result
-					tenant_nb+=1
-					retry_attempt=0
-					next_conf=get_conf(workers, result)
-					new_window=window
+					print([utils.array_to_str(el) for el in lst])
+					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
 				else:
-					print("NO RESULT")
-					result={}
-					retry_attempt+=nr_of_experiments
-					new_window=window
-					if tenant_nb > 1:
-						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-						print([utils.array_to_str(el) for el in lst])
-						new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
-					next_conf=lst[0]
+					totalcost = scalingFunction.target(tenant_nb)
+					opt_conf=get_conf(workers, result)
+					new_workers=copy(workers)
+					diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] 2 
+					worker_index=0
+					while diff > 0 and worker_index < len(workers):
+						new_workers[len(workers)-worker_index].scale(workers[len(workers)-worker_index].cpu-1,workers[len(workers)-worker_index].memory-1)
+						diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] + totalcost['memory']
+						
+					
+				next_conf=lst[0]
+			elif result:
+				d[sla['name']][str(tenant_nb)]=result
+				tenant_nb+=1
+				retry_attempt=0
+				next_conf=get_conf(workers, result)
+				new_window=window
+			else:
+				print("NO RESULT")
+				result={}
+				retry_attempt+=nr_of_experiments
+				new_window=window
+				if tenant_nb > 1:
+					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+					print([utils.array_to_str(el) for el in lst])
+					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+				next_conf=lst[0]
 			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
@@ -250,7 +260,6 @@ def _sort(workers,base):
 			c1.insert(0,0)
 	sorted_list=sorted(comb,key=cost_for_sort)
 	return sorted_list
-
 
 
 

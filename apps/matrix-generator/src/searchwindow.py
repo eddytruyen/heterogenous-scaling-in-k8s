@@ -1,7 +1,7 @@
 import math
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c,cpu,mem, cpu_is_dominant, nodes, alphabet):
+	def __init__(self, coef_a, coef_b, coef_c,cpu,mem, cpu_is_dominant, nodes):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
@@ -9,7 +9,6 @@ class ScalingFunction:
 		self.Cpu = cpu
 		self.Mem = mem
 		self.Nodes = nodes
-		self.Alphabet=alphabet
 		self.CpuIsDominant = cpu_is_dominant 
 
 
@@ -22,7 +21,7 @@ class ScalingFunction:
 	def derivative(self,x1,x2):
 		return (self.eval(x2)-self.eval(x1))/(x2-x1)
 
-	def target(self,slo,tenants,element_nb):
+	def target(self,slo,tenants):
 		y=self.eval(tenants)
 		print(y)
 		dict={}
@@ -36,8 +35,6 @@ class ScalingFunction:
                                 "cpu": math.ceil((tenants*math.log(self.Cpu,tenants+1)*y)/slo),
                                 "memory": math.ceil((tenants*self.Mem*y)/slo)
                         }
-
-		self.Alphabet['elements'][element_nb-1]={'size': dict}
 		return dict
 
 class AdaptiveWindow:
