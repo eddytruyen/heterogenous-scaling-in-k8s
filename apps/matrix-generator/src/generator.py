@@ -3,7 +3,7 @@ from .parser import ConfigParser
 from .experiment import SLAConfigExperiment
 from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
-from .searchwindow import AdaptiveWindow
+from .searchwindow import AdaptiveWindow, ScalingFunction
 from functools import reduce
 
 THRESHOLD = -1
@@ -11,6 +11,8 @@ NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=1.0
+NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
+
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -26,6 +28,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
+		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,NODES,alphabet)
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
@@ -54,26 +57,42 @@ def generate_matrix(initial_conf):
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
 			result=find_optimal_result(workers,results)
-			remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
-			if result:
-				d[sla['name']][str(tenant_nb)]=result
-				tenant_nb+=1
-				retry_attempt=0
-				next_conf=get_conf(workers, result)
-				new_window=window
-			else:
-				print("NO RESULT")
+			if sla.slos['completionTime'] >  result["completionTime"] * 1.20:
+				workerdict = scalingFunction.target(tenant_nb, 1)
+				worker[1].scale(workerdict['cpu'],workerdict['memory'])
+				lst=sort_configs(lst,combinations)
 				result={}
-				retry_attempt+=nr_of_experiments
+ 				retry_attempt+=nr_of_experiments
 				new_window=window
 				if tenant_nb > 1:
 					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-					print([utils.array_to_str(el) for el in lst])
-					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+                                        print([utils.array_to_str(el) for el in lst])
+                                        new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+
 				next_conf=lst[0]
+			else:
+				remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
+				if result:
+					d[sla['name']][str(tenant_nb)]=result
+					tenant_nb+=1
+					retry_attempt=0
+					next_conf=get_conf(workers, result)
+					new_window=window
+				else:
+					print("NO RESULT")
+					result={}
+					retry_attempt+=nr_of_experiments
+					new_window=window
+					if tenant_nb > 1:
+						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+						print([utils.array_to_str(el) for el in lst])
+						new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+					next_conf=lst[0]
 			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+
+
 
 def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, window):
 		if optimal_conf:
@@ -212,6 +231,7 @@ def sort_configs(workers,combinations):
 
 	sorted_list=sorted(combinations, key=cost_for_sort)
 	return sorted_list
+
 
 
 def _sort(workers,base):

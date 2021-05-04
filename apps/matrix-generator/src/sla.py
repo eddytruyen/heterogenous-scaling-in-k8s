@@ -17,3 +17,7 @@ class WorkerConf:
 	def setReplicas(self, min_replicas, max_replicas):
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
+
+        def scale(self, cpu, memory):
+                self.cpu = cpu
+                self.memory = memory
