@@ -10,14 +10,14 @@ class ExperimentAnalizer:
 	def analyzeExperiment(self):
 		content=utils.readFile(self.exp_path+ '/report.csv')
 		results=[line.replace('#','') for line in content.split('\n') if line.strip() != '']
-		header=results[0]
+		header=results[0].replace("best score", "best_score")
 		runs=results[1:]
 		values=[]
 		score_index=header.index('score')
 
 		for run in runs:
 			d={}
-			for h,v in zip(header[:score_index+5].split(),run[:score_index+1].split()):
+			for h,v in zip(header.split(),run.split()):
 				d[h]=v
 			values.append(d)  
 

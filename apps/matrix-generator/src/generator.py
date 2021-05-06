@@ -28,7 +28,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,True,NODES)
+		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,14,True,NODES)
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
@@ -59,32 +59,55 @@ def generate_matrix(initial_conf):
 			result=find_optimal_result(workers,results)
 			remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
 			print(result)
-			if result and sla['slos']['completionTime'] > result['CompletionTime'] * 1.20:
+			slo=float(sla['slos']['completionTime'])
+			metric=float(result['CompletionTime'])
+			print(metric)
+			print(slo)
+			if result and slo > metric * 1.20:
 				print("NO COST EFFECTIVE RESULT")
-				result={}
-				retry_attempt+=nr_of_experiments
-				new_window=window
 			#	if tenant_nb > 1:
 			#		previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 			#		print([utils.array_to_str(el) for el in lst])
 			#		new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
 			#	else:
-				totalcost = scalingFunction.target(tenant_nb)
+				totalcost = scalingFunction.target(metric,tenant_nb)
+				print("predicted total cost")
+				print(totalcost)
 				opt_conf=get_conf(workers, result)
-				new_workers=copy(workers)
-				diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] - 1  
-				worker_index=0
-				while diff > 0 and worker_index < len(workers):
-					scalingFunction.scale_worker_down(new_workers, len(workers)-worker_index, 1) 
-					diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] + totalcost['memory'] -1
-				workers=new_workers
-				lst=sort_configs(workers,lst)
-				next_conf=lst[0]
+				new_workers=workers[:]
+				diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] - 1
+				print("difference between resource_cost optimal conf and predicted total cost -1")
+				print(diff)  
+				worker_index=1
+				while diff > 0 and worker_index <= len(workers):
+					if not workers[len(workers)-worker_index].isFlagged():
+						scalingFunction.scale_worker_down(new_workers, len(workers)-worker_index, 1)
+						diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
+					worker_index += 1
+				if different_workers(workers, new_workers):
+					print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
+					workers=new_workers
+					for w in workers:
+						print(w.cpu,w.memory)
+					retry_attempt+=nr_of_experiments
+					new_window=adaptive_window.get_current_window()
+					lst=sort_configs(workers,lst)
+					next_conf=lst[0]
+					result={}
+				else:
+					print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
+					d[sla['name']][str(tenant_nb)]=result
+					tenant_nb+=1
+					retry_attempt=0
+					next_conf=get_conf(workers, result)
+					flag_workers(workers,next_conf)
+					new_window=window
 			elif result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
 				retry_attempt=0
 				next_conf=get_conf(workers, result)
+				flag_workers(workers,next_conf)
 				new_window=window
 			else:
 				print("NO RESULT")
@@ -99,6 +122,21 @@ def generate_matrix(initial_conf):
 			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+
+
+def different_workers(workersA, workersB):
+	if len(workersA) != len(workersB):
+		return False
+	for a,b in zip(workersA,workersB):
+		if not a.equals(b):
+			return False
+	return True
+
+
+def flag_workers(workers, conf):
+	for k,v in conf:
+		if v>0:
+			workers[k].flag()
 
 
 

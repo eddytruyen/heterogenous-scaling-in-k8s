@@ -15,8 +15,9 @@ class ScalingFunction:
 	def maximum(self,x1,x2):
 		fprojection=[self.eval(x) for x in range(x1,x2+1,1)]
 		fprojectionmax=max(fprojection)
-		fdomainmax=fprojection.reverse().index(fprojectionmax)
-		return [fdomainmax,fprojectionmax]
+		fprojection.reverse()
+		fdomainmax=fprojection.index(fprojectionmax)
+		return [x2-fdomainmax,fprojectionmax]
 
 	def minimum(self,x1,x2):
                 fprojection=[self.eval(x) for x in range(x1,x2+1,1)]
@@ -38,22 +39,21 @@ class ScalingFunction:
 
 	def target(self,slo,tenants):
 		y=self.eval(tenants)
-		print(y)
 		dict={}
 		if self.CpuIsDominant:
 			dict = {
-				"cpu": math.ceil((tenants*self.Cpu*y)/slo), 
+				"cpu": int((tenants*self.Cpu*y)/slo), 
 				"memory": math.ceil((tenants*math.log(self.Mem,tenants+1)*y)/slo)
 			}
 		else:
                         dict = {
                                 "cpu": math.ceil((tenants*math.log(self.Cpu,tenants+1)*y)/slo),
-                                "memory": math.ceil((tenants*self.Mem*y)/slo)
+                                "memory": int((tenants*self.Mem*y)/slo)
                         }
 		return dict
 
 
-	def scale_worker_down(workers, worker_index, nb_of_units):
+	def scale_worker_down(self, workers, worker_index, nb_of_units):
 		worker=workers[worker_index]
 		if self.CpuIsDominant:
 			worker.scale(worker.cpu-nb_of_units,worker.memory)
@@ -61,7 +61,7 @@ class ScalingFunction:
 			worker.scale(worker.cpu, worker.memory-nb_of_units)
 		return workers
 
-	def scale_worker_up(workers, worker_index, nb_of_units):
+	def scale_worker_up(self,workers, worker_index, nb_of_units):
                 worker=workers[worker_index]
                 if self.CpuIsDominant:
                         worker.scale(worker.cpu+nb_of_units,worker.memory)
