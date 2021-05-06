@@ -31,11 +31,13 @@ config_data = yaml.safe_load(open(CONFIG_FILE))
 
 
 def generate_matrix():
-	generate_matrix2(config_data)
-#	nodes=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
-#	f=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,nodes)
-#	print(f.target(150,1))
-#	max=f.maximum(1,10)
+#	generate_matrix2(config_data)
+	nodes=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
+	f=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,14,nodes,True)
+	print(f.eval(1))
+	print(f.target(250,1))
+	max=f.maximum(2,3)
+	print(max)
 #	min=f.minimum(1,10)
 #	range=max-min
 	#for x in range(1,10,1):
