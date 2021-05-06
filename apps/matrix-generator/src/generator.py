@@ -28,7 +28,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,NODES)
+		scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,2,True,NODES)
 		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
@@ -58,29 +58,27 @@ def generate_matrix(initial_conf):
 					results.append(res)
 			result=find_optimal_result(workers,results)
 			remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window())
-			if result and sla.slos['completionTime'] >  result["completionTime"] * 1.20:
-				print("NO COST EFFECTIVE  RESULT")
-				workerdict = scalingFunction.target(tenant_nb)
-				worker[1].scale(workerdict['cpu'],workerdict['memory'])
-				lst=sort_configs(lst,combinations)
+			print(result)
+			if result and sla['slos']['completionTime'] > result['CompletionTime'] * 1.20:
+				print("NO COST EFFECTIVE RESULT")
 				result={}
 				retry_attempt+=nr_of_experiments
 				new_window=window
-				if tenant_nb > 1:
-					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-					print([utils.array_to_str(el) for el in lst])
-					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
-				else:
-					totalcost = scalingFunction.target(tenant_nb)
-					opt_conf=get_conf(workers, result)
-					new_workers=copy(workers)
-					diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] 2 
-					worker_index=0
-					while diff > 0 and worker_index < len(workers):
-						new_workers[len(workers)-worker_index].scale(workers[len(workers)-worker_index].cpu-1,workers[len(workers)-worker_index].memory-1)
-						diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] + totalcost['memory']
-						
-					
+			#	if tenant_nb > 1:
+			#		previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+			#		print([utils.array_to_str(el) for el in lst])
+			#		new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+			#	else:
+				totalcost = scalingFunction.target(tenant_nb)
+				opt_conf=get_conf(workers, result)
+				new_workers=copy(workers)
+				diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] - 1  
+				worker_index=0
+				while diff > 0 and worker_index < len(workers):
+					scalingFunction.scale_worker_down(new_workers, len(workers)-worker_index, 1) 
+					diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] + totalcost['memory'] -1
+				workers=new_workers
+				lst=sort_configs(workers,lst)
 				next_conf=lst[0]
 			elif result:
 				d[sla['name']][str(tenant_nb)]=result
