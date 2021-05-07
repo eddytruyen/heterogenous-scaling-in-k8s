@@ -4,9 +4,11 @@
 x=`pwd`
 cd Results/$1/$2/
 rm results*.json
+for i in `find . | grep 'results.*-srt'`; do echo "removing $i"; rm $i; done
+for i in `find . | grep 'results\.json.*-cr'`; do echo "removing $i"; rm $i; done
 find . | grep results.json > files
-for i in `cat files`; do sed -z 's;false}},{"bench;false}}\n{"bench;g' $i | sed -z 's;true}},{"bench;true}}\n{"bench;g' > $i-cr ; done
-for i in `cat files`; do sort $i-cr -o $i-srt; done
+for i in `cat files`; do echo "cutting $i"; sed -z 's;false}},{"bench;false}}\n{"bench;g' $i | sed -z 's;true}},{"bench;true}}\n{"bench;g' > $i-cr ; done
+for i in `cat files`; do echo "sorting $i"; sort $i-cr -o $i-srt; done
 y=$(head -n 1 files)
 cat $y-srt > results1.json
 sed -i 1d files
