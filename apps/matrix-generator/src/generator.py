@@ -44,6 +44,7 @@ def generate_matrix(initial_conf):
 		d[sla['name']]={}
 		tenant_nb=1
 		retry_attempt=0
+		start=0
 		while tenant_nb <= sla['maxTenants']:
 			results=[]
 			nr_of_experiments=len(next_exp)
@@ -64,7 +65,7 @@ def generate_matrix(initial_conf):
 			slo=float(sla['slos']['completionTime'])
 			print(slo)
 			if result and slo > float(result['CompletionTime']) * 1.15:
-				remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window(),False)
+				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),False)
 				metric=float(result['CompletionTime'])
 				print(metric)
 				print("NO COST EFFECTIVE RESULT")
@@ -95,7 +96,9 @@ def generate_matrix(initial_conf):
 					retry_attempt+=nr_of_experiments
 					result={}
 					new_window=window
+					start=0
 					lst=sort_configs(workers,lst)
+					next_conf=lst[0]
 					if tenant_nb > 1:
 						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 						print("Moving filtered samples in sorted combinations after the window")
@@ -105,7 +108,7 @@ def generate_matrix(initial_conf):
 						print([utils.array_to_str(el) for el in lst])
 						next_conf=lst[start_and_window[0]]
 						new_window=start_and_window[1]
-					next_conf=lst[0]
+						start=start_and_window[0]
 				else:
 					print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
 					d[sla['name']][str(tenant_nb)]=result
@@ -114,8 +117,9 @@ def generate_matrix(initial_conf):
 					next_conf=get_conf(workers, result)
 					flag_workers(workers,next_conf)
 					new_window=window
+					start=lst.index(next_conf)
 			elif result:
-				remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window(),True)
+				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),True)
 				metric=float(result['CompletionTime'])
 				print(metric)
 				d[sla['name']][str(tenant_nb)]=result
@@ -124,9 +128,10 @@ def generate_matrix(initial_conf):
 				next_conf=get_conf(workers, result)
 				flag_workers(workers,next_conf)
 				new_window=window
+				start=lst.index(next_conf)
 			else:
 				print("NO RESULT")
-				remove_failed_confs(lst, workers, results, get_conf(workers, result), adaptive_window.get_current_window(),True)
+				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),True)
 				result={}
 				retry_attempt+=nr_of_experiments
 				new_window=window
@@ -144,7 +149,7 @@ def generate_matrix(initial_conf):
 					new_window=start_and_window[1]
 			for w in workers:
 				w.untest()
-			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,start,new_window,False))
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
