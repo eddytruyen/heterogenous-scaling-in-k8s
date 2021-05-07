@@ -19,3 +19,6 @@ sed  -z 's;false}}\]\n\[{"bench;false}},{"bench;g' results2.json |  sed -z 's;tr
 sed  -z 's;false}}\n\[{"bench;false}},{"bench;g' results3.json |  sed -z 's;true}}\n\[{"bench;true}},{"bench;g' > results2.json
 sed  -z 's;false}}\]\n{"bench;false}},{"bench;g' results2.json |  sed -z 's;true}}\]\n{"bench;true}},{"bench;g' > results3.json
 cd $x
+echo "Moving results to /tmp/matrix-generator-results"
+rm -r /tmp/matrix-generator-results/*
+mv Results/$1/$2/* /tmp/matrix-generator-results
