@@ -1,20 +1,24 @@
 from . import utils
 
 class ConfigParser:
-	def __init__(self, optimizer, util_func, slas, chart_dir, samples, output,  configs, minimum_replicas, maximum_replicas, prev_results=None):
+	def __init__(self, optimizer, util_func, slas, chart_dir, samples, sampling_rate, output,  configs, minimum_replicas, maximum_replicas, prev_results=None):
 		self.optimizer = optimizer
 		self.prev_results = prev_results
 		self.util_func = util_func
 		self.slas = slas
 		self.chart_dir = chart_dir
-		self.samples=samples
-		self.iterations=1
-	#	if samples%2 == 0:
-	#		self.samples=2
-	#		self.iterations=int(samples/2)
-	#	elif samples%3 == 0:
-	#		self.samples=3
-	#		self.iterations=int(samples/3)
+		if sampling_rate == 1.0:
+			self.samples=samples
+			self.iterations=1
+		elif samples%2 == 0:
+			self.samples=2
+			self.iterations=int(samples/2)
+		elif samples%3 == 0:
+			self.samples=3
+			self.iterations=int(samples/3)
+		else:
+			self.samples=samples
+			self.iterations=1
 		self.output = output
 		self.maximum_replicas = maximum_replicas
 		self.minimum_replicas = minimum_replicas

@@ -9,7 +9,9 @@ class ScalingFunction:
 		self.Cpu = cpu
 		self.Mem = mem
 		self.Nodes = nodes
-		self.CpuIsDominant = cpu_is_dominant 
+		self.CpuIsDominant = cpu_is_dominant
+		self.WorkersScaleDown = [] 
+		self.WorkersScaleUp = []
 
 
 	def maximum(self,x1,x2):
@@ -54,19 +56,43 @@ class ScalingFunction:
 
 
 	def scale_worker_down(self, workers, worker_index, nb_of_units):
+		if not self.scaleWorkersDown:
+			self.scaleWorkersDown=[0 for w in workers]
 		worker=workers[worker_index]
+		self.scaleWorkersDown[worker_index]+=1
+		scaleSecondaryResource=False
+		if scaleWorkersDown[worker_index] % 2 == 0:
+			scaleSecondaryResource=True
 		if self.CpuIsDominant:
-			worker.scale(worker.cpu-nb_of_units,worker.memory)
+			if scaleSecondaryResource:
+				worker.scale(worker.cpu-nb_of_units,worker.memory-1)
+			else
+				worker.scale(worker.cpu-nb_of_units,worker.memory)
 		else:
-			worker.scale(worker.cpu, worker.memory-nb_of_units)
+			if scaleSecondaryResource:
+				worker.scale(worker.cpu-1, worker.memory-nb_of_units)
+			else:
+				worker.scale(worker.cpu, worker.memory-nb_of_units)
 		return workers
 
-	def scale_worker_up(self,workers, worker_index, nb_of_units):
-                worker=workers[worker_index]
+	def scale_worker_up(self, workers, worker_index, nb_of_units):
+                if not self.scaleWorkersUp:
+			self.scaleWorkersUp=[0 for w in workers]
+		worker=workers[worker_index]
+		self.scaleWorkersUp[worker_index]+=1
+		scaleSecondaryResource=False
+		if scaleWorkersUp[worker_index] % 2 == 0:
+                        scaleSecondaryResource=True
                 if self.CpuIsDominant:
-                        worker.scale(worker.cpu+nb_of_units,worker.memory)
+                        if scaleSecondaryResource:
+                                worker.scale(worker.cpu+nb_of_units,worker.memory+1)
+                        else
+                                worker.scale(worker.cpu+nb_of_units,worker.memory)
                 else:
-                        worker.scale(worker.cpu, worker.memory+nb_of_units)
+                        if scaleSecondaryResource:
+                                worker.scale(worker.cpu+1, worker.memory+nb_of_units)
+                        else:
+                                worker.scale(worker.cpu, worker.memory+nb_of_units)
                 return workers
 
 
