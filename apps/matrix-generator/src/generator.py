@@ -12,6 +12,7 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
+OPT_IN_FOR_RESTART=False
 
 
 def generate_matrix(initial_conf):
@@ -55,9 +56,11 @@ def generate_matrix(initial_conf):
 					samples=1
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(res)
-			tag_tested_workers(workers, results)
 			result=find_optimal_result(workers,results)
-			print(result)
+			if result:
+				tag_tested_workers(workers,get_conf(workers,result))
+				print("RESULT FOUND")
+				print(get_conf(workers,result))
 			slo=float(sla['slos']['completionTime'])
 			print(slo)
 			if result and slo > float(result['CompletionTime']) * 1.15:
@@ -80,7 +83,7 @@ def generate_matrix(initial_conf):
 				worker_index=1
 				L=len(workers)
 				while diff > 0 and worker_index <= len(workers):
-					if not workers[L-worker_index].isFlagged() and workers[L-worker_index].isTested() and  workers[L-worker_index].cpu > 1 and  workers[L-worker_index].memory > 1:
+					if not (workers[L-worker_index].isFlagged() and not OPT_IN_FOR_RESTART) and workers[L-worker_index].isTested() and  workers[L-worker_index].cpu > 1 and  workers[L-worker_index].memory > 1:
 						scalingFunction.scale_worker_down(new_workers, len(workers)-worker_index, 1)
 						diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
 					worker_index += 1
@@ -95,9 +98,12 @@ def generate_matrix(initial_conf):
 					lst=sort_configs(workers,lst)
 					if tenant_nb > 1:
 						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-                                        	print("Moving filtered samples in sorted combinations after the window")
+						print("Moving filtered samples in sorted combinations after the window")
+						print([utils.array_to_str(el) for el in lst])
 						start_and_window=filter_samples(lst, workers,get_conf(workers, previous_tenant_result), 0, window)
-	                                        next_conf=lst[start_and_window[0]]
+						print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+						print([utils.array_to_str(el) for el in lst])
+						next_conf=lst[start_and_window[0]]
 						new_window=start_and_window[1]
 					next_conf=lst[0]
 				else:
@@ -124,16 +130,21 @@ def generate_matrix(initial_conf):
 				result={}
 				retry_attempt+=nr_of_experiments
 				new_window=window
+				next_conf=lst[0]
+				start=0
 				if tenant_nb > 1:
 					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 					print("Moving filtered samples in sorted combinations after the window")
+					print([utils.array_to_str(el) for el in lst])
 					start_and_window=filter_samples(lst,[],get_conf(workers, previous_tenant_result), 0, window)
+					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+					print([utils.array_to_str(el) for el in lst])
 					next_conf=lst[start_and_window[0]]
+					start=start_and_window[0]
 					new_window=start_and_window[1]
-				next_conf=lst[0]
 			for w in workers:
 				w.untest()
-			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
+			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,start,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
@@ -147,6 +158,8 @@ def different_workers(workersA, workersB):
 	return True
 
 def all_flagged_conf(workers, conf):
+	if not (workers and conf):
+		return False
 	for w,c in zip(workers, conf):
 		if not w.isFlagged() and c > 0:
 			return False
@@ -167,10 +180,9 @@ def tag_tested_workers(workers, conf):
                         workers[k].tested()
 
 
-def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, window,optimal_conf_is_cost_effective):
+
+def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, start, window,optimal_conf_is_cost_effective):
 		if optimal_conf and optimal_conf_is_cost_effective:
-			print("Optimal Result")
-			print(optimal_conf)
 			tmp_combinations=sort_configs(workers,sorted_combinations)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
@@ -180,9 +192,9 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
 		elif not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
-			failed_range=window
+			failed_range=start+window
 			print("Removing all configs in window because no optimal config has been found at all")
-			for i in range(0,failed_range):
+			for i in range(start,failed_range,1):
 				print(sorted_combinations[0])
 				sorted_combinations.remove(sorted_combinations[0])
 		for failed_conf in return_failed_confs(workers,results):
@@ -197,32 +209,18 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, window):
 	new_window=window
 	for el in range(start, window):
-		already_moved=False
 		result_conf=sorted_combinations[el-(window-new_window)]
 		qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
 		cost=qualitiesOfSample['cost']
 		nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-		if workers:
-			if all_flagged_conf(workers, result_conf):
-				print(result_conf)
-				sorted_combinations.remove(result_conf)
-				sorted_combinations.insert(window+el-1,result_conf)
-				already_moved=True
-				new_window-=1
-		if cost > MAXIMUM_TRANSITION_COST:
+		if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
 			print(result_conf)
 			sorted_combinations.remove(result_conf)
-			sorted_combinations.insert(window+el-1,result_conf)
-			already_moved=True
+			sorted_combinations.insert(new_window+el-1,result_conf)
 			new_window-=1
-		if nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
-			if not already_moved:
-				print(result_conf)
-				sorted_combinations.remove(result_conf)
-				sorted_combinations.insert(window+el-1,result_conf)
-				new_window-=1
+
 	if new_window == 0:
-		return filter_samples(sorted_combinations, previous_tenant_conf, window, window)
+		return filter_samples(sorted_combinations, workers, previous_tenant_conf, window, window)
 	else:
 		return [start, new_window]
 
@@ -253,11 +251,11 @@ def return_failed_confs(workers,results):
 #		return []
 
 
-def tag_tested_workers(workers, results):
-	for r in results:
-		for k,v in enumerate(get_conf(workers, results)):
-			if v > 0:
-				workers[k].tested()
+#def tag_tested_workers(workers, results):
+#	for r in results:
+#		for k,v in enumerate(get_conf(workers, r)):
+#			if v > 0:
+#				workers[k].tested()
 
 
 def find_optimal_result(workers,results):
