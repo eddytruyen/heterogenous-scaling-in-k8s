@@ -16,6 +16,9 @@ class WorkerConf:
 		self._flag = False
 		self._tested = False
 
+	def clone(self):
+		return WorkerConf(self.worker_id, self.cpu, self.memory, self.min_replicas, self.max_replicas)
+
 	def setReplicas(self, min_replicas, max_replicas):
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas

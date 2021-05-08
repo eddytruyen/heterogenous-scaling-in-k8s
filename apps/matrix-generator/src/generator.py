@@ -77,7 +77,7 @@ def generate_matrix(initial_conf):
 				print("predicted total cost")
 				print(totalcost)
 				opt_conf=get_conf(workers, result)
-				new_workers=workers[:]
+				new_workers=[w.clone() for w in workers]
 				diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] - 1
 				print("difference between resource_cost optimal conf and predicted total cost -1")
 				print(diff)  
@@ -85,10 +85,11 @@ def generate_matrix(initial_conf):
 				L=len(workers)
 				while diff > 0 and worker_index <= len(workers):
 					if not (workers[L-worker_index].isFlagged() and not OPT_IN_FOR_RESTART) and workers[L-worker_index].isTested() and  workers[L-worker_index].cpu > 1 and  workers[L-worker_index].memory > 1:
-						scalingFunction.scale_worker_down(new_workers, len(workers)-worker_index, 1)
+						print("Rescaling worker " + str(L-worker_index))
+						scalingFunction.scale_worker_down(new_workers, L-worker_index, 1)
 						diff=_resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
 					worker_index += 1
-				if different_workers(workers, new_workers):
+				if not equal_workers(workers, new_workers):
 					print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
 					workers=new_workers
 					for w in workers:
@@ -154,7 +155,7 @@ def generate_matrix(initial_conf):
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 
-def different_workers(workersA, workersB):
+def equal_workers(workersA, workersB):
 	if len(workersA) != len(workersB):
 		return False
 	for a,b in zip(workersA,workersB):
@@ -213,7 +214,7 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, sta
 
 def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, window):
 	new_window=window
-	for el in range(start, window):
+	for el in range(start, start+window):
 		result_conf=sorted_combinations[el-(window-new_window)]
 		qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
 		cost=qualitiesOfSample['cost']
