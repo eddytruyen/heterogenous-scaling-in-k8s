@@ -86,11 +86,11 @@ def generate_matrix(initial_conf):
 				print(diff)  
 				worker_index=1
 				L=len(workers)
-				while diff > 0 and (worker_index <= len(workers) or ScaledDown):
+				while diff > 0 and (worker_index <= len(workers)) and not ScaledDown:
 					wi=L-worker_index
 					if not (workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and isTestable(workers[wi],workers,opt_conf) and workers[wi].cpu > 1 and  workers[wi].memory > 1:
 						print("Rescaling worker " + str(workers[wi].worker_id))
-						if not workers[wi] in failedScalings:
+						if not workers[wi] in FailedScalings:
 							scalingFunction.scale_worker_down(new_workers, wi, 1)
 							diff1 = _resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
 							if diff != diff1:
@@ -98,7 +98,6 @@ def generate_matrix(initial_conf):
 								ScaledDown = True
 						else:
 							print("Passing over worker in previously failed scaling")
-							failedScalings.remove(workers[wi])
 					worker_index += 1
 				if not equal_workers(workers, new_workers):
 					print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
@@ -107,15 +106,13 @@ def generate_matrix(initial_conf):
 						print(w.cpu,w.memory)
 					retry_attempt+=nr_of_experiments
 					result={}
-					new_window=1
-					start=0
 					lst=sort_configs(workers,lst)
-					next_conf=lst[0]
+					previous_tenant_conf=[]
 					if tenant_nb > 1:
-						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+						previous_tenant_conf=get_conf(workers,d[sla['name']][str(tenant_nb-1)])
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst, workers,get_conf(workers, previous_tenant_result), start, window, ScaledDownWorkerIndex)
+					start_and_window=filter_samples(lst, workers,previous_tenant_conf, start, window, ScaledDownWorkerIndex)
 					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 					print([utils.array_to_str(el) for el in lst])
 					next_conf=lst[start_and_window[0]]
@@ -125,7 +122,7 @@ def generate_matrix(initial_conf):
 					print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
 					d[sla['name']][str(tenant_nb)]=result
 					if ScaledDown:
-						failedScalings.pop()
+						FailedScalings=[]
 						ScaledDown=False
 					tenant_nb+=1
 					retry_attempt=0
@@ -136,6 +133,7 @@ def generate_matrix(initial_conf):
 			elif result:
 				if ScaledDown:
 					ScaledDown=False
+					FailedScalings=[]
 				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),True)
 				metric=float(result['CompletionTime'])
 				print(metric)
@@ -149,8 +147,8 @@ def generate_matrix(initial_conf):
 			else:
 				print("NO RESULT")
 				if ScaledDown:
-					failed_scaled_worker=scalingFunction.undo_scale_down(workers)
-					failedScalings.append(failed_scaled_workers)
+					failed_scaled_worker=scalingFunction.undo_scaled_down(workers)
+					FailedScalings.append(failed_scaled_workers)
 					lst=sort_configs(workers,lst)
 					ScaledDown=False
 				else:
@@ -190,12 +188,13 @@ def isTestable(worker, workers, conf):
 		return True
 	else:
 		w = smallest_worker_of_conf(workers,conf)
+		print("Smallest worker of conf" + str(w.worker_id))
 		return worker.worker_id >= w.worker_id
 
 
 def smallest_worker_of_conf(workers, conf):
-	conf.reverse()
-	for k,v in enumerate(conf):
+	for k,v in enumerate(reversed(conf)):
+		print(v)
 		if v > 0:
 			return workers[len(workers)-k-1]
 
@@ -239,7 +238,7 @@ def tag_tested_workers(workers, conf):
 
 
 def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, start, window,optimal_conf_is_cost_effective):
-		if optimal_conf and optimal_conf_is_cost_effective:
+		if optimal_conf:
 			tmp_combinations=sort_configs(workers,sorted_combinations)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
@@ -266,31 +265,31 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, sta
 def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, window, ScaledDownWorkerIndex=-1):
 	new_window=window
 	for el in range(start, start+window):
+		result_conf=sorted_combinations[el-(window-new_window)]
 		if previous_tenant_conf:
-			result_conf=sorted_combinations[el-(window-new_window)]
 			qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
 			cost=qualitiesOfSample['cost']
 			nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
 			minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
-			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, conf, ScaledDownWorkerIndex):
+			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledDownWorkerIndex):
 				print(result_conf)
 				sorted_combinations.remove(result_conf)
-				if window > 1:
-					sorted_combinations.insert(start+new_window+el-1,result_conf)
-				elif window == 1:
-					sorted_combinations.insert(start+new_window+el,result_conf)
+				#if window > 1:
+				sorted_combinations.insert(start+new_window+el-1,result_conf)
+				#elif window == 1:
+				#	sorted_combinations.insert(start+new_window+el,result_conf)
 				new_window-=1
-		elif not involves_worker(workers, conf, ScaledDownWorkerIndex):
+		elif not involves_worker(workers, result_conf, ScaledDownWorkerIndex):
 			print(result_conf)
 			sorted_combinations.remove(result_conf)
-			if window > 1:
-                		sorted_combinations.insert(start+new_window+el-1,result_conf)
-			elif window == 1:
-				sorted_combinations.insert(start+new_window+el,result_conf)
+			#if window > 1:
+			sorted_combinations.insert(start+new_window+el-1,result_conf)
+			#elif window == 1:
+			#	sorted_combinations.insert(start+new_window+el,result_conf)
 			new_window-=-1
 
 	if new_window == 0:
-		return filter_samples(sorted_combinations, workers, previous_tenant_conf, start+window, window)
+		return filter_samples(sorted_combinations, workers, previous_tenant_conf, start+window, window, ScaledDownWorkerIndex)
 	else:
 		return [start, new_window]
 
