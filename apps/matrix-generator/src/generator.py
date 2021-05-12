@@ -68,7 +68,15 @@ def generate_matrix(initial_conf):
 			slo=float(sla['slos']['completionTime'])
 			print(slo)
 			if result and slo > float(result['CompletionTime']) * 1.15:
-				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),False)
+				failed_scaled_worker=None
+				if ScaledDown:
+                                        failed_scaled_worker=scalingFunction.undo_scaled_down(workers)
+                                        ScaledDownWorkerIndex=-1
+                                        FailedScalings.append(failed_scaled_worker.worker_id)
+                                        lst=sort_configs(workers,lst)
+                                        ScaledDown=False
+				else:
+					remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),False)
 				metric=float(result['CompletionTime'])
 				print(metric)
 				print("NO COST EFFECTIVE RESULT")
@@ -81,25 +89,27 @@ def generate_matrix(initial_conf):
 				print(totalcost)
 				opt_conf=get_conf(workers, result)
 				new_workers=[w.clone() for w in workers]
+				for w in workers:
+                                                print(w.cpu,w.memory)
 				diff=_resource_cost(workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] - 1
 				print("difference between resource_cost optimal conf and predicted total cost -1")
 				print(diff)  
+				print([utils.array_to_str(el) for el in lst])
 				worker_index=1
 				L=len(workers)
 				while diff > 0 and (worker_index <= len(workers)) and not ScaledDown:
 					wi=L-worker_index
 					if not (workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and isTestable(workers[wi],workers,opt_conf) and workers[wi].cpu > 1 and  workers[wi].memory > 1:
-						print("Rescaling worker " + str(workers[wi].worker_id))
-						if not workers[wi] in FailedScalings:
+						if not workers[wi].worker_id in FailedScalings:
 							scalingFunction.scale_worker_down(new_workers, wi, 1)
-							diff1 = _resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
-							if diff != diff1:
-								ScaledDownWorkerIndex=wi
-								ScaledDown = True
+							diff = _resource_cost(new_workers, opt_conf) - totalcost['cpu'] - totalcost['memory'] -1
+							print("Rescaling worker " + str(workers[wi].worker_id))
+							ScaledDownWorkerIndex=workers[wi].worker_id-1
+							ScaledDown = True
 						else:
 							print("Passing over worker in previously failed scaling")
 					worker_index += 1
-				if not equal_workers(workers, new_workers):
+				if ScaledDown and not equal_workers(workers, new_workers):
 					print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
 					workers=new_workers
 					for w in workers:
@@ -120,10 +130,13 @@ def generate_matrix(initial_conf):
 					start=start_and_window[0]
 				else:
 					print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
+					if failed_scaled_worker:
+						scalingFunction.scale_worker_down(workers, failed_scaled_worker.worker_id-1, 1)
+						lst=sort_configs(workers,lst)
+					ScaledDownWorkerIndex=-1
 					d[sla['name']][str(tenant_nb)]=result
-					if ScaledDown:
-						FailedScalings=[]
-						ScaledDown=False
+					FailedScalings=[]
+					ScaledDown=False
 					tenant_nb+=1
 					retry_attempt=0
 					next_conf=get_conf(workers, result)
@@ -133,7 +146,8 @@ def generate_matrix(initial_conf):
 			elif result:
 				if ScaledDown:
 					ScaledDown=False
-					FailedScalings=[]
+					ScaledDownWorkerIndex=-1
+				FailedScalings=[]
 				remove_failed_confs(lst, workers, results, get_conf(workers, result), start, adaptive_window.get_current_window(),True)
 				metric=float(result['CompletionTime'])
 				print(metric)
@@ -148,7 +162,8 @@ def generate_matrix(initial_conf):
 				print("NO RESULT")
 				if ScaledDown:
 					failed_scaled_worker=scalingFunction.undo_scaled_down(workers)
-					FailedScalings.append(failed_scaled_workers)
+					ScaledDownWorkerIndex=-1
+					FailedScalings.append(failed_scaled_worker.worker_id)
 					lst=sort_configs(workers,lst)
 					ScaledDown=False
 				else:
@@ -187,8 +202,7 @@ def isTestable(worker, workers, conf):
 	if worker.isTested():
 		return True
 	else:
-		w = smallest_worker_of_conf(workers,conf)
-		print("Smallest worker of conf" + str(w.worker_id))
+		w = largest_worker_of_conf(workers,conf)
 		return worker.worker_id >= w.worker_id
 
 
@@ -205,6 +219,7 @@ def largest_worker_of_conf(workers, conf):
                         return workers[k]
 
 def involves_worker(workers, conf, worker_index):
+	print("SCALING INDEX = " +  str(worker_index))
 	if worker_index < 0 or worker_index >= len(workers):
 		return True
 	if conf[worker_index] > 0:
@@ -238,7 +253,7 @@ def tag_tested_workers(workers, conf):
 
 
 def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, start, window,optimal_conf_is_cost_effective):
-		if optimal_conf:
+		if optimal_conf and optimal_conf_is_cost_effective:
 			tmp_combinations=sort_configs(workers,sorted_combinations)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
