@@ -1,6 +1,11 @@
 import math
 
 MINIMUM_MEMORY=2
+SCALING_DOWN_TRESHOLD=1.15
+UNDO_SCALE_DOWN =  8544343532
+NO_COST_EFFECTIVE_RESULT = 553583943
+COST_EFFECTIVE_RESULT = 50240434322
+NO_RESULT = 9880593853
 
 class ScalingFunction:
 	def __init__(self, coef_a, coef_b, coef_c, cpu, mem, cpu_is_dominant, nodes):
@@ -142,6 +147,64 @@ class ScalingFunction:
 				k=self.workersScaledUp[worker_index]
 				self.workersScaledUp[worker_index]=[k[0]+1, [0] + k[1], [nb_of_units] + k[2]]
 		return workers
+
+
+
+class AdaptiveScaler:
+
+	
+	def __init__(self, scalingFunction):
+		self.ScaledDown = False
+		self.ScalingFunction = scalingFunction
+		self.FailedScalings = []
+		self.ScaledDownWorkerIndex=-1
+		self.failed_scaled_worker=None
+
+	def reset(self):
+		self.FailedScalings = []
+		self.ScaledDownWorkerIndex=-1
+		self.ScaledDown=False
+		self.failed_scaled_worker=None
+
+
+	def validate_result(self,workers,result,conf,slo):
+		self.tag_tested_workers(workers,conf)
+		states = []
+
+		def undo_scale_down():
+                        self.failed_scaled_worker=self.ScalingFunction.undo_scaled_down(workers)
+                        self.ScaledDownWorkerIndex=-1
+                        self.FailedScalings.append(self.failed_scaled_worker.worker_id)
+                        self.ScaledDown=False
+
+
+		if result and slo > float(result['CompletionTime']) * SCALING_DOWN_TRESHOLD:
+			states+=[NO_COST_EFFECTIVE_RESULT]
+			self.failed_scaled_worker=None
+			if self.ScaledDown:
+				states+=[UNDO_SCALE_DOWN]
+				undo_scale_down()
+			return states
+		elif result:
+			if self.ScaledDown:
+				self.ScaledDown=False
+				self.ScaledDownWorkerIndex=-1
+			self.FailedScalings=[]
+			states+=[COST_EFFECTIVE_RESULT]
+			return states
+		else:
+			states += [NO_RESULT]
+			if self.ScaledDown:
+				states+=[UNDO_SCALE_DOWN]	
+				undo_scale_down()
+			return states
+
+
+
+	def tag_tested_workers(self,workers,conf):
+		for k,v in enumerate(conf):
+                	if v > 0:
+                        	workers[k].tested()
 
 
 class AdaptiveWindow:
