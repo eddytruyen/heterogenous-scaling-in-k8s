@@ -10,7 +10,7 @@ THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.75
+SAMPLING_RATE=1.0
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -109,7 +109,7 @@ def generate_matrix(initial_conf):
 			print("New cycle")
 			for w in adaptive_scaler.workers:
 				print(w.cpu, w.memory)
-			states=adaptive_scaler.validate_result(result, conf, slo)
+			states=adaptive_scaler.validate_result(result, get_conf(adaptive_scaler.workers,result), slo)
 			print(states)
 			state=states.pop(0)
 
@@ -165,33 +165,6 @@ def generate_matrix(initial_conf):
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 
-def equal_workers(workersA, workersB):
-	if len(workersA) != len(workersB):
-		return False
-	for a,b in zip(workersA,workersB):
-		if not a.equals(b):
-			return False
-	return True
-
-def isTestable(worker, workers, conf):
-	if worker.isTested():
-		return True
-	else:
-		w = largest_worker_of_conf(workers,conf)
-		return worker.worker_id >= w.worker_id
-
-
-def smallest_worker_of_conf(workers, conf):
-	for k,v in enumerate(reversed(conf)):
-		print(v)
-		if v > 0:
-			return workers[len(workers)-k-1]
-
-
-def largest_worker_of_conf(workers, conf):
-        for k,v in enumerate(conf):
-                if v > 0:
-                        return workers[k]
 
 def involves_worker(workers, conf, worker_index):
 	print("SCALING INDEX = " +  str(worker_index))
@@ -269,14 +242,14 @@ def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, wi
 				#elif window == 1:
 				#	sorted_combinations.insert(start+new_window+el,result_conf)
 				new_window-=1
-		elif not involves_worker(workers, result_conf, ScaledDownWorkerIndex):
+		elif involves_worker(workers, result_conf, ScaledDownWorkerIndex):
 			print(result_conf)
 			sorted_combinations.remove(result_conf)
 			#if window > 1:
 			sorted_combinations.insert(start+new_window+el-1,result_conf)
 			#elif window == 1:
 			#	sorted_combinations.insert(start+new_window+el,result_conf)
-			new_window-=-1
+			new_window-=1
 
 	if new_window == 0:
 		return filter_samples(sorted_combinations, workers, previous_tenant_conf, start+window, window, ScaledDownWorkerIndex)
