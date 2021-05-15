@@ -66,11 +66,14 @@ def generate_matrix(initial_conf):
 				result={}
 				retry_attempt+=nr_of_experiments
 				new_window=window
+				start=0
 				if tenant_nb > 1:
 					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 					print([utils.array_to_str(el) for el in lst])
-					new_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
-				next_conf=lst[0]
+					start_and_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+					start=start_and_window[0]
+					new_window=start_and_window[1]
+				next_conf=lst[start]
 			next_exp=_find_next_exp(lst,workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
@@ -100,32 +103,26 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 				sorted_combinations.remove(failed_conf)
 
 
-
 def filter_samples(sorted_combinations, previous_tenant_conf, start, window):
-	print("Moving filtered samples in sorted combinations after the window")
-	new_window=window
-	for el in range(start, window):
-		already_moved=False
-		result_conf=sorted_combinations[el-(window-new_window)]
-		qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
-		cost=qualitiesOfSample['cost']
-		nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-		if cost > MAXIMUM_TRANSITION_COST:
-			print(result_conf)
-			sorted_combinations.remove(result_conf)
-			sorted_combinations.insert(window+el-1,result_conf)
-			already_moved=True
-			new_window-=1
-		if nb_shrd_replicas < MINIMUM_SHARED_REPLICAS:
-			if not already_moved:
-				print(result_conf)
-				sorted_combinations.remove(result_conf)
-				sorted_combinations.insert(window+el-1,result_conf)
-				new_window-=1
-	if new_window == 0:
-		return filter_samples(sorted_combinations, previous_tenant_conf, window, window)
-	else:
-		return new_window
+        new_window=window
+        for el in range(start, start+window):
+                result_conf=sorted_combinations[el-(window-new_window)]
+                if previous_tenant_conf:
+                        qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
+                        cost=qualitiesOfSample['cost']
+                        nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
+                        minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+                        if cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas:
+                                print(result_conf)
+                                sorted_combinations.remove(result_conf)
+                                sorted_combinations.insert(start+new_window+el-1,result_conf)
+                                new_window-=1
+
+        if new_window == 0:
+                return filter_samples(sorted_combinations, previous_tenant_conf, start+window, window)
+        else:
+                return [start, new_window]
+
 
 
 def get_conf(workers, result):
