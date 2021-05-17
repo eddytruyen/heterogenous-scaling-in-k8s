@@ -42,7 +42,7 @@ def generate_matrix(initial_conf):
                                     elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states2 and states2.pop(0) == REDO_SCALE_DOWN:
-                                                    print("REDOING_LAST_SCALED_DOWN")
+                                                    print("REDOING_LAST_SCALE_DOWN")
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
                                             d[sla['name']][str(tenant_nb)]=result
                                             tenant_nb+=1

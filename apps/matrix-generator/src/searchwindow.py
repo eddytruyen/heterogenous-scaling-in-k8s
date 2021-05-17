@@ -172,11 +172,14 @@ class AdaptiveScaler:
 		self.failed_scaled_worker=None
 		self.workers = workers
 
-	def reset(self):
-		self.FailedScalings = []
-		self.ScaledDownWorkerIndex=-1
-		self.ScaledDown=False
-		self.failed_scaled_worker=None
+	def reset(self, scale_down=True):
+		if scale_down:
+			self.FailedScalings = []
+			self.ScaledDownWorkerIndex=-1
+			self.ScaledDown=False
+			self.failed_scaled_worker=None
+		else:
+			self.ScaleUp=False
 
 
 	def validate_result(self,result,conf,slo):
@@ -276,8 +279,11 @@ class AdaptiveScaler:
 			nonlocal scale_down
 			if scale_down:
 				self.ScalingFunction.scale_worker_down(workers, worker_index, nb_of_scaling_units)
+				self.ScaledDownWorkerIndex=self.workers[wi].worker_id-1
+                                self.ScaledDown = True
 			else:
 				self.ScalingFunction.scale_worker_up(workers, worker_index, nb_of_scaling_units)
+				self.ScaleUp = True
 
 		def redo_scale_action(nb_of_scaling_units):
 			nonlocal scale_down
@@ -307,7 +313,7 @@ class AdaptiveScaler:
 				 	self.ScaledDown = True
 				else:
 					print("Passing over worker in previously failed scaling")
-			worker_index += 1
+ 			worker_index += 1
 		if self.ScaledDown and not equal_workers(self.workers, new_workers):
 			self.workers=new_workers
 			for w in self.workers:
@@ -318,14 +324,24 @@ class AdaptiveScaler:
 			if self.failed_scaled_worker:
 				states+=[REDO_SCALE_DOWN]
 				redo_scale_action(1)
-			self.reset()
+			self.reset(scale_down)
 		return states
 
 	def get_tipped_over_failed_results(self, results, slo):
 		return [r for r in results if float(r['CompletionTime']) > slo and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD]
 
-	def find_cost_effective__tipped_over_result(self, tipped_over_results, tipped_over_confs, self):
-
+	def find_cost_effective_tipped_over_result(self, tipped_over_results, tipped_over_confs, tenant_nb):
+		L = len(tipped_over_confs)
+		conf_index = 0
+		succesfulScaleUp = False
+		while conf_index < L and not SuccessfulScaleUp:
+			states=adaptive_scaler.find_cost_effective_result(tipped_over_confs[conf_index], float(tipped_over_results[conf_index]['CompletionTime']), tenant_nb, scale_down=False)
+			state=states.pop(0)
+			if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
+				lst=lst.sort(adaptive_scaler.workers)
+				return tipped_over_confs[conf_index]
+			elif state == NO_COST_EFFECTIVE_ALTERNATIVE and states and states.pop(0) == REDO_SCALE_DOWN
+				lst=lst.sort(adaptive_scaler.workers)
 class AdaptiveWindow:
 	def __init__(self, initial_window):
 		self.original_window=initial_window
