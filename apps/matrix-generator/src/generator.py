@@ -10,7 +10,7 @@ THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.75
+SAMPLING_RATE=0.5
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -142,7 +142,11 @@ def generate_matrix(initial_conf):
 					print("Previous scale down undone")
 					lst=sort_configs(adaptive_scaler.workers,lst)
 				else:
-					remove_failed_confs(lst, adaptive_scaler.workers, results, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False)
+					tipped_over_results=adaptive_scaler.get_tipped_over_failed_results(results, slo)
+					if tipped_over_results:
+						states=adaptive_scaler.validate_tipped_over_results(tipped_over_results, [get_conf(adaptive_scaler.workers,r) for r in tipped_over_results], slo)
+					else:  
+						remove_failed_confs(lst, adaptive_scaler.workers, results, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False)
 				new_window=window
 				next_conf=lst[0]
 				start=0
