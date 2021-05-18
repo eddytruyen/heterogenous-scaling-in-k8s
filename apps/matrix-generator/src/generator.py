@@ -15,14 +15,19 @@ NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
 def generate_matrix(initial_conf):
 
-	def find_cost_effective_config():
+	def find_cost_effective_config(opt_conf=None):
                                     nonlocal result
-                                    nonlocal metric
+                                    nonlocal slo
                                     nonlocal tenant_nb
                                     nonlocal retry_attempt
                                     nonlocal lst
                                     nonlocal adaptive_scaler
-                                    states2=adaptive_scaler.find_cost_effective_config(get_conf(adaptive_scaler.workers, result), metric, tenant_nb)
+                                    result_found=True if result else False
+                                    if not opt_conf and result:
+                                            opt_conf=get_conf(adaptive_scaler.workers, result)
+                                    elif not opt_conf and not result:
+                                            exit("No result, thus explicit optimal conf needed")
+                                    states2=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, result_found)
                                     state=states2.pop(0)
                                     for w in adaptive_scaler.workers:
                                             print(w.cpu)
@@ -44,12 +49,15 @@ def generate_matrix(initial_conf):
                                             if states2 and states2.pop(0) == REDO_SCALE_DOWN:
                                                     print("REDOING_LAST_SCALED_DOWN")
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
-                                            d[sla['name']][str(tenant_nb)]=result
-                                            tenant_nb+=1
-                                            retry_attempt=0
-                                            next_conf=get_conf(adaptive_scaler.workers, result)
-                                            flag_workers(adaptive_scaler.workers,next_conf)
-                                            return [lst.index(next_conf),window]
+                                            if result_found:
+                                                    d[sla['name']][str(tenant_nb)]=result
+                                                    tenant_nb+=1
+                                                    retry_attempt=0
+                                                    next_conf=get_conf(adaptive_scaler.workers, result)
+                                                    flag_workers(adaptive_scaler.workers,next_conf)
+                                                    return [lst.index(next_conf),window]
+                                            else:
+                                                    return [0, window]
 
 	bin_path=initial_conf['bin']['path']
 	chart_dir=initial_conf['charts']['chartdir']
@@ -141,11 +149,16 @@ def generate_matrix(initial_conf):
 				if states and states.pop(0) == UNDO_SCALE_DOWN:
 					print("Previous scale down undone")
 					lst=sort_configs(adaptive_scaler.workers,lst)
+					start_and_window=find_cost_effective_config(opt_conf=lst[0])
+					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+					start=start_and_window[0]
+					new_window=start_and_window[1]
+					next_conf=lst[start]
 				else:
 					remove_failed_confs(lst, adaptive_scaler.workers, results, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False)
-				new_window=window
-				next_conf=lst[0]
-				start=0
+					new_window=window
+					next_conf=lst[0]
+					start=0
 				result={}
 				retry_attempt+=nr_of_experiments
 				if tenant_nb > 1:

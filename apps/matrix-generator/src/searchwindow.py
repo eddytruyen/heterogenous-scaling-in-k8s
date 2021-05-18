@@ -214,7 +214,7 @@ class AdaptiveScaler:
 				undo_scale_down()
 			return states
 
-	def find_cost_effective_config(self,opt_conf, metric, tenant_nb):
+	def find_cost_effective_config(self,opt_conf, slo, tenant_nb, result_found=True):
 
 		def isTestable(worker, conf):
                       if worker.isTested():
@@ -252,7 +252,7 @@ class AdaptiveScaler:
                       return True
 
 		states=[]
-		totalcost = self.ScalingFunction.target(metric,tenant_nb)
+		totalcost = self.ScalingFunction.target(slo,tenant_nb)
 		new_workers=[w.clone() for w in self.workers]
 		for w in self.workers:
 			print(w.cpu,w.memory)
@@ -280,7 +280,7 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
-			if self.failed_scaled_worker:
+			if self.failed_scaled_worker and result_found:
 				states+=[REDO_SCALE_DOWN]
 				self.ScalingFunction.scale_worker_down(self.workers, self.failed_scaled_worker.worker_id-1, 1)
 			self.reset()
