@@ -10,7 +10,7 @@ THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.5
+SAMPLING_RATE=0.75
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -156,7 +156,8 @@ def generate_matrix(initial_conf):
 					new_window=start_and_window[1]
 					next_conf=lst[start]
 				else:
-					tipped_over_results=adaptive_scaler.get_tipped_over_failed_results(results, slo)
+#					tipped_over_results=adaptive_scaler.get_tipped_over_failed_results(results, slo)
+					tipped_over_results=False
 					if tipped_over_results:
 						states=adaptive_scaler.validate_tipped_over_results(tipped_over_results, [get_conf(adaptive_scaler.workers,r) for r in tipped_over_results], slo)
 					else:  

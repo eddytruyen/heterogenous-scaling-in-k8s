@@ -266,13 +266,13 @@ class AdaptiveScaler:
 		def is_worker_scaleable(worker_index):
 			nonlocal scale_down
 			if scale_down:
-				return self.workers[worker_index].cpu > MINIMUM_CPU if self.CpuIsDominant else self.workers[worker_index].memory > MINIMUM_MEMORY
+				return self.workers[worker_index].cpu > MINIMUM_CPU if self.ScalingFunction.CpuIsDominant else self.workers[worker_index].memory > MINIMUM_MEMORY
 			else:
 				max_cpu = self.ScalingFunction.maxCPU
 				max_mem = self.ScalingFunction.maxMem
 				if self.CpuIsDominant: 
 					return self.workers[worker_index].cpu < max_cpu
-				else
+				else:
 					return self.workers[worker_index].memory < max_mem
 
 		def scale_worker(workers, worker_index, nb_of_scaling_units):
@@ -280,7 +280,7 @@ class AdaptiveScaler:
 			if scale_down:
 				self.ScalingFunction.scale_worker_down(workers, worker_index, nb_of_scaling_units)
 				self.ScaledDownWorkerIndex=self.workers[wi].worker_id-1
-                                self.ScaledDown = True
+				self.ScaledDown = True
 			else:
 				self.ScalingFunction.scale_worker_up(workers, worker_index, nb_of_scaling_units)
 				self.ScaleUp = True
@@ -310,10 +310,10 @@ class AdaptiveScaler:
 					diff = difference(generator.resource_cost(new_workers, opt_conf),totalcost['cpu'] +  totalcost['memory'])
 					print("Rescaling worker " + str(self.workers[wi].worker_id))
 					self.ScaledDownWorkerIndex=self.workers[wi].worker_id-1
-				 	self.ScaledDown = True
+					self.ScaledDown = True
 				else:
 					print("Passing over worker in previously failed scaling")
- 			worker_index += 1
+			worker_index += 1
 		if self.ScaledDown and not equal_workers(self.workers, new_workers):
 			self.workers=new_workers
 			for w in self.workers:
@@ -340,7 +340,7 @@ class AdaptiveScaler:
 			if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
 				lst=lst.sort(adaptive_scaler.workers)
 				return tipped_over_confs[conf_index]
-			elif state == NO_COST_EFFECTIVE_ALTERNATIVE and states and states.pop(0) == REDO_SCALE_DOWN
+			elif state == NO_COST_EFFECTIVE_ALTERNATIVE and states and states.pop(0) == REDO_SCALE_DOWN:
 				lst=lst.sort(adaptive_scaler.workers)
 class AdaptiveWindow:
 	def __init__(self, initial_window):
