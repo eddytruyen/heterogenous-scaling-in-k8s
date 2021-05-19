@@ -22,6 +22,7 @@ def generate_matrix(initial_conf):
                                     nonlocal retry_attempt
                                     nonlocal lst
                                     nonlocal adaptive_scaler
+                                    nonlocal nr_of_experiments
                                     result_found=True if result else False
                                     if not opt_conf and result:
                                             opt_conf=get_conf(adaptive_scaler.workers, result)
@@ -159,18 +160,18 @@ def generate_matrix(initial_conf):
 					new_window=window
 					next_conf=lst[0]
 					start=0
+					if tenant_nb > 1:
+						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+						print("Moving filtered samples in sorted combinations after the window")
+						print([utils.array_to_str(el) for el in lst])
+						start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
+						print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+						print([utils.array_to_str(el) for el in lst])
+						next_conf=lst[start_and_window[0]]
+						start=start_and_window[0]
+						new_window=start_and_window[1]
 				result={}
 				retry_attempt+=nr_of_experiments
-				if tenant_nb > 1:
-					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-					print("Moving filtered samples in sorted combinations after the window")
-					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
-					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-					print([utils.array_to_str(el) for el in lst])
-					next_conf=lst[start_and_window[0]]
-					start=start_and_window[0]
-					new_window=start_and_window[1]
 			for w in adaptive_scaler.workers:
 				w.untest()
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
