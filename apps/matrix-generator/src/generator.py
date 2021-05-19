@@ -48,7 +48,7 @@ def generate_matrix(initial_conf):
                                     elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states2 and states2.pop(0) == REDO_SCALE_DOWN:
-                                                    print("REDOING_LAST_SCALE_DOWN")
+                                                    print("REDOING_LAST_SCALED_DOWN")
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
                                             if result_found:
                                                     d[sla['name']][str(tenant_nb)]=result
@@ -156,25 +156,20 @@ def generate_matrix(initial_conf):
 					new_window=start_and_window[1]
 					next_conf=lst[start]
 				else:
-#					tipped_over_results=adaptive_scaler.get_tipped_over_failed_results(results, slo)
-					tipped_over_results=False
-					if tipped_over_results:
-						states=adaptive_scaler.validate_tipped_over_results(tipped_over_results, [get_conf(adaptive_scaler.workers,r) for r in tipped_over_results], slo)
-					else:  
-						remove_failed_confs(lst, adaptive_scaler.workers, results, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False)
-						new_window=window
-						next_conf=lst[0]
-						start=0
-						if tenant_nb > 1:
-							previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-							print("Moving filtered samples in sorted combinations after the window")
-							print([utils.array_to_str(el) for el in lst])
-							start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
-							print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-							print([utils.array_to_str(el) for el in lst])
-							next_conf=lst[start_and_window[0]]
-							start=start_and_window[0]
-							new_window=start_and_window[1]
+					remove_failed_confs(lst, adaptive_scaler.workers, results, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False)
+					new_window=window
+					next_conf=lst[0]
+					start=0
+					if tenant_nb > 1:
+						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+						print("Moving filtered samples in sorted combinations after the window")
+						print([utils.array_to_str(el) for el in lst])
+						start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
+						print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+						print([utils.array_to_str(el) for el in lst])
+						next_conf=lst[start_and_window[0]]
+						start=start_and_window[0]
+						new_window=start_and_window[1]
 				result={}
 				retry_attempt+=nr_of_experiments
 			for w in adaptive_scaler.workers:
