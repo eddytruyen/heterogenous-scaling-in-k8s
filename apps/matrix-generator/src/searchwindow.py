@@ -277,9 +277,10 @@ class AdaptiveScaler:
 		def difference(conf_cost, total_cost):
                         nonlocal scale_down
                         if scale_down:
-				print("SCALE DOWN")
+                                print("SCALE DOWN DIFF")
                                 return conf_cost-total_cost - 1
                         else:
+                                print("SCALE UP DIFF")
                                 return total_cost + 1 - conf_cost
 
 		def is_worker_scaleable(worker_index):

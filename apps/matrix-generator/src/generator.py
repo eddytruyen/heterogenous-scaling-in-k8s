@@ -24,7 +24,7 @@ def generate_matrix(initial_conf):
                                     nonlocal adaptive_scaler
                                     nonlocal nr_of_experiments
 
-                                    result_found=True if result else False
+                                    only_failed_results=False if result else True
 
                                     def process_states(states, scaling_up=False):
                                         nonlocal result
@@ -59,7 +59,7 @@ def generate_matrix(initial_conf):
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
                                                     print("REDOING_LAST_SCALED_DOWN")
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
-                                            if result_found:
+                                            if not only_failed_results:
                                                     d[sla['name']][str(tenant_nb)]=result
                                                     tenant_nb+=1
                                                     retry_attempt=0
@@ -73,7 +73,7 @@ def generate_matrix(initial_conf):
                                     elif not opt_conf and not result:
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
-                                    states2=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, result_found)
+                                    states2=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, True, only_failed_results)
                                     for w in adaptive_scaler.workers:
                                             print(w.cpu)
                                     start_and_window=process_states(states2)
