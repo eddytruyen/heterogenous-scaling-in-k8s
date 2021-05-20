@@ -23,6 +23,8 @@ def generate_matrix(initial_conf):
                                     nonlocal lst
                                     nonlocal adaptive_scaler
                                     nonlocal nr_of_experiments
+                                    nonlocal adaptive_window
+                                    nonlocal results
 
                                     only_failed_results=False if result else True
 
@@ -59,14 +61,15 @@ def generate_matrix(initial_conf):
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
                                                     print("REDOING_LAST_SCALED_DOWN")
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
-                                            if not only_failed_results:
+                                            if scaling_up and not only_failed_results:
                                                     d[sla['name']][str(tenant_nb)]=result
                                                     tenant_nb+=1
                                                     retry_attempt=0
                                                     next_conf=get_conf(adaptive_scaler.workers, result)
                                                     flag_workers(adaptive_scaler.workers,next_conf)
                                                     return [lst.index(next_conf),window]
-
+                                        else:
+                                                    return []
 
                                     if not opt_conf and result:
                                             opt_conf=get_conf(adaptive_scaler.workers, result)
@@ -79,11 +82,19 @@ def generate_matrix(initial_conf):
                                     start_and_window=process_states(states2)
                                     if start_and_window:
                                            return start_and_window
-                                    if adaptive_scaler.ScalingUpPhase and adaptive_scaler.set_tipped_over_failed_confs(results, slo):
-                                           states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
-                                           return process_states(states, scaling_up=True)
-                                    else:
-                                           return [0, window]
+                                    if adaptive_scaler.ScalingUpPhase:
+                                           if adaptive_scaler.set_tipped_over_failed_confs(results, slo):
+                                                   states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                                   return process_states(states, scaling_up=True)
+                                           else:
+                                                   states3=[NO_COST_EFFECTIVE_ALTERNATIVE]
+                                                   start_and_window=process_states(states3, scaling_up=True)
+                                                   if start_and_window:
+                                                           return start_and_window
+                                                   else:
+                                                           exit("Error in generator.get_start_and_window")
+                                                           #remove_failed_confs(lst, adaptive_scaler.workers, results, opt_conf, start, adaptive_window.get_current_window(),False)
+                                                           #return [0, window]
 
 
 	bin_path=initial_conf['bin']['path']
@@ -256,7 +267,7 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, sta
 			for i in range(start,failed_range,1):
 				print(sorted_combinations[0])
 				sorted_combinations.remove(sorted_combinations[0])
-		for failed_conf in return_failed_confs(workers,results):
+		for failed_conf in return_failed_confs(workers,results, lambda result: float(result['score']) <= THRESHOLD):
 			if failed_conf in sorted_combinations:
 				print("Removing failed conf")
 				print(failed_conf)
@@ -313,9 +324,9 @@ def get_conf(workers, result):
 # 
 
 
-def return_failed_confs(workers,results):
+def return_failed_confs(workers,results, f):
 #	if DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT:
-	failed_results=[result for result in results if float(result['score']) <= THRESHOLD]
+	failed_results=[result for result in results if f(result)]
 	print("Failed results")
 	print(failed_results)
 	return [get_conf(workers,failed_result) for failed_result in failed_results]

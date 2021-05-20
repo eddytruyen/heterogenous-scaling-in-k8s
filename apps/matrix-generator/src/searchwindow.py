@@ -176,6 +176,7 @@ class AdaptiveScaler:
 		self.workers = workers
 		self.tipped_over_confs = []
 		self.current_tipped_over_conf = None
+		self.failed_results=[]
 
 	def reset(self):
 		self.FailedScalings = []
@@ -188,12 +189,11 @@ class AdaptiveScaler:
 		elif self.ScalingUpPhase and (not self.tipped_over_confs):
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
+			self.failed_results = []
 		self.ScaledDown=False
 		self.ScaledUp=False
 
 	def validate_result(self,result,conf,slo):
-		
-
 
 		def undo_scale_action():
 			if self.ScaledUp:
@@ -364,7 +364,11 @@ class AdaptiveScaler:
 
 	def set_tipped_over_failed_confs(self, results, slo):
 		if not self.tipped_over_confs:
-                	self.tipped_over_confs = [generator.get_conf(self.workers,r) for r in generator.sort_results([r for r in results if float(r['CompletionTime']) > slo and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD])]
+                        self.tipped_over_confs = [generator.get_conf(self.workers,r) for r in generator.sort_results([r for r in results if float(r['CompletionTime']) > slo and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD])]
+                        print("TIPPED_OVER_CONFS")
+                        print(self.tipped_over_confs)
+                        if not self.tipped_over_confs:
+                               self.reset()
 		return self.tipped_over_confs
 
 	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
