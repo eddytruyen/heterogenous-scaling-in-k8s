@@ -220,7 +220,7 @@ class AdaptiveScaler:
 			self.failed_scaled_worker=None
 			if self.ScaledDown or self.ScaledUp:
 				states+=[UNDO_SCALE_ACTION]
-				undo_scale_action(True)
+				undo_scale_action(False)
 			return states
 		elif result:
 			if self.ScaledDown:
@@ -236,7 +236,7 @@ class AdaptiveScaler:
 			states += [NO_RESULT]
 			if self.ScaledDown or self.ScaledUp:
 				states+=[UNDO_SCALE_ACTION]
-				undo_scale_action(False)
+				undo_scale_action(True)
 			return states
 
 	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False):
