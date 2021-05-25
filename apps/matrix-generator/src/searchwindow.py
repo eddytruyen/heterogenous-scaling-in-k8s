@@ -1,5 +1,6 @@
 import math
 from . import generator
+from . import utils
 
 MINIMUM_CPU=1
 MINIMUM_MEMORY=2
@@ -81,9 +82,10 @@ class ScalingFunction:
 		worker_index = self.LastScaledDownWorker.pop()
 		scalingRecord=self.workersScaledDown[worker_index]
 		worker=workers[worker_index]
+		worker2=worker.clone()
 		worker.scale(worker.cpu+scalingRecord[1].pop(0), worker.memory+scalingRecord[2].pop(0))
 		scalingRecord[0]-=1
-		return worker
+		return worker2
 
 	def undo_scaled_up(self,workers):
                 if not self.LastScaledUpWorker:
@@ -91,9 +93,10 @@ class ScalingFunction:
                 worker_index = self.LastScaledUpWorker.pop()
                 scalingRecord=self.workersScaledUp[worker_index]
                 worker=workers[worker_index]
+                worker2=worker.clone()
                 worker.scale(worker.cpu-scalingRecord[1].pop(0), worker.memory-scalingRecord[2].pop(0))
                 scalingRecord[0]-=1
-                return worker
+                return worker2
 
 
 	def scale_worker_down(self, workers, worker_index, nb_of_units):
@@ -172,16 +175,16 @@ class AdaptiveScaler:
 		self.ScalingFunction = scalingFunction
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
-		self.failed_scaled_worker=None
+		self.failed_scaled_workers=[]
 		self.workers = workers
 		self.tipped_over_confs = []
 		self.current_tipped_over_conf = None
 		self.failed_results=[]
+		self.initial_confs=[]
 
 	def reset(self):
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
-		self.failed_scaled_worker=None
 		if self.ScalingDownPhase:
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
@@ -190,6 +193,8 @@ class AdaptiveScaler:
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
 			self.failed_results = []
+			self.failed_scaled_workers=[]
+			self.initial_confs=[]
 		self.ScaledDown=False
 		self.ScaledUp=False
 
@@ -202,7 +207,7 @@ class AdaptiveScaler:
 			elif self.ScaledDown:
                                 failed_worker=self.ScalingFunction.undo_scaled_down(self.workers)
                                 if not only_failed_results:
-                                         self.failed_scaled_worker = failed_worker
+                                         self.failed_scaled_workers += [failed_worker]
                                 self.ScaledDown=False
 			self.ScaledWorkerIndex=-1
 			self.FailedScalings.append(failed_worker.worker_id)
@@ -217,7 +222,9 @@ class AdaptiveScaler:
 
 		if result and slo > float(result['CompletionTime']) * SCALING_DOWN_TRESHOLD:
 			states+=[NO_COST_EFFECTIVE_RESULT]
-			self.failed_scaled_worker=None
+			if not self.ScalingUpPhase:
+				self.initial_confs+=[[result,conf]]
+			#self.failed_scaled_workers=[]
 			if self.ScaledDown or self.ScaledUp:
 				states+=[UNDO_SCALE_ACTION]
 				undo_scale_action(False)
@@ -230,6 +237,8 @@ class AdaptiveScaler:
 				self.ScaledUp=False
 				self.ScaledWorkerIndex=-1
 			self.FailedScalings=[]
+			self.failed_scaled_workers=[]
+			self.initial_confs=[]
 			states+=[COST_EFFECTIVE_RESULT]
 			return states
 		else:
@@ -239,7 +248,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True): #only_failed_results=False):
 
 		def isTestable(worker, conf):
                       nonlocal scale_down
@@ -311,10 +320,20 @@ class AdaptiveScaler:
                                 self.ScaledUp = True
 
 
-		def redo_scale_action(nb_of_scaling_units):
-                        nonlocal scale_down
-                        if scale_down:
-                                self.ScalingFunction.scale_worker_down(self.workers, self.failed_scaled_worker.worker_id-1, nb_of_scaling_units)
+		def redo_scale_action():
+			nonlocal scale_down
+			nonlocal opt_conf
+			if not scale_down:
+				worker_confs=[]
+				for w in self.failed_scaled_workers:
+					tmp_workers=[w.clone() for w in self.workers]
+					tmp_workers[w.worker_id-1].cpu=w.cpu
+					tmp_workers[w.worker_id-1].memory=w.memory
+					worker_confs+=[tmp_workers]
+				costs=[generator.resource_cost(w, opt_conf) for w in worker_confs]
+				failed_scaled_worker_index=costs.index(min(costs))
+				self.workers[self.failed_scaled_workers[failed_scaled_worker_index].worker_id-1].cpu=self.failed_scaled_workers[failed_scaled_worker_index].cpu
+				self.workers[self.failed_scaled_workers[failed_scaled_worker_index].worker_id-1].memory=self.failed_scaled_workers[failed_scaled_worker_index].memory
                         #else:
                         #        self.ScalingFunction.scale_worker_up(self.workers, self.failed_scaled_worker.worker_id-1, nb_of_scaling_units)
 
@@ -359,11 +378,28 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
-			if self.failed_scaled_worker and not only_failed_results:
-				states+=[REDO_SCALE_ACTION]
-				redo_scale_action(1)
-			self.reset()
+#			if self.ScalingUpPhase and self.failed_scaled_workers and only_failed_results:
+#				print("YEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSS")
+#				states+=[REDO_SCALE_ACTION]
+#				redo_scale_action()
 		return states
+
+
+
+	def redo_scale_action(self):
+                worker_confs=[]
+                print(self.initial_confs)
+                for k,w in enumerate(self.failed_scaled_workers):
+                        tmp_workers=[w.clone() for w in self.workers]
+                        tmp_workers[w.worker_id-1].cpu=w.cpu
+                        tmp_workers[w.worker_id-1].memory=w.memory
+                        worker_confs+=[tmp_workers]
+                costs=[generator.resource_cost(wcomb[0], wcomb[1][1]) for wcomb in zip(worker_confs,self.initial_confs)]
+                failed_scaled_worker_index=costs.index(min(costs))
+                self.workers[self.failed_scaled_workers[failed_scaled_worker_index].worker_id-1].cpu=self.failed_scaled_workers[failed_scaled_worker_index].cpu
+                self.workers[self.failed_scaled_workers[failed_scaled_worker_index].worker_id-1].memory=self.failed_scaled_workers[failed_scaled_worker_index].memory
+                print("Going back to worker configuration with lowest cost for combination: " + utils.array_to_delimited_str(self.initial_confs[failed_scaled_worker_index]))
+                return self.initial_confs[failed_scaled_worker_index]
 
 
 
@@ -378,16 +414,22 @@ class AdaptiveScaler:
 
 	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
                 conf_index = 0
+                result_and_conf=[]
                 while len(self.tipped_over_confs) > 0:
-                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True)
+                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False) #, only_failed_results=True)
                         copy_of_states=states[:]
                         state=states.pop(0)
                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
                                 self.current_tipped_over_conf=self.tipped_over_confs[conf_index]
-                                return copy_of_states
+                                return [conf,copy_of_states]
                         elif state == NO_COST_EFFECTIVE_ALTERNATIVE:
-                                self.tipped_over_confs.pop(0)
-                return copy_of_states
+                                conf=self.tipped_over_confs.pop(0)
+                if state == NO_COST_EFFECTIVE_ALTERNATIVE:
+                        if self.ScalingUpPhase and self.failed_scaled_workers:
+                                print("YEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSS")
+                                copy_of_states+=[REDO_SCALE_ACTION]
+                                result_and_conf=self.redo_scale_action()
+                return [result_and_conf, copy_of_states]
 
 class AdaptiveWindow:
 	def __init__(self, initial_window):
