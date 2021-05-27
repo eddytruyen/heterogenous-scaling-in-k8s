@@ -9,7 +9,7 @@ from functools import reduce
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=2
+MINIMUM_SHARED_REPLICAS=0.50
 SAMPLING_RATE=0.75
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
@@ -84,18 +84,10 @@ def generate_matrix(initial_conf):
                                                             print([utils.array_to_str(el) for el in lst])
                                                             return start_and_window
                                             else:
-                                                    if adaptive_scaler.set_tipped_over_failed_confs(results, slo):
-                                                            adaptive_scaler.reset()
-                                                            conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
-                                                            return process_states(conf_and_states)
-                                                    else:
-                                                            remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(), False, [])
-                                                            print("Moving filtered samples in sorted combinations after the window")
-                                                            print([utils.array_to_str(el) for el in lst])
-                                                            start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
-                                                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                                                            print([utils.array_to_str(el) for el in lst])
-                                                            return start_and_window
+                                                    adaptive_scaler.reset()
+                                                    adaptive_scaler.set_tipped_over_failed_confs(results, slo)
+                                                    conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                                    return process_states(conf_and_states)
 
                                     if not opt_conf and result:
                                             opt_conf=get_conf(adaptive_scaler.workers, result)
@@ -264,8 +256,10 @@ def flag_workers(workers, conf):
 
 
 
-def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf, start, window,optimal_conf_is_cost_effective, tipped_over_results):
+def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results):
 		if optimal_conf and optimal_conf_is_cost_effective:
+			if tipped_over_results and optimal_conf in tipped_over_results:
+				tipped_over_results.remove(optimal_conf)
 			tmp_combinations=sort_configs(workers,sorted_combinations)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
@@ -303,7 +297,8 @@ def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, wi
 			qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
 			cost=qualitiesOfSample['cost']
 			nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-			minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+			#minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+			minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
 			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
 				print(result_conf)
 				sorted_combinations.remove(result_conf)

@@ -55,3 +55,6 @@ class WorkerConf:
 			return True
 		else:
 			return False
+	def str(self):
+		return_str =  "{workerId=" + str(self.worker_id) + ", cpu=" + str(self.cpu) + ", mem=" + str(self.memory) + ", min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
+		return return_str
