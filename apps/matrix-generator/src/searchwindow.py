@@ -181,12 +181,21 @@ class AdaptiveScaler:
 		self.failed_results=[]
 		self.initial_confs=[]
 
+	def status(self):
+                print("ScalingDownPhase, ScalingUpPhase, Tipped_over_confs, Current_tipped_over_conf, initial_confs")
+                print(self.ScalingDownPhase)
+                print(self.ScalingUpPhase)
+                print(self.tipped_over_confs)
+                print(self.current_tipped_over_conf)
+                print(self.initial_confs)
+
 	def reset(self):
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
 		if self.ScalingDownPhase:
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
+			self.tipped_over_confs = []
 			self.current_tipped_over_conf = None
 		elif self.ScalingUpPhase and (not self.tipped_over_confs):
 			self.ScalingDownPhase = True
@@ -232,6 +241,9 @@ class AdaptiveScaler:
 			elif self.ScaledUp:
 				self.ScaledUp=False
 				self.ScaledWorkerIndex=-1
+			if self.ScalingUpPhase:
+				self.ScalingUpPhase=False
+				self.ScalingDownPhase=True
 			self.FailedScalings=[]
 			self.initial_confs=[]
 			states+=[COST_EFFECTIVE_RESULT]

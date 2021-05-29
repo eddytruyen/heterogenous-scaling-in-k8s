@@ -9,7 +9,7 @@ from functools import reduce
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=0.50
+MINIMUM_SHARED_REPLICAS=0.5
 SAMPLING_RATE=0.75
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
 
@@ -94,10 +94,19 @@ def generate_matrix(initial_conf):
                                     elif not opt_conf and not result:
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
-                                    states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, adaptive_scaler.ScalingDownPhase)
+                                    if adaptive_scaler.ScalingDownPhase:
+                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb)
+                                            for w in adaptive_scaler.workers:
+                                                    print(w.cpu)
+                                            return process_states([[],states])
+                                    elif adaptive_scaler.ScalingUpPhase:
+                                            adaptive_scaler.set_tipped_over_failed_confs(results, slo)
+                                            conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                            for w in adaptive_scaler.workers:
+                                                    print(w.cpu)
+                                            return process_states(conf_and_states) 
                                     for w in adaptive_scaler.workers:
                                             print(w.cpu)
-                                    return process_states([[],states])
 
 
 	bin_path=initial_conf['bin']['path']
@@ -161,8 +170,10 @@ def generate_matrix(initial_conf):
 			states=adaptive_scaler.validate_result(result, get_conf(adaptive_scaler.workers,result), slo)
 			print(states)
 			state=states.pop(0)
-
-			adaptive_scaler.failed_results += return_failed_confs(workers, results, lambda r: float(r['score']) < THRESHOLD and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
+			print("State of adaptive_scaler")
+			adaptive_scaler.status()
+			if not adaptive_scaler.ScalingUpPhase:
+				adaptive_scaler.failed_results += return_failed_confs(workers, results, lambda r: float(r['score']) < THRESHOLD and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 			if state == NO_COST_EFFECTIVE_RESULT:
 				print("NO COST EFFECTIVE RESULT")
 				if states and states.pop(0) == UNDO_SCALE_ACTION:
@@ -177,6 +188,8 @@ def generate_matrix(initial_conf):
 				next_conf=lst[start]
 			elif state == COST_EFFECTIVE_RESULT:
 				print("COST-EFFECTIVE-RESULT")
+				if adaptive_scaler.ScalingUpPhase:
+					lst=sort_configs(adaptive_scalers.workers,lst)
 				remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,adaptive_scaler.failed_results)
 				adaptive_scaler.failed_results=[]
 				d[sla['name']][str(tenant_nb)]=result
@@ -196,24 +209,35 @@ def generate_matrix(initial_conf):
 					start=start_and_window[0]
 					new_window=start_and_window[1]
 					next_conf=lst[start]
+					result={}
+					retry_attempt+=nr_of_experiments
 				else:
 					remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[])
 					new_window=window
 					next_conf=lst[0]
 					start=0
-					previous_tenant_result={}
-					if tenant_nb > 1:
-						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
-					print("Moving filtered samples in sorted combinations after the window")
-					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
-					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-					print([utils.array_to_str(el) for el in lst])
-					next_conf=lst[start_and_window[0]]
-					start=start_and_window[0]
-					new_window=start_and_window[1]
-				result={}
-				retry_attempt+=nr_of_experiments
+					if adaptive_scaler.ScalingDownPhase and adaptive_scaler.failed_results:
+						adaptive_scaler.reset()
+						start_and_window=get_start_and_window_for_next_experiments()
+						print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+						start=start_and_window[0]
+						new_window=start_and_window[1]
+						next_conf=lst[start]
+					else: 
+						previous_tenant_result={}
+						if tenant_nb > 1:
+							previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
+						print("Moving filtered samples in sorted combinations after the window")
+						print([utils.array_to_str(el) for el in lst])
+						start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
+						print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+						print([utils.array_to_str(el) for el in lst])
+						next_conf=lst[start_and_window[0]]
+						start=start_and_window[0]
+						new_window=start_and_window[1]
+						result={}
+						retry_attempt+=nr_of_experiments
+
 			for w in adaptive_scaler.workers:
 				w.untest()
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
@@ -270,10 +294,17 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 					sorted_combinations.remove(possible_removal)
 		elif not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
 			failed_range=start+window
-			print("Removing all configs in window because no optimal config has been found at all")
+			print("Removing all configs in window going over the scaling_up_threshold because no optimal config has been found at all")
+			index=start
+			possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 			for i in range(start,failed_range,1):
-				print(sorted_combinations[0])
-				sorted_combinations.remove(sorted_combinations[0])
+				print("???")
+				print(sorted_combinations[index])
+				if not sorted_combinations[index] in possible_tipped_over_confs:
+					print(sorted_combinations[index])
+					sorted_combinations.remove(sorted_combinations[index])
+				else:
+					index=+1
 		#for failed_conf in return_failed_confs(workers,results, lambda result: float(result['score']) <= THRESHOLD):
 		for failed_conf in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo * SCALING_UP_THRESHOLD):
 			if failed_conf in sorted_combinations:
@@ -297,8 +328,10 @@ def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, wi
 			qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
 			cost=qualitiesOfSample['cost']
 			nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-			#minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
-			minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
+			if isinstance(MINIMUM_SHARED_REPLICAS,int): 
+				minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+			else:
+				minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
 			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
 				print(result_conf)
 				sorted_combinations.remove(result_conf)
