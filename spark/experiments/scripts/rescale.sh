@@ -32,19 +32,22 @@ for i in `seq 4`
                         #cpu_size=$((valueCpu))
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2)
-                        memory_size=$((valueMemory))
+                        memory_size=$valueMemory
                 fi
         done
-echo "New memory size: " $valueMemory
-if [ ${valueMemory}Gi != $old_memory_size ]
+echo "New memory size: " $memory_size
+if [ ! ${memory_size}Gi == $old_memory_size ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
-	sed "s/memory: 2/memory: $valueMemory/g"  spark-client/spark-client.yaml > tmp.yaml
-	kubectl delete -f spark-client/spark-client.yaml -n $namespace
+	kubectl get statefulset spark-client -n $namespace -o yaml > ss.yaml
+	sed "s/memory: 2/memory: $memory_size/g" ss.yaml > tmp.yaml
+	kubectl replace -f tmp.yaml -n $namespace
 	kubectl wait --for=delete  pod/spark-client-0 -n $namespace --timeout=120s
-	kubectl create -f tmp.yaml -n $namespace
 	kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s
+	rm ss.yaml
+	rm tmp.yaml
 fi
+rm old_pod.yaml
 for i in `seq 4`
 	do
 		keyName=worker$i.replicaCount

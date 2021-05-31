@@ -14,7 +14,7 @@ class SLAConfigExperiment:
 	def runExperiment(self):
 		exp_template=SLAConfigTemplate(self.exp_config)
 		exp_template.saveTemplate(self.exp_path+'conf.yaml')
-		exit_code=utils.call_cmd(self.bin_path+ ' -e sparkbenchbatch' + ' -p bestconfigconstraint' + ' -c '+self.exp_path+'conf.yaml' + ' -r dataset/results4.json')
+		exit_code=utils.call_cmd(self.bin_path+ ' -e sparkbenchbatch' + ' -p bestconfigconstraint' + ' -c '+self.exp_path+'conf.yaml') # + ' -r dataset/results4.json')
 		print('Generating new experiment. Saving results on '+self.exp_path)
 		try:
 			assert exit_code==0
