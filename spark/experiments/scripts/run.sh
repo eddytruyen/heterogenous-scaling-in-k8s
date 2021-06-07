@@ -23,9 +23,9 @@ do
   replicas=$i
   #fi
   echo "scaling to $replicas replicas..."
-  kubectl scale statefulset $release-worker --replicas=$replicas
+  kubectl scale statefulset $release-worker --replicas=$replicas -n $namespace
   echo "calculating sleeptime for $replicas replicas to come up"
-  sleeptimeFor1Replica=60
+  sleeptimeFor1Replica=120
   if [ $i -eq $startingTenantId ] 
   then
      sleeptime=$(($replicas * $sleeptimeFor1Replica)) 
@@ -39,8 +39,9 @@ do
   sudo cp ./$workload/output.conf /mnt/nfs-disk-2/spark-bench/
   echo "executing script for $i tenants"
   t1=`date +%s` 
-  kubectl exec -it -n $namespace spark-client-0 -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace $release $workload $tenantGroup 2> /tmp/test
+  kubectl exec -it -n $namespace spark-client-0 -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace $release $workload $tenantGroup
   t2=`date +%s`
   period=$(($t2 - $t1))
-  echo period >> timings.csv
+  echo Duration for $i tenants: $period
+  echo $period >> timings.csv
 done
