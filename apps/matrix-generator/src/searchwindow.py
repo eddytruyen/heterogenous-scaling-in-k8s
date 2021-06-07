@@ -302,7 +302,8 @@ class AdaptiveScaler:
                                 return conf_cost-total_cost - 1
                         else:
                                 print("SCALE UP DIFF")
-                                return total_cost + 1 - conf_cost
+                                #return total_cost + 1 - conf_cost
+                                return 3
 
 		def is_worker_scaleable(worker_index):
                         nonlocal scale_down
@@ -368,6 +369,7 @@ class AdaptiveScaler:
 				print(w.cpu,w.memory)
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
+			self.FailedScalings=[]
 			states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
 		return states
 
