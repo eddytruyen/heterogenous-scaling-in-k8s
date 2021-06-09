@@ -215,6 +215,10 @@ y=unlist(get(operation, data))
 y=unname(y[1:L])
 print(y)
 
+x=read.csv(file="timings.csv", header= FALSE)
+y=unlist(x)
+y=unname(y[1:L])
+print(y)
 
 z = (1:L)
 frame=data.frame(z,y)
