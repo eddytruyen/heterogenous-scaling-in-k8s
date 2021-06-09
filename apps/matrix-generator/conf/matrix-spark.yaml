@@ -9,10 +9,11 @@ slas:
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
       tenantGroup: "2"
-      completionTime: 90
+      completionTime: 150
       #jobsize: 10
       #throughput: 0.5
-    maxTenants: 7
+    maxTenants: 10
+    startTenant: 1
     alphabet:
       searchWindow: 10
       base: 4
