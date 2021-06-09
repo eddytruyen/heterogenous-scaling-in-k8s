@@ -10,7 +10,7 @@ THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.75
+SAMPLING_RATE=0.1
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -50,7 +50,7 @@ def generate_matrix(initial_conf):
                                             result={}
                                             if adaptive_scaler.ScalingDownPhase:
                                                     previous_tenant_conf=[]
-                                                    if tenant_nb > 1:
+                                                    if tenant_nb > startTenant:
                                                             previous_tenant_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb-1)])
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
@@ -82,7 +82,7 @@ def generate_matrix(initial_conf):
                                                             print("Moving filtered samples in sorted combinations after the window")
                                                             print([utils.array_to_str(el) for el in lst])
                                                             previous_tenant_conf=[]
-                                                            if tenant_nb > 1:
+                                                            if tenant_nb > startTenant:
                                                                   previous_tenant_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb-1)])
                                                             start_and_window=filter_samples(lst,[],previous_tenant_conf, 0, window)
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
@@ -236,7 +236,7 @@ def generate_matrix(initial_conf):
 						next_conf=lst[start]
 					else: 
 						previous_tenant_result={}
-						if tenant_nb > 1:
+						if tenant_nb > startTenant:
 							previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 						print("Moving filtered samples in sorted combinations after the window")
 						print([utils.array_to_str(el) for el in lst])
