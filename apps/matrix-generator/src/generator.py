@@ -7,14 +7,13 @@ from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_
 from functools import reduce
 import yaml
 
-THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.1
-NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
+#NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
 
-def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_tenants):
+def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf, previous_conf):
 
 	def get_start_and_window_for_next_experiments(opt_conf=None):
                                     nonlocal result
@@ -143,17 +142,27 @@ def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_
 	print([utils.array_to_str(el) for el in lst])
 	exps_path=exp_path+'/'+sla['name']
 	#next_exp=_find_next_exp(lst,adaptive_scaler.workers,[],lst[0],base,window)
-	startTenant = int(tenants)
+	startTenants = int(tenants)
 	maxTenants = int(tenants)
 	d=yaml.safe_load(open('Results/matrix.yaml'))
 	if not sla['name'] in d: 
 		d[sla['name']]={}
 	next_conf=[]
 	result={}
-	if d[sla['name']][tenants]:
-		startTenant+=1
+	if previous_tenants == 0 and d[sla['name']][tenants]:
+		startTenants=+1
 		result=d[sla['name']][tenants]
+                next_conf=get_conf(adaptive_scaler.workers, result)
+	elif previous_tenants == 0 and  startTenants > 1 and sla['name']][str(startTenant-1)]:
+		startTenants=+1
+		result=d[sla['name']][str(startTenant-1)]
 		next_conf=get_conf(adaptive_scaler.workers, result)
+	elif previous_tenants > and completion_time > 0:
+		result=create_result(adaptive_scaler, previous_tenants, completion_time, previous_conf, sla['name'])
+		tenant_nb=startTenants
+		results=result
+		nr_of_experiments=1
+
 	#tenant_nb=1
 	retry_attempt=0
 	#start=0
@@ -161,14 +170,12 @@ def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_
 	#ScaledDown=False
 	#FailedScalings=[]
 	#ScaledWorkerIndex=-1
-	tenant_nb = startTenant
+	tenant_nb = startTenants
 	slo=float(sla['slos']['completionTime'])
 	#next_conf=get_conf_for_start_tenant(slo,tenant_nb,adaptive_scaler,lst)
 	start=lst.index(next_conf)
-	next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,window)
+	#next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,window)
 	while tenant_nb <= maxTenants:
-		results=[]
-		nr_of_experiments=len(next_exp)
 		print("Running " + str(nr_of_experiments) + " experiments") 
 		for i,ws in enumerate(next_exp):
 			#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
@@ -178,7 +185,7 @@ def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_
 				samples=1
 			for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 				results.append(res)
-		result=find_optimal_result(adaptive_scaler.workers,results)
+		result=find_optimal_result(adaptive_scaler.workers,results,slo)
 		#slo=float(sla['slos']['completionTime'])
 		print("SLO is " + str(slo))
 		if result:
@@ -196,7 +203,7 @@ def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_
 		print("State of adaptive_scaler")
 		adaptive_scaler.status()
 		if not adaptive_scaler.ScalingUpPhase:
-			adaptive_scaler.failed_results += return_failed_confs(workers, results, lambda r: float(r['score']) < THRESHOLD and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
+			adaptive_scaler.failed_results += return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo  and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 		if state == NO_COST_EFFECTIVE_RESULT:
 			print("NO COST EFFECTIVE RESULT")
 			if states and states.pop(0) == UNDO_SCALE_ACTION:
@@ -263,9 +270,37 @@ def generate_matrix(initial_conf, namespace, tenants, completion_time, previous_
 		for w in adaptive_scaler.workers:
 			w.untest()
 		next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
+		nr_of_experiments=len(next_exp)
+                for i,ws in enumerate(next_exp):
+                        #samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
+                        sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                        samples=int(ws[4]*SAMPLING_RATE)
+                        if samples == 0:
+                                samples=1
+                        for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+                                results.append(res)
+		_sort(results)
+		d[sla['name']][str(tenant_nb]=create_result(adaptive_scaler,tenant_nb, completion_time, get_conf(adaptive_scaler.workers,results[0]), sla['name'])
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
+
+def create_result(adaptive_scaler, nb_of_tenants, completion_time, conf, sla_name):
+	result={'config': '0'}
+        for i,w in enumerate(adaptive_scaler.workers)
+		result["worker"+str(i+1)+".replicaCount"]=conf[i]
+		result["worker"+str(i+1)+".resources.requests.cpu"]=w.cpu
+		result["worker"+str(i+1)+".resources.requests.memory"]=w.memory
+	result['score']='n/a'
+	result['best_score']='n/a'
+	result['SLAName']=sla_name
+	if completion_time == 0:
+		result['CompletionTime']= '0'
+ 		result['Successfull']='false'
+	else:
+                result['CompletionTime']= 'completion_time'
+                result['Successfull']='true'
+	return result
 
 def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations):
        target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
@@ -419,10 +454,10 @@ def return_failed_confs(workers,results, f):
 #				workers[k].tested()
 
 
-def find_optimal_result(workers,results):
+def find_optimal_result(workers,results, slo):
 	print("Results")
 	print(results)
-	filtered_results=[result for result in results if float(result['score']) > THRESHOLD]
+	filtered_results=[result for result in results if float(result['CompletionTime']) <= slo]
 	print("Filtered results")
 	if filtered_results:
 		filtered_results=sort_results(filtered_results)
@@ -659,6 +694,6 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
 
-	return results
+	return [2,0,0,0]
 
 
