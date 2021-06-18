@@ -14,7 +14,7 @@ def create_app():
     app = Flask(__name__)
     #app.config.from_object("settings")
 
-    #app.add_url_rule("/conf", view_func=home)
+    app.add_url_rule("/conf", view_func=matrix.home)
     #app.add_url_rule("/movies", view_func=views.movies_page)
 
     #db = Database()
@@ -40,6 +40,7 @@ def create_app():
 
     app.config["adaptive_scaler"] = adaptive_scaler
     app.config["initial_config"] = initial_config
+    app.config["nodes"] = NODES
 
     return app
 
@@ -50,25 +51,4 @@ if __name__ == "__main__":
     app.run(host= '0.0.0.0',port=port,debug=True)
 
 
-@app.route("/conf")
-def home():
-    namespace = request.args.get('namespace')
-    tenants = request.args.get('tenants')
-    completion_time = request.args.get('completiontime')
-    previous_tenants = request.args.get('previoustenants')
-    previous_conf = request.args.get('previousconf')
-
-    adaptive_scaler=current_app.config["adaptive_scaler"]
-    initial_config=current_app.config["initial_config"]
-
-    slas=initial_config['slas']
-    for s in slas:
-        if s['name'] == namespace:
-            sla=s
-
-    matrix.generate_matrix(initial_config, adaptive_scaler, namespace, tenants, completion_time, previous_tenants,previous_conf)
-
-    config_data = yaml.safe_load(open('Results/matrix.yaml'))
-    conf=config_data[str(namespace)][str(tenants)]
-    return json.dumps(conf)
 
