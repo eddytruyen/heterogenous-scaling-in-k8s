@@ -15,7 +15,12 @@ do
   #nrOfPartitions=$(($i * 2))
   nrOfPartitions=0
   #2 cores per tenant
-  ./rescale.sh $namespace $i
+  if [ $i -eq $startingTenantId ]
+     then 
+         ./rescale.sh $namespace $i
+     else
+	 ./rescale.sh $namespace $i $period $((i-1))
+  fi
   #if [ $clientmode -eq 0 ]
   #then`
   #  replicas=$(($i + 1))

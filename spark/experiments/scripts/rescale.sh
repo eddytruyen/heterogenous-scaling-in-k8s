@@ -1,14 +1,16 @@
 #!/bin/bash
 namespace=$1
 nb_of_tenants=$2
+completion_time=${3:-0}
+previous_tenant_nb=${4:-0}
 fileName=values.json
-resourcePlannerURL=http://172.17.13.119:30681
+resourcePlannerURL=http://172.17.13.119:80
 
 function str_to_int {
   echo $(( 0x$(echo -n "$1" | sha1sum | cut -d " " -f 1) % $2 ))
 }
 
-curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName 
+curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb" > $fileName 
 sed -i 's/\"//g' $fileName
 sed -i 's|,|\n|g' $fileName
 sed -i 's/{//g' $fileName
