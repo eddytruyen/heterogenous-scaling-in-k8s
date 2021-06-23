@@ -14,7 +14,6 @@ MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.1
 
 def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf):
-	print(previous_conf)
 	def get_start_and_window_for_next_experiments(opt_conf=None):
                                     nonlocal result
                                     nonlocal slo
@@ -151,25 +150,24 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 	if str(startTenants) in d[sla['name']]:
 		currentResult=d[sla['name']][str(startTenants)]
 	elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
-		startTenants-=1
+		startTenants=startTenants-1
 		previousResult=d[sla['name']][str(startTenants)]
-		d[sla['name']][str(startTenants+1)]=previousResult
+		tmp_result=previousResult.copy()
+		tmp_result['CompletionTime']=str(slo+float(999999))
+		d[sla['name']][str(startTenants+1)]=tmp_result
 	else:
 		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window)
 	if int(previous_tenants) > 0 and float(completion_time) > 0:
 		evaluate=True
-		nr_of_experiments=1
-		if (currentResult or previousResult) and int(previous_tenants) == startTenants:
+		if (currentResult or previousResult) and int(previous_tenants) == int(startTenants):
 			if currentResult:
-				print("YEEEEEEEEEEEEEEEEEEEEEEEEES")
 				evaluate_current=True
 			if previousResult:
-				print("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 				evaluate_previous=True
 		tenant_nb=int(previous_tenants)
 		maxTenants=int(previous_tenants)
 		tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-		next_conf=get_conf(adaptive_scaler.workers, result)
+		next_conf=get_conf(adaptive_scaler.workers, tmp_result)
 		results=[tmp_result]
 
 	#tenant_nb=1
@@ -224,14 +222,16 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 			if str(tenant_nb) in d[sla['name']]:
 				x=d[sla['name']][str(tenant_nb)]
 				if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, x)) >= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)) or float(x['CompletionTime']) > slo:
-					d[sla['name']][str(tenant_nb)]=result
+					d[sla['name']][str(tenant_nb)]=result.copy()
 			else:
-				d[sla['name']][str(tenant_nb)]=result
+				d[sla['name']][str(tenant_nb)]=result.copy()
 			retry_attempt=0
 			next_conf=get_conf(adaptive_scaler.workers, result)
 			flag_workers(adaptive_scaler.workers,next_conf)
 			new_window=window
 			start=lst.index(next_conf)
+			if not (evaluate_previous or evaluate_current):
+				result={}
 		elif state == NO_RESULT:
 			print("NO RESULT")
 			if states and states.pop(0) == UNDO_SCALE_ACTION:
@@ -257,12 +257,9 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 					new_window=start_and_window[1]
 					next_conf=lst[start]
 				else: 
-					previous_tenant_result={}
-					if str(tenant_nb-1) in d[sla['name']]:
-						previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst,[],get_conf(adaptive_scaler.workers, previous_tenant_result), 0, window)
+					start_and_window=filter_samples(lst,[],previous_conf, 0, window)
 					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 					print([utils.array_to_str(el) for el in lst])
 					next_conf=lst[start_and_window[0]]
@@ -273,7 +270,7 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 		for w in adaptive_scaler.workers:
 			w.untest()
 		if state == COST_EFFECTIVE_RESULT and evaluate_previous:
-			 d[sla['name']][str(tenant_nb+1)]=d[sla['name']][str(tenant_nb)]
+			 d[sla['name']][str(tenant_nb+1)]=d[sla['name']][str(tenant_nb)].copy()
 		if state != COST_EFFECTIVE_RESULT and not str(tenant_nb) in d[sla['name']]:
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 			nr_of_experiments=len(next_exp)
@@ -303,8 +300,19 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 				results.append(create_result(adaptive_scaler, str(float(slo)+999999.000), res, sla['name']))
 		sort_results(adaptive_scaler.workers,slo,results)
 		d[sla['name']][tenants]=results[0]
-	print("Saving results into matrix")
+	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+	if previous_conf and not (evaluate_current or evaluate_previous):
+		print("Moving filtered samples in sorted combinations after the window")
+		print([utils.array_to_str(el) for el in lst])
+		next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])
+		start_and_window=filter_samples(lst,[],previous_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window)
+		print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+		print([utils.array_to_str(el) for el in lst])
+		next_conf=lst[start_and_window[0]]
+		d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
+	print("Saving filtered results into matrix")
+	utils.saveToYaml(d,'Results/result-matrix.yaml')
 
 
 def create_result(adaptive_scaler, completion_time, conf, sla_name):
@@ -418,7 +426,7 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 
 
 
-def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, window, ScaledWorkerIndex=-1):
+def filter_samples(sorted_combinations, workers, previous_tenant_conf, costIsRelevant, start, window, ScaledWorkerIndex=-1):
 	new_window=window
 	for el in range(start, start+window):
 		result_conf=sorted_combinations[el-(window-new_window)]
@@ -430,7 +438,7 @@ def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, wi
 				minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
 			else:
 				minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
-			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
+			if all_flagged_conf(workers, result_conf) or (costIsRelevant and cost > MAXIMUM_TRANSITION_COST) or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
 				print(result_conf)
 				sorted_combinations.remove(result_conf)
 				#if window > 1:

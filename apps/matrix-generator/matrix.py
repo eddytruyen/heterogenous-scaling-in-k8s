@@ -25,7 +25,8 @@ def home():
     previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
     generate_matrix(initial_config, adaptive_scaler, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
 
-    config_data = yaml.safe_load(open('Results/matrix.yaml'))
+    config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
+    print(config_data)
     conf=config_data[str(namespace)][str(tenants)]
     return json.dumps(conf)
 
