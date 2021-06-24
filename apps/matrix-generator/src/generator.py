@@ -68,9 +68,8 @@ def generate_matrix(initial_conf):
 				new_window=window
 				start=0
 				if tenant_nb > 1:
-					previous_tenant_result=d[sla['name']][str(tenant_nb-1)]
 					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst, get_conf(workers, previous_tenant_result), 0, window)
+					start_and_window=filter_samples(lst, workers, 0, window, d[sla['name']], 1, tenant_nb-1)
 					start=start_and_window[0]
 					new_window=start_and_window[1]
 				next_conf=lst[start]
@@ -103,25 +102,43 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 				sorted_combinations.remove(failed_conf)
 
 
-def filter_samples(sorted_combinations, previous_tenant_conf, start, window):
-        new_window=window
-        for el in range(start, start+window):
-                result_conf=sorted_combinations[el-(window-new_window)]
-                if previous_tenant_conf:
-                        qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
-                        cost=qualitiesOfSample['cost']
-                        nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-                        minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
-                        if cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas:
-                                print(result_conf)
+def filter_samples(sorted_combinations, workers, start, window, previous_results, start_tenant, tenant_nb):
+	i=start_tenant
+	new_window=window
+	while i <= tenant_nb:
+		previous_tenant_conf=get_conf(workers, previous_results[str(i)])
+		for el in range(start, start+window):
+			result_conf=sorted_combinations[el-(window-new_window)]
+			print(result_conf)
+			qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
+			cost=qualitiesOfSample['cost']
+			nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
+			if isinstance(MINIMUM_SHARED_REPLICAS,int): 
+				minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+			else:
+				minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
+			if cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas:
+                                print("removed")
                                 sorted_combinations.remove(result_conf)
                                 sorted_combinations.insert(start+new_window+el-1,result_conf)
                                 new_window-=1
+			else:
+				print("not removed")
+		if new_window == 0:
+			return filter_samples(sorted_combinations, workers, start+window, window, previous_results, start_tenant, tenant_nb )
+		else:
+			i+=1
+			window=new_window
+			while i <= tenant_nb and equal_conf(previous_tenant_conf,get_conf(workers, previous_results[str(i)])):
+				i+=1
+	return [start, new_window]
 
-        if new_window == 0:
-                return filter_samples(sorted_combinations, previous_tenant_conf, start+window, window)
-        else:
-                return [start, new_window]
+
+def equal_conf(conf1, conf2):
+	for x, y in zip(conf1, conf2):
+		if x != y:
+			return False
+	return True
 
 
 
