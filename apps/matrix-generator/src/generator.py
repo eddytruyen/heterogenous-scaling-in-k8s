@@ -9,8 +9,9 @@ from functools import reduce
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=2
+MINIMUM_SHARED_REPLICAS=0.5
 SAMPLING_RATE=0.75
+SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -151,7 +152,7 @@ def generate_matrix(initial_conf):
 		startTenant = sla['startTenant']
 		tenant_nb = startTenant
 		slo=float(sla['slos']['completionTime'])
-		next_conf=get_conf_for_start_tenant(slo,tenant_nb,adaptive_scaler,lst)
+		next_conf=get_conf_for_start_tenant(slo,tenant_nb,adaptive_scaler,lst,window)
 		start=lst.index(next_conf)
 		next_exp=_find_next_exp(lst,adaptive_scaler.workers,[],next_conf,base,window)
 		while tenant_nb <= sla['maxTenants']:
@@ -256,14 +257,32 @@ def generate_matrix(initial_conf):
 	utils.saveToYaml(d,'Results/matrix.yaml')
 
 
-def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations):
+#def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations):
+#       target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
+#       total_cost=target['cpu']+target['memory']
+#       print("total_cost = " + str(total_cost))
+#       for conf in combinations:
+#           if resource_cost(adaptive_scaler.workers, conf) > total_cost:
+#               return conf
+#       return []
+
+def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, window):
+       if len(combinations) == 0:
+           return []
        target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
        total_cost=target['cpu']+target['memory']
        print("total_cost = " + str(total_cost))
-       for conf in combinations:
-           if resource_cost(adaptive_scaler.workers, conf) > total_cost:
-               return conf
-       return []
+       index=0
+       conf=combinations[index]
+       while index < len(combinations)-1 and resource_cost(adaptive_scaler.workers, conf) <  total_cost:
+           index+=1
+           conf=combinations[index]
+       if resource_cost(adaptive_scaler.workers, conf) >=  total_cost:
+           solution_index=max(0,combinations.index(conf)+int(window*SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW))
+           return combinations[solution_index]
+       else:
+           return []
+
 
 
 
@@ -340,43 +359,10 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 					sorted_combinations.remove(failed_conf)
 
 
-
-def filter_samples(sorted_combinations, workers, previous_tenant_conf, start, window, ScaledWorkerIndex=-1):
-	new_window=window
-	for el in range(start, start+window):
-		result_conf=sorted_combinations[el-(window-new_window)]
-		if previous_tenant_conf:
-			qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
-			cost=qualitiesOfSample['cost']
-			nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-			if isinstance(MINIMUM_SHARED_REPLICAS,int): 
-				minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
-			else:
-				minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
-			if all_flagged_conf(workers, result_conf) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
-				print(result_conf)
-				sorted_combinations.remove(result_conf)
-				#if window > 1:
-				sorted_combinations.insert(start+new_window+el-1,result_conf)
-				#elif window == 1:
-				#	sorted_combinations.insert(start+new_window+el,result_conf)
-				new_window-=1
-		elif not involves_worker(workers, result_conf, ScaledWorkerIndex):
-			print(result_conf)
-			sorted_combinations.remove(result_conf)
-			#if window > 1:
-			sorted_combinations.insert(start+new_window+el-1,result_conf)
-			#elif window == 1:
-			#	sorted_combinations.insert(start+new_window+el,result_conf)
-			new_window-=1
-	if new_window == 0:
-		return filter_samples(sorted_combinations, workers, previous_tenant_conf, start+window, window, ScaledWorkerIndex)
-	else:
-		return [start, new_window]
-
 def filter_samples(sorted_combinations, workers, start, window, previous_results, start_tenant, tenant_nb, check_workers=False, ScaledDownWorkerIndex=-1):
         i=start_tenant
         new_window=window
+        start_window=window
         if previous_results:
                 while i <= tenant_nb:
                         previous_tenant_conf=get_conf(workers, previous_results[str(i)])
@@ -399,7 +385,7 @@ def filter_samples(sorted_combinations, workers, start, window, previous_results
                                 else:
                                         print("not removed")
                         if new_window == 0:
-                                return filter_samples(sorted_combinations, workers, start+window, window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
+                                return filter_samples(sorted_combinations, workers, start+start_window, start_window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
                         else:
                                 i+=1
                                 window=new_window
