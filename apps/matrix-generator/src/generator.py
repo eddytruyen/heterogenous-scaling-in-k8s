@@ -42,7 +42,7 @@ def generate_matrix(initial_conf):
                                                     previous_tenant_results=d[sla['name']]
                                             print("Moving filtered samples in sorted combinations after the window")
                                             print([utils.array_to_str(el) for el in lst])
-                                            start_and_window=filter_samples(lst, workers, start, window, previous_tenant_results, 1, tenant_nb-1, True, ScaledDownWorkerIndex)
+                                            start_and_window=filter_samples(lst, adaptive_scaler.workers, start, window, previous_tenant_results, 1, tenant_nb-1, True, adaptive_scaler.ScaledDownWorkerIndex)
                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                             print([utils.array_to_str(el) for el in lst])
                                             return start_and_window
@@ -165,7 +165,7 @@ def generate_matrix(initial_conf):
                                                 previous_tenant_results=d[sla['name']]
                                                 print("Moving filtered samples in sorted combinations after the window")
                                                 print([utils.array_to_str(el) for el in lst])
-                                                start_and_window=filter_samples(lst,workers,0, window, previous_tenant_results, 1, tenant_nb-1)
+                                                start_and_window=filter_samples(lst, adaptive_scaler.workers, 0, window, previous_tenant_results, 1, tenant_nb-1)
                                                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                 print([utils.array_to_str(el) for el in lst])
                                                 next_conf=lst[start_and_window[0]]
