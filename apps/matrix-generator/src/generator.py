@@ -9,8 +9,8 @@ from functools import reduce
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=0.50
-SAMPLING_RATE=0.75
+MINIMUM_SHARED_REPLICAS=2
+SAMPLING_RATE=1.0
 NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
 
 def generate_matrix(initial_conf):
@@ -242,6 +242,7 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, sta
 
 def filter_samples(sorted_combinations, workers, start, window, previous_results, start_tenant, tenant_nb, check_workers=False, ScaledDownWorkerIndex=-1):
         i=start_tenant
+        start_window=window
         new_window=window
         if previous_results:
                 while i <= tenant_nb:
@@ -265,7 +266,9 @@ def filter_samples(sorted_combinations, workers, start, window, previous_results
                                 else:
                                         print("not removed")
                         if new_window == 0:
-                                return filter_samples(sorted_combinations, workers, start+window, window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
+                                print("RECURSIVE START NEW WINDOW")
+                                print("=================================")
+                                return filter_samples(sorted_combinations, workers, start+start_window, start_window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
                         else:
                                 i+=1
                                 window=new_window
