@@ -105,6 +105,7 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 def filter_samples(sorted_combinations, workers, start, window, previous_results, start_tenant, tenant_nb):
 	i=start_tenant
 	new_window=window
+	start_window=window
 	while i <= tenant_nb:
 		previous_tenant_conf=get_conf(workers, previous_results[str(i)])
 		for el in range(start, start+window):
@@ -125,7 +126,7 @@ def filter_samples(sorted_combinations, workers, start, window, previous_results
 			else:
 				print("not removed")
 		if new_window == 0:
-			return filter_samples(sorted_combinations, workers, start+window, window, previous_results, start_tenant, tenant_nb )
+			return filter_samples(sorted_combinations, workers, start+start_window, start_window, previous_results, start_tenant, tenant_nb )
 		else:
 			i+=1
 			window=new_window
