@@ -9,9 +9,9 @@ from functools import reduce
 THRESHOLD = -1
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
-MINIMUM_SHARED_REPLICAS=2
+MINIMUM_SHARED_REPLICAS=0.50
 SAMPLING_RATE=0.75
-NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,8],[3,6]]
+NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
 
 def generate_matrix(initial_conf):
 
