@@ -7,7 +7,8 @@ MINIMUM_MEMORY=2
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
 OPT_IN_FOR_RESTART = False
-
+CAREFUL_SCALING= False
+SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES=[0.5, 0.1]
 
 UNDO_SCALE_ACTION =  8544343532
 REDO_SCALE_ACTION = 999767537
@@ -302,8 +303,10 @@ class AdaptiveScaler:
                                 return conf_cost-total_cost - 1
                         else:
                                 print("SCALE UP DIFF")
-                                return total_cost + 1 - conf_cost
-                                #return 3
+                                if CAREFUL_SCALING:
+                                    return total_cost + 1 - conf_cost
+                                else:
+                                    return total_cost + 1 - conf_cost + int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[0]*float(self.ScalingFunction.MaxCPU) + SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[1]*float(self.ScalingFunction.MaxMem))
 
 		def is_worker_scaleable(worker_index):
                         nonlocal scale_down
