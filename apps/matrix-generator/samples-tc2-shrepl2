@@ -3,3 +3,4 @@ search ration 1.0: 52
 search ratio 0.75 -verticalscaling-down-up: 32
 search ratio 0.75 - vertical scaling careful-up-scaling: 33
 search ratio 0.75 - vertical scaling careful-up-scaling-filtering-full-closure: 25
+search ratio 0.75 -verticalscaling-down-up-filtering-full-closure:21
