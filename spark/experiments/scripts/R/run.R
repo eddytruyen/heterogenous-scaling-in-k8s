@@ -204,7 +204,7 @@ L=10
 metric="mean"
 workload="spark-bench"
 deployment="hps"
-operation="total"
+operation="select c from csv"
 title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
@@ -231,9 +231,12 @@ computeFunction <- function(y,z,frame) {
 }
 
 
+
 z=(1:L)
-plotPoints(y~z)
+f<-computeFunction(y,z,frame)
 coef(f)
+plotPoints(y~z)
+
 plotFun(f(z)~z, z.lim = range(1:L), add = TRUE, col="blue")
 
 d=D(f(z)~z)
