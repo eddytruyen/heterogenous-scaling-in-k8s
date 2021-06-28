@@ -18,8 +18,8 @@ def generate_matrix(initial_conf):
 		alphabet=sla['alphabet']
 		window=alphabet['searchWindow']
 		base=alphabet['base']
-		workers=[WorkerConf(worker_id=i+1,cpu=v['size'], min_replicas=0,max_replicas=alphabet['base']-3) for i,v in enumerate(alphabet['elements'])]
-
+		workers=[WorkerConf(worker_id=i+1,cpu=v['size'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+                workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas) 
 		exps_path=exp_path+'/'+sla['name']
 		next_exp=[workers]
 		d[sla['name']]={}
