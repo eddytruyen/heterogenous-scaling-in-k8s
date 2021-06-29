@@ -7,6 +7,9 @@ from functools import reduce
 
 THRESHOLD = 0
 DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT = True
+#Single Replica
+WORKER_ID=3
+
 
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
@@ -21,7 +24,7 @@ def generate_matrix(initial_conf):
 		alphabet=sla['alphabet']
 		window=alphabet['searchWindow']
 		base=alphabet['base']
-		workers=[WorkerConf(worker_id=i+1, cpu=v['size'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+		workers=[WorkerConf(worker_id=WORKER_ID-i, cpu=v['size'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
                 # HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
 		exps_path=exp_path+'/'+sla['name']
@@ -35,10 +38,8 @@ def generate_matrix(initial_conf):
 			nr_of_experiments=len(next_exp)
 			print("Running " + str(nr_of_experiments) + " experiments") 
 			for i,ws in enumerate(next_exp):
+				samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws])
 				sla_conf=SLAConf(sla['name'],tenant_nb,ws,sla['demoCPU'],sla['slos'])
-				samples=int(ws[4]*SAMPLING_RATE)
-				if samples == 0:
-					samples=1
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt)):
 					results.append(res)
 			previous_tenant_result={}
@@ -138,10 +139,10 @@ def _sort(workers,base):
 	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
 	#REMARK: Only single replica allows for base higher than 10. This is because int(string,base) does not work properly for base > 10
 	if len(workers) == 1:
+		print("SINGLE REPLICA CONFIG!")
 		max_conf=int(utils.array_to_str([base-1 for worker in workers]))
 	else:
 	 	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
-	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
 	print(initial_conf)
 	print(max_conf)
 	index=range(initial_conf,max_conf+1)
@@ -186,21 +187,12 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 	intervals=_split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, base)
 	print("Next possible experiments for next nb of tenants")
 	print(intervals)
-	for k, v in intervals.items():
-		constant_ws_replicas=map(lambda a: int(a),list(k))
-
-		experiment=[]
-
-		for replicas,worker in zip(constant_ws_replicas,workers[:-1]):
-			new_worker=WorkerConf(worker.worker_id,worker.cpu,replicas,replicas)
-			experiment.append(new_worker)
-
-		new_worker=WorkerConf(workers[-1].worker_id,workers[-1].cpu, min(map(lambda a: int(a),v)),max(map(lambda a: int(a),v)))
-		experiment.append(new_worker)
-
-		workers_exp.append(experiment)
-
-	return workers_exp	
+	samples=intervals["exp"]["None"]
+	nb_of_samples=len(samples)
+	worker_min=samples[0]
+	worker_max=samples[nb_of_samples-1]
+	new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,int(worker_min[0]),int(worker_max[0]))
+	return [[new_worker]]
 
 
 
@@ -214,12 +206,10 @@ def _split_exp_intervals(sorted_combinations, min_conf, only_min_conf, window, b
 		max_conf_dec=min_conf_dec+window
 	combinations=[sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]
 	for c in range(min_conf_dec,max_conf_dec):
-		print(c)
 		print(sorted_combinations[c])
-	exp={}
-
-	return [sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]
-
+	list=[]
+	length=len(combinations[0])
+	return {"exp": {"None": [sorted_combinations[c] for c in range(min_conf_dec,max_conf_dec)]}, "nbOfshiftsToLeft": 0}
 
 
 def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path):
