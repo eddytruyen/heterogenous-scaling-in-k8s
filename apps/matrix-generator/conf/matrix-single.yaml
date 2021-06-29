@@ -1,0 +1,19 @@
+bin:
+  path: /bin/k8-resource-optimizer
+charts:
+  name: mychart
+  chartdir: /chart/exp2app
+slas:
+  - name : gold
+    slos: 
+      jobsize: 10
+      p99: 250.0
+    maxTenants: 10
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 20
+      elements:
+        - size: 250
+utilFunc: replicaBased
+output: Results/exp-single
