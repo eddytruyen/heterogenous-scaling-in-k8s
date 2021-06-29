@@ -7,7 +7,7 @@ slas:
   - name : gold
     slos: 
       jobsize: 10
-      throughput: 0.5
+      p99: 250.0
     maxTenants: 10
     demoCPU: 800
     alphabet:

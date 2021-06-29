@@ -21,8 +21,5 @@ class ExperimentAnalizer:
 				d[h]=v
 			values.append(d)  
 
-		scores=[float(val['score']) for val in values]
-		opt_configuration=values[scores.index(max(scores))]
-
-		return opt_configuration
+		return values
 
