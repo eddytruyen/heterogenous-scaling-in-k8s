@@ -2,13 +2,13 @@ nbOfIterations: 1
 nbOfSamplesPerIteration: 2
 charts:
   - name: my-app
-    chartdir: conf/helm/exp2app
+    chartdir: chart/exp2app
 slas:
   - name : gold
     chartName: my-app
     slos: 
       jobsize: 10
-      throughput: 0.5
+      p99: 5000
     nbOfTenants: 1
     parameters:
       - name: worker1CPU
@@ -61,6 +61,6 @@ slas:
         prefix: 
         suffix: m
 namespaceStrategy: NSPSLA
-optimizer: bestconfig
+optimizer: mtbestconfig
 utilFunc: alphabetBased
 outputDir: Results/exp3/gold/1_tenants-ex0/op/

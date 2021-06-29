@@ -9,7 +9,7 @@ slas:
     chartName: my-app
     slos: 
       jobsize: {{sla.slos.jobsize}}
-      throughput: {{sla.slos.throughput}}
+      p99: {{sla.slos.p99}}
     nbOfTenants: {{sla.tenants}}
     parameters:
     {% for worker in sla.workers %}

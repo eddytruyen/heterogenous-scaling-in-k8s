@@ -26,9 +26,9 @@ class ConfigParser:
 					'demoCPU': sla.demo_cpu,
 					'slos': {
 						'jobsize': sla.slos['jobsize'],
-						'throughput': sla.slos['throughput']
+						'p99': sla.slos['p99']
 					},
-					'workers': [{
+                                        'workers': [{
 						'id': worker.worker_id,
 						'cpu': worker.cpu,
 						'replicas':{
