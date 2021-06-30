@@ -166,7 +166,7 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 	nb_of_samples=len(samples)
 	worker_min=samples[0]
 	worker_max=samples[nb_of_samples-1]
-	new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,int(worker_min[0]),int(worker_max[0]))
+	new_worker=WorkerConf(workers[0].worker_id,workers[0].cpu,int(worker_min),int(worker_max))
 	return [[new_worker]]
 
 
