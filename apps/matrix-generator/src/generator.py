@@ -43,7 +43,9 @@ def generate_matrix(initial_conf):
 					results.append(res)
 			result=find_optimal_result(workers,results)
 			for failed_conf in return_failed_confs(workers,results):
-				lst.remove(utils.array_to_str(failed_conf))
+				elem=utils.array_to_str(failed_conf)
+				if elem in lst:
+					lst.remove(elem)
 			if result:
 				d[sla['name']][str(tenant_nb)]=result
 				tenant_nb+=1
