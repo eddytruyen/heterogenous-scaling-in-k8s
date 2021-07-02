@@ -12,7 +12,7 @@ slas:
     demoCPU: 800
     alphabet:
       searchWindow: 3
-      base: 3
+      base: 4
       elements:
         - size: 2200
         - size: 750
