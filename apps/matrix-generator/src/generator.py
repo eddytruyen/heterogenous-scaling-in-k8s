@@ -12,6 +12,16 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=1.0
 
+def create_workers(elements, weights, base):
+    resources=[v['size'] for v in elements]
+    print(resources)
+    weights=weights
+    workers=[]
+    for i in range(0,len(resources)):
+        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], weights=weights, min_replicas=0,max_replicas=base-1)
+        workers.append(worker_conf)
+    return workers
+
 def generate_matrix(initial_conf):
 	bin_path=initial_conf['bin']['path']
 	chart_dir=initial_conf['charts']['chartdir']
@@ -26,7 +36,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+		workers=create_workers(alphabet['elements'], alphabet['weights'], base)
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
@@ -252,7 +262,10 @@ def _sort(workers,base):
 def _resource_cost(workers, conf):
         cost=0
         for w,c in zip(workers,conf):
-            cost+=c*w.cpu+c*w.memory
+            worker_cost=0
+            for resource_name in w.resources.keys():
+                 worker_cost+=w.resources[resource_name]*w.weights[resource_name]*c
+            cost+=worker_cost
         return cost
 
 
@@ -304,13 +317,13 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 		min_replica_count=utils.array_to_delimited_str(sorted_combinations[min_replica_count_index], " ")
 		experiment=[]
 		for replicas,worker in zip(constant_ws_replicas,tmp_workers[:-nb_of_variable_workers]):
-			new_worker=WorkerConf(worker.worker_id,worker.cpu,worker.memory,replicas,replicas)
+			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.weights,replicas,replicas)
 			experiment.append(new_worker)
 		for i in reversed(range(0,nb_of_variable_workers)):
 			l=i+1
 			worker_min=min(map(lambda a: int(a[-l]),v))
 			worker_max=max(map(lambda a: int(a[-l]),v))
-			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].cpu,tmp_workers[-l].memory,worker_min,worker_max)
+			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].weights,worker_min,worker_max)
 			experiment.append(new_worker)
 		workers_exp.append([experiment, elementstr, min_replica_count,max_replica_count,nb_of_samples])
 		print("Min replicacount:" + min_replica_count)

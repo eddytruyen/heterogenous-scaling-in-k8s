@@ -29,5 +29,8 @@ slas:
         - size:
             cpu: 2
             memory: 2
+      weights:
+        cpu: 1
+        memory: 1
 utilFunc: sparkbenchalphabet
 output: Results/exp3
