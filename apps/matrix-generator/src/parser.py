@@ -53,8 +53,8 @@ class ConfigParser:
 							'min':worker.min_replicas,
 							'max':worker.max_replicas
 						},
-						'cpus': worker.cpu,
-						'mems': worker.memory
+						'resources': worker.resources,
+						'weights': worker.weights
 					} for worker in sla.workers]
 				} 
 				for sla in self.slas]

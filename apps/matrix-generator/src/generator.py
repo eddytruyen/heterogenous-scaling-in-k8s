@@ -12,7 +12,18 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=-1.0
-NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
+NODES=[{"cpu": 4,"memory": 8},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 3,"memory": 6}]
+
+def create_workers(elements, weights, base):
+    resources=[v['size'] for v in elements]
+    print(resources)
+    weights=weights
+    workers=[]
+    for i in range(0,len(resources)):
+        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], weights=weights, min_replicas=0,max_replicas=base-1)
+        workers.append(worker_conf)
+    return workers
+
 
 def generate_matrix(initial_conf):
 
@@ -103,16 +114,16 @@ def generate_matrix(initial_conf):
                                     if adaptive_scaler.ScalingDownPhase:
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb)
                                             for w in adaptive_scaler.workers:
-                                                    print(w.cpu)
+                                                    print(w.resources['cpu'])
                                             return process_states([[],states])
                                     elif adaptive_scaler.ScalingUpPhase:
                                             adaptive_scaler.set_tipped_over_failed_confs(results, slo)
                                             conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
                                             for w in adaptive_scaler.workers:
-                                                    print(w.cpu)
+                                                    print(w.resources['cpu'])
                                             return process_states(conf_and_states) 
                                     for w in adaptive_scaler.workers:
-                                            print(w.cpu)
+                                            print(w.resources['cpu'])
 
 
 	bin_path=initial_conf['bin']['path']
@@ -129,7 +140,8 @@ def generate_matrix(initial_conf):
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
 		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126,2,2,True,NODES)
-		workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+		workers=create_workers(alphabet['elements'], alphabet['weights'], base)
+                #workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
@@ -178,7 +190,7 @@ def generate_matrix(initial_conf):
 				print(conf)
 			print("New cycle")
 			for w in adaptive_scaler.workers:
-				print(w.cpu, w.memory)
+				print(w.resources)
 			states=adaptive_scaler.validate_result(result, get_conf(adaptive_scaler.workers,result), slo)
 			print(states)
 			state=states.pop(0)
@@ -270,7 +282,10 @@ def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, win
        if len(combinations) == 0:
            return []
        target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
-       total_cost=target['cpu']+target['memory']
+       total_cost=0
+       weights=adaptive_scaler.workers[0].weights
+       for i in target.keys():
+           total_cost+=target[i]*weights[i]
        print("total_cost = " + str(total_cost))
        index=0
        conf=combinations[index]
@@ -547,10 +562,11 @@ def _sort(workers,base):
 def resource_cost(workers, conf):
         cost=0
         for w,c in zip(workers,conf):
-            cost+=c*w.cpu+c*w.memory
+            worker_cost=0
+            for resource_name in w.resources.keys():
+                 worker_cost+=w.resources[resource_name]*w.weights[resource_name]*c
+            cost+=worker_cost
         return cost
-
-
 
 def _pairwise_transition_cost(previous_conf,conf):
         if not previous_conf:
@@ -599,13 +615,13 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 		min_replica_count=utils.array_to_delimited_str(sorted_combinations[min_replica_count_index], " ")
 		experiment=[]
 		for replicas,worker in zip(constant_ws_replicas,tmp_workers[:-nb_of_variable_workers]):
-			new_worker=WorkerConf(worker.worker_id,worker.cpu,worker.memory,replicas,replicas)
+			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.weights,replicas,replicas)
 			experiment.append(new_worker)
 		for i in reversed(range(0,nb_of_variable_workers)):
 			l=i+1
 			worker_min=min(map(lambda a: int(a[-l]),v))
 			worker_max=max(map(lambda a: int(a[-l]),v))
-			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].cpu,tmp_workers[-l].memory,worker_min,worker_max)
+			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].weights,worker_min,worker_max)
 			experiment.append(new_worker)
 		workers_exp.append([experiment, elementstr, min_replica_count,max_replica_count,nb_of_samples])
 		print("Min replicacount:" + min_replica_count)

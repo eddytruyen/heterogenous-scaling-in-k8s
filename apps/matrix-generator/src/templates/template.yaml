@@ -25,23 +25,16 @@ slas:
           granularity: 1
         prefix: 
         suffix:
-      - name: worker{{worker.id}}.resources.requests.cpu
-        resource: CPU
+    {% for key,value in worker.resources.items() %}
+      - name: worker{{worker.id}}.resources.requests.{{key}}
+        resource: {{key}}
         searchspace:
-          min: {{worker.cpus}}
-          max: {{worker.cpus}}
+          min: {{value}}
+          max: {{value}}
           granularity: 1
         prefix:
         suffix:
-      - name: worker{{worker.id}}.resources.requests.memory
-        resource: Mem
-        searchspace:
-          min: {{worker.mems}}
-          max: {{worker.mems}}
-          granularity: 1
-        prefix:
-        suffix: Gi
-       {% endfor %}
+       {% endfor %}{% endfor %}
 {% endfor %}
 namespaceStrategy: NSPSLA
 optimizer: {{optimizer}}
