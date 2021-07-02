@@ -9,7 +9,7 @@ class SLAConf:
 class WorkerConf:
 	def __init__(self, worker_id, resources, weights, min_replicas,max_replicas):
 		self.worker_id = worker_id
-		self.resources = weights
+		self.resources = resources
 		self.weights = weights
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
@@ -17,7 +17,7 @@ class WorkerConf:
 		self._tested = False
 
 	def clone(self):
-		w2=WorkerConf(self.worker_id, self.cpu, self.memory, self.min_replicas, self.max_replicas)
+		w2=WorkerConf(self.worker_id, self.resources.copy(), self.weights.copy(), self.min_replicas, self.max_replicas)
 		if self.isFlagged():
 			w2.flag()
 		if self.isTested():
@@ -28,9 +28,8 @@ class WorkerConf:
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
 
-	def scale(self, cpu, memory):
-		self.cpu = cpu
-		self.memory = memory
+	def scale(self, resource, amount):
+		self.resources[resource] = amount
 
 	def isTested(self):
 		return self._tested
@@ -51,10 +50,22 @@ class WorkerConf:
 		self._flag = False
 
 	def equals(self, other):
-		if self.worker_id == other.worker_id and self.cpu == other.cpu and self.memory == other.memory and self.min_replicas == other.min_replicas and self.max_replicas == other.max_replicas:
+		if self.worker_id == other.worker_id and self.min_replicas == other.min_replicas and self.max_replicas == other.max_replicas:
+			if len(self.resources) != len(other.resources) or len(self.weights) != len(other.weights):
+				return False
+			for i in self.resources.keys():
+				if not (i in other.resources.keys()) or not (i in other.weights.keys()):
+					return False
+				if self.resources[i] != other.resources[i]:
+					return False
+				if self.weights[i] !=  other.weights[i]:
+					return False
 			return True
 		else:
 			return False
 	def str(self):
-		return_str =  "{workerId=" + str(self.worker_id) + ", cpu=" + str(self.cpu) + ", mem=" + str(self.memory) + ", min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
+		return_str =  "{workerId=" + str(self.worker_id)
+		for i in self.resources:
+			return_str+= ", " + i + "=" + str(self.resources[i]) 
+		return_str+= ", min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
 		return return_str

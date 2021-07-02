@@ -2,8 +2,7 @@ import math
 from . import generator
 from . import utils
 
-MINIMUM_CPU=1
-MINIMUM_MEMORY=2
+MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
 OPT_IN_FOR_RESTART = False
@@ -21,19 +20,20 @@ NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
 
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c, cpu, mem, cpu_is_dominant, nodes):
+	def __init__(self, coef_a, coef_b, coef_c, resources, weights, dominant_resources, nodes):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
-		self.Cpu = cpu
-		self.Mem = mem
+		self.resources=resources
+		self.weights=weights
+		self.DominantResources=dominant_resources
 		self.Nodes = nodes
-		self.CpuIsDominant = cpu_is_dominant
 		self.workersScaledDown = [] 
 		self.workersScaledUp = []
-		self.MaxCPU = max([c[0] for c in nodes])
-		self.MaxMem = max([c[1] for c in nodes])
+		self.Max={}
+		for i in resources.keys():
+			self.Max[i]=max([c[i] for c in nodes])
 		self.LastScaledDownWorker = []
 		self.LastScaledUpWorker = []
 
@@ -65,18 +65,14 @@ class ScalingFunction:
 	def target(self,slo,tenants):
 		y=self.eval(tenants)
 		dict={}
-		if self.CpuIsDominant:
-			dict = {
-				"cpu": int((tenants*self.Cpu*y)/slo), 
-				"memory": math.ceil((tenants*math.log(self.Mem,tenants+1)*y)/slo)
-			}
-		else:
-                        dict = {
-                                "cpu": math.ceil((tenants*math.log(self.Cpu,tenants+1)*y)/slo),
-                                "memory": int((tenants*self.Mem*y)/slo)
-                        }
+		for res in self.resources.keys():
+			if res in self.DominantResources:
+				dict[res]=int((tenants*self.resources[res]*y)/slo)
+			else:
+				dict[res]=math.ceil((tenants*math.log(self.resources[res],tenants+1)*y)/slo)
 		return dict
 
+        # this function returns the worker config for which the last scaling did not yield a cost-effective result
 	def undo_scaled_down(self,workers):
 		if not self.LastScaledDownWorker:
 			return None
@@ -84,10 +80,12 @@ class ScalingFunction:
 		scalingRecord=self.workersScaledDown[worker_index]
 		worker=workers[worker_index]
 		worker2=worker.clone()
-		worker.scale(worker.cpu+scalingRecord[1].pop(0), worker.memory+scalingRecord[2].pop(0))
+		for res in worker.resources.keys():
+			worker.scale(res, worker.resources[res]+scalingRecord[1][res].pop(0))
 		scalingRecord[0]-=1
 		return worker2
 
+	# this function returns the worker config for which the last scaling did not yield a cost-effective result
 	def undo_scaled_up(self,workers):
                 if not self.LastScaledUpWorker:
                         return None
@@ -95,72 +93,59 @@ class ScalingFunction:
                 scalingRecord=self.workersScaledUp[worker_index]
                 worker=workers[worker_index]
                 worker2=worker.clone()
-                worker.scale(worker.cpu-scalingRecord[1].pop(0), worker.memory-scalingRecord[2].pop(0))
+                for res in worker.resources.keys():
+                        worker.scale(res, worker.resources[res]-scalingRecord[1][res].pop(0))
                 scalingRecord[0]-=1
                 return worker2
 
 
 	def scale_worker_down(self, workers, worker_index, nb_of_units):
-		if not self.workersScaledDown:
-			self.workersScaledDown=[[1,[],[]] for w in workers]
-		worker=workers[worker_index]
-		scaleSecondaryResource=False
-		if self.workersScaledDown[worker_index][0] % 2 == 0:
-			scaleSecondaryResource=True
-		if self.CpuIsDominant and worker.cpu-nb_of_units >= 1:
-			if scaleSecondaryResource and worker.memory > MINIMUM_MEMORY:
-				self.LastScaledDownWorker+=[worker_index]
-				worker.scale(worker.cpu-nb_of_units,worker.memory-1)
-				k=self.workersScaledDown[worker_index]
-				self.workersScaledDown[worker_index]=[k[0]+1, [nb_of_units] + k[1], [1] + k[2]]
+                scale_down={res: [] for res in self.resources.keys()}
+                if not self.workersScaledDown:
+                        self.workersScaledDown=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
+                worker=workers[worker_index]
+                scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
+                for res in self.resources.keys():
+                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units >= MINIMUM_RESOURCES[res]:
+                            worker.scale(res, worker.resources[res]-nb_of_units)
+                            self.LastScaledDownWorker+=[worker_index]
+                            k=self.workersScaledDown[worker_index][1]
+                            scale_down[res]=[nb_of_units] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] - 1 >= MINIMUM_RESOURCES[res]:
+                            worker.scale(res, worker.resources[res]-1)
+                            self.LastScaledDownWorker+=[worker_index]
+                            k=self.workersScaledDown[worker_index][1]
+                            scale_down[res]=[1] + k[res]
+                        else:
+                            k=self.workersScaledDown[worker_index][1]
+                            scale_down[res]=[0] + k[res]
+                k=self.workersScaledDown[worker_index][0]
+                self.workersScaledDown[worker_index]=[k+1, scale_down]
+                return workers
 
-			else:
-				self.LastScaledDownWorker+=[worker_index]
-				worker.scale(worker.cpu-nb_of_units,worker.memory)
-				k=self.workersScaledDown[worker_index]
-				self.workersScaledDown[worker_index]=[k[0]+1, [nb_of_units] + k[1], [0] + k[2]]
-		elif worker.memory - nb_of_units >= MINIMUM_MEMORY:
-			if scaleSecondaryResource and worker.cpu > 1:
-				self.LastScaledDownWorker+=[worker_index]
-				worker.scale(worker.cpu-1, worker.memory-nb_of_units)
-				k=self.workersScaledDown[worker_index]
-				self.workersScaledDown[worker_index]=[k[0]+1, [1] + k[1], [nb_of_units] + k[2]]
-			else:
-				self.LastScaledDownWorker+=[worker_index]
-				worker.scale(worker.cpu, worker.memory-nb_of_units)
-				k=self.workersScaledDown[worker_index]
-				self.workersScaledDown[worker_index]=[k[0]+1, [0] + k[1], [nb_of_units] + k[2]]
-		return workers
 
 	def scale_worker_up(self, workers, worker_index, nb_of_units):
+		scale_up={res: [] for res in self.resources.keys()}
 		if not self.workersScaledUp:
-			self.workersScaledUp=[[1,[],[]] for w in workers]
+			self.workersScaledUp=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
 		worker=workers[worker_index]
-		scaleSecondaryResource=False
-		if self.workersScaledUp[worker_index][0] % 2 == 0:
-			scaleSecondaryResource=True
-		if self.CpuIsDominant and worker.cpu+nb_of_units <= self.MaxCPU:
-			if scaleSecondaryResource and worker.memory < self.MaxMem:
-				self.LastScaledUpWorker+=[worker_index]
-				worker.scale(worker.cpu+nb_of_units,worker.memory+1)
-				k=self.workersScaledUp[worker_index]
-				self.workersScaledUp[worker_index]=[k[0]+1, [nb_of_units] + k[1], [1] + k[2]]
-			else:
-				self.LastScaledUpWorker+=[worker_index]
-				worker.scale(worker.cpu+nb_of_units,worker.memory)
-				k=self.workersScaledUp[worker_index]
-				self.workersScaledUp[worker_index]=[k[0]+1, [nb_of_units] + k[1], [0] + k[2]]
-		elif worker.memory + nb_of_units <= self.MaxMem:
-			if scaleSecondaryResource and worker.cpu < self.MaxCPU:
-				self.LastScaledUpWorker+=[worker_index]
-				worker.scale(worker.cpu+1, worker.memory+nb_of_units)
-				k=self.workersScaledUp[worker_index]
-				self.workersScaledUp[worker_index]=[k[0]+1, [1] + k[1], [nb_of_units] + k[2]]
-			else:
-				self.LastScaledUpWorker+=[worker_index]
-				worker.scale(worker.cpu, worker.memory+nb_of_units)
-				k=self.workersScaledUp[worker_index]
-				self.workersScaledUp[worker_index]=[k[0]+1, [0] + k[1], [nb_of_units] + k[2]]
+		scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
+		for res in self.resources.keys():
+                        if (res in self.DominantResources) and worker.resources[res]+nb_of_units <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+nb_of_units)
+                            self.LastScaledUpWorker+=[worker_index]
+                            k=self.workersScaledUp[worker_index][1]
+                            scale_up[res]=[nb_of_units] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] + 1 <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+1)
+                            self.LastScaledUpWorker+=[worker_index]
+                            k=self.workersScaledUp[worker_index][1]
+                            scale_up[res]=[1] + k[res]
+                        else:
+                            k=self.workersScaledUp[worker_index][1]
+                            scale_up[res]=[0] + k[res]
+		k=self.workersScaledUp[worker_index][0]
+		self.workersScaledUp[worker_index]=[k+1, scale_up]
 		return workers
 
 

@@ -16,7 +16,6 @@ NODES=[{"cpu": 4,"memory": 8},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"
 
 def create_workers(elements, weights, base):
     resources=[v['size'] for v in elements]
-    print(resources)
     weights=weights
     workers=[]
     for i in range(0,len(resources)):
@@ -139,7 +138,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126,2,2,True,NODES)
+		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['weights'], ["cpu"],NODES)
 		workers=create_workers(alphabet['elements'], alphabet['weights'], base)
                 #workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
@@ -499,30 +498,41 @@ def generate_matrix2(initial_conf):
                 window=alphabet['searchWindow']
                 adaptive_window=AdaptiveWindow(window)
                 base=alphabet['base']
-                scalingFunction=ScalingFunction(172.2835754,-0.4288966,66.9643290,2,14,True,NODES)
-                workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+                scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['weights'], ["cpu"],NODES)
+                workers=create_workers(alphabet['elements'], alphabet['weights'], base)
+                for w in workers:
+                        print(w.resources)
                 # HARDCODED => make more generic by putting workers into an array
                 workers[0].setReplicas(min_replicas=0,max_replicas=0)
                 workers[1].setReplicas(min_replicas=0,max_replicas=0)
                 workers[2].setReplicas(min_replicas=0,max_replicas=0)
                 workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
                 #print(smallest_worker_of_conf(workers, [1,0,0,0]).worker_id)
-                scalingFunction.scale_worker_up(workers,0,2)
+                w2=workers[3].clone()
+                print(w2.equals(workers[2]))
                 for w in workers:
-                        print(str(w.cpu) + ", " + str(w.memory))
+                        print(w.resources)
+                print("scalingFunction.scale_worker_down(workers,0,2)")
+                scalingFunction.scale_worker_down(workers,0,2)
+                for w in workers:
+                        print(w.resources)
+             
+                print("scalingFunction.scale_worker_down(workers,0,1)")
+                scalingFunction.scale_worker_down(workers,0,1)
+                for w in workers:
+                        print(w.resources)
 
-                scalingFunction.scale_worker_up(workers,0,1)
+                print("scalingFunction.undo_scaled_down(workers)")
+                scalingFunction.undo_scaled_down(workers)
                 for w in workers:
-                        print(str(w.cpu) + ", " + str(w.memory))
-
-                print(scalingFunction.undo_scaled_up(workers))
+                        print(w.resources)
+                
+                print("scalingFunction.undo_scaled_down(workers)")
+                failed_worker=scalingFunction.undo_scaled_down(workers)
                 for w in workers:
-                        print(str(w.cpu) + ", " + str(w.memory))
-
-                print(scalingFunction.undo_scaled_up(workers))
-                for w in workers:
-                        print(str(w.cpu) + ", " + str(w.memory))
-                print(scalingFunction.undo_scaled_up(workers))
+                        print(w.resources)
+                print(failed_worker.resources)
+                
 
 def sort_results(results):
 	def score_for_sort(result):
