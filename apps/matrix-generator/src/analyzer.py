@@ -14,7 +14,7 @@ class ExperimentAnalizer:
 		runs=results[1:]
 		values=[]
 		score_index=header.index('score')
-                for run in runs:
+		for run in runs:
                         d={}
                         for h,v in zip(header.split(),run.split()):
                                 d[h]=v
