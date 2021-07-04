@@ -7,7 +7,7 @@ SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
 OPT_IN_FOR_RESTART = False
 CAREFUL_SCALING= False
-SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES=[1.0, 1.0]
+SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
 
 UNDO_SCALE_ACTION =  8544343532
 REDO_SCALE_ACTION = 999767537
@@ -291,19 +291,24 @@ class AdaptiveScaler:
                                 if CAREFUL_SCALING:
                                     return total_cost + 1 - conf_cost
                                 else:
-                                    return total_cost + 1 - conf_cost + int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[0]*float(self.ScalingFunction.MaxCPU) + SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[1]*float(self.ScalingFunction.MaxMem))
+                                    offset=0
+                                    for res in self.ScalingFunction.Max.keys():
+                                        offset+=int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[res]*float(self.ScalingFunction.Max[res]))
+                                    return total_cost + 1 - conf_cost + offset 
 
 		def is_worker_scaleable(worker_index):
                         nonlocal scale_down
                         if scale_down:
-                                return self.workers[worker_index].cpu > MINIMUM_CPU if self.ScalingFunction.CpuIsDominant else self.workers[worker_index].memory > MINIMUM_MEMORY
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                        return False
+                                return True
                         else:
-                                max_cpu = self.ScalingFunction.MaxCPU
-                                max_mem = self.ScalingFunction.MaxMem
-                                if self.ScalingFunction.CpuIsDominant:
-                                        return self.workers[worker_index].cpu < max_cpu
-                                else:
-                                        return self.workers[worker_index].memory < max_mem
+                                max_resources = self.ScalingFunction.Max
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == max_resources[res]:
+                                        return False
+                                return True
 
 		def scale_worker(workers, worker_index, nb_of_scaling_units):
                         nonlocal scale_down
@@ -333,8 +338,11 @@ class AdaptiveScaler:
 		totalcost = self.ScalingFunction.target(slo,tenant_nb)
 		new_workers=[w.clone() for w in self.workers]
 		for w in self.workers:
-			print(w.cpu,w.memory)
-		diff=difference(generator.resource_cost(self.workers, opt_conf), totalcost['cpu'] + totalcost['memory'])
+			print(w.resources)
+		absolute_totalcost=0
+		for res in totalcost.keys():
+			absolute_totalcost+=totalcost[res]
+		diff=difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
 		print("difference between resource_cost optimal conf and predicted total cost -1")
 		print(diff)
 		worker_index=1
@@ -344,7 +352,7 @@ class AdaptiveScaler:
 			if not (self.workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and isTestable(self.workers[wi],opt_conf) and is_worker_scaleable(wi):
 				if not self.workers[wi].worker_id in [fs.worker_id for fs in self.FailedScalings]:
 					scale_worker(new_workers, wi, 1)
-					diff = difference(generator.resource_cost(self.workers, opt_conf), totalcost['cpu'] + totalcost['memory'])
+					diff = difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
 					print("Rescaling worker " + str(self.workers[wi].worker_id))
 					self.ScaledWorkerIndex=self.workers[wi].worker_id-1
 					set_scaled()
@@ -354,7 +362,7 @@ class AdaptiveScaler:
 		if is_scaled() and not equal_workers(self.workers, new_workers):
 			self.workers=new_workers
 			for w in self.workers:
-				print(w.cpu,w.memory)
+				print(w.resources)
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
