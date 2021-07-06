@@ -336,11 +336,11 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 		if optimal_conf and optimal_conf_is_cost_effective:
 			if tipped_over_results and optimal_conf in tipped_over_results:
 				tipped_over_results.remove(optimal_conf)
-			tmp_combinations=sort_configs(workers,sorted_combinations)
+			tmp_combinations=sort_configs(workers,sorted_combinations, cost_aware=False)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
 				possible_removal=tmp_combinations[i]
-				if resource_cost(workers, possible_removal) < (resource_cost(workers, optimal_conf) ):
+				if resource_cost(workers, possible_removal,cost_aware=False) < (resource_cost(workers, optimal_conf, cost_aware=False) ):
 					print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
@@ -541,9 +541,9 @@ def sort_results(results):
 	return sorted(results,key=score_for_sort)
 
 
-def sort_configs(workers,combinations):
+def sort_configs(workers,combinations,cost_aware=True):
 	def cost_for_sort(elem):
-                return resource_cost(workers,elem)
+                return resource_cost(workers,elem,cost_aware)
 
 	sorted_list=sorted(combinations, key=cost_for_sort)
 	return sorted_list
@@ -569,14 +569,17 @@ def _sort(workers,base):
 
 
 
-def resource_cost(workers, conf):
+
+def resource_cost(workers, conf, cost_aware=True):
         cost=0
         for w,c in zip(workers,conf):
             worker_cost=0
             for resource_name in w.resources.keys():
-                 worker_cost+=w.resources[resource_name]*w.costs[resource_name]*c
+                 weight=w.costs[resource_name] if cost_aware else 1
+                 worker_cost+=w.resources[resource_name]*weight*c
             cost+=worker_cost
         return cost
+
 
 def _pairwise_transition_cost(previous_conf,conf):
         if not previous_conf:
