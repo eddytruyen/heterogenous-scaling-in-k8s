@@ -8,7 +8,7 @@ import socket
 import atexit
 
 
-GRAPHITE_HOST = '172.17.13.119'
+GRAPHITE_HOST = '172.19.140.16'
 GRAPHITE_PORT = 30688
 SLA='gold'
 

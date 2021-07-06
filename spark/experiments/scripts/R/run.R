@@ -200,11 +200,11 @@ workloads = readRDS(file=workloadfile)
 
 
 
-L=10
-metric="mean"
+L=7
+metric="median"
 workload="spark-bench"
-deployment="hps"
-operation="select c from csv"
+deployment="vps"
+operation="total"
 title="Horizontal auto-scaling cpu-threshold 80%"
 xl="Number of tenants"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
@@ -230,14 +230,14 @@ computeFunction <- function(y,z,frame) {
   return(f)
 }
 
-
+f <- computeFunction(y,z,frame)
 
 z=(1:L)
-f<-computeFunction(y,z,frame)
-coef(f)
 plotPoints(y~z)
-
+coef(f)
 plotFun(f(z)~z, z.lim = range(1:L), add = TRUE, col="blue")
+z=(1:100)
+plotFun(f(z)~z, z.lim = range(1:100), add = FALSE, col="blue")
 
 d=D(f(z)~z)
 

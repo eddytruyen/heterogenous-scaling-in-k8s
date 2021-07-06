@@ -17,7 +17,7 @@ Note the following node labels:
 pip3 requires python3
 
 ```
-$ pip3 install locust=1.3.1
+$ pip3 install locust
 ```
 
 Add locust to your PATH by adding the following line to your .bashrc or .bash_profile file
@@ -112,7 +112,7 @@ For generating local files with throughput and turnaround time, `Locust/locustfi
 
 To get metrics of the locust test into the graphite server ...
 
- * Edit `Locust/locustfile-exp1.py` to replace all instances of the `172.17.13.119` IP adres with the IP address of the VM on top of which the locust server runs. Leave the port `30698` as is.
+ * Edit `Locust/locustfile-exp1.py` to replace the IP of the queue host on the HttpLocust class for your queue endpoint.
  * Update the IP-address of the Locust service and the graphite service in `metrics.py`
  * Run:
 

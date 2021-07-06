@@ -1,0 +1,35 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: consumer3
+  namespace: gold
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: consumer3
+  minReplicas: 1
+  maxReplicas: 14
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 15
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 30
+      selectPolicy: Max
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+ssh -i thibautjeroen.pem ubuntu@172.19.140.15

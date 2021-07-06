@@ -19,30 +19,11 @@ public class SimpleController {
     @Autowired
     private MyQueue q;
 
-    @Autowired
-    private UserCount uc;
-
     private static final Logger log = LoggerFactory.getLogger(SimpleController.class);
-
-    @Autowired
-    public SimpleController() {
-    }
-
-    @RequestMapping("/login")
-    public String login() {
-        uc.loginUser();
-        return "User registered";
-    }
-
-    @RequestMapping("/logout")
-    public String logout() {
-        uc.logoutUser();
-        return "Logout";
-    }
 
     @RequestMapping("/push")
     public String push() {
-        q.addNewTask(10000);
+        q.addNewTask();
         return "Queue length " + q.getLength();
     }
 
@@ -57,20 +38,15 @@ public class SimpleController {
 
     @RequestMapping("/pull")
     public MyTask pull(@RequestParam(value = "ack", defaultValue = "") String ack){
-//        if(ack != null)System.out.println(ack);
-
         UUID ackUUID = this.getUUIDFromString(ack);
-        if(ackUUID != null )
-            log.info("piggybacked uuid " + ackUUID);
+//        if(ackUUID != null )
+//            log.info("piggybacked uuid " + ackUUID);
         MyTask t = q.getFirstTask(ackUUID);
-        if(t != null){
-//            log.info("Requested ");
-
-            return t;}
-        else{
-
+        if(t != null)
+            return t;
+        else
             return new MyTask(true);
-    }}
+    }
 
 
 

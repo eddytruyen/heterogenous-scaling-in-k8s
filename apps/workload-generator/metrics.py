@@ -4,7 +4,7 @@ import json
 import time
 import aiohttp
 
-LOCUST_HOST='http://172.17.13.119:8089'
+LOCUST_HOST='http://172.19.140.15:8089'
 # LOCUST_HOST='http://localhost:8089'
 
 
@@ -15,7 +15,7 @@ class Analyzer:
 		self.sock = socket.socket()
 
 		try:
-			self.sock.connect(('172.17.13.119', 30688))
+			self.sock.connect(('172.19.140.16', 30688))
 		except (socket.error):
 			print("Couldnt connect with the socket-server: terminating program...")
 
