@@ -6,9 +6,9 @@ import json
 import matrix
 from src.searchwindow import AdaptiveScaler, ScalingFunction
 from src.sla import WorkerConf
+from src.generator import create_workers as _create_workers
 
-NODES=[[4,8],[8,32],[8,32],[8,32],[8,16],[8,16],[8,16],[3,6]]
-
+NODES=[{"cpu": 4,"memory": 8},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 3,"memory": 6}]
 
 def create_app():
     app = Flask(__name__)
@@ -28,8 +28,8 @@ def create_app():
             sla=s
 
     alphabet=sla['alphabet']
-    scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126,2,2,True,NODES)
-    workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
+    scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES)
+    workers=_create_workers(alphabet['elements'], alphabet['costs'], alphabet['base'])
     # HARDCODED => make more generic by putting workers into an array
     workers[0].setReplicas(min_replicas=0,max_replicas=0)
     workers[1].setReplicas(min_replicas=0,max_replicas=0)
