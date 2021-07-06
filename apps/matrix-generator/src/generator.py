@@ -12,13 +12,11 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=1.0
 
-def create_workers(elements, weights, base):
+def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
-    print(resources)
-    weights=weights
     workers=[]
     for i in range(0,len(resources)):
-        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], weights=weights, min_replicas=0,max_replicas=base-1)
+        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], costs=costs[i], min_replicas=0,max_replicas=base-1)
         workers.append(worker_conf)
     return workers
 
@@ -36,7 +34,7 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		workers=create_workers(alphabet['elements'], alphabet['weights'], base)
+		workers=create_workers(alphabet['elements'], alphabet['costs'], base)
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
 		workers[1].setReplicas(min_replicas=0,max_replicas=0)
@@ -91,11 +89,11 @@ def remove_failed_confs(sorted_combinations, workers, results, optimal_conf, win
 		if optimal_conf:
 			print("Optimal Result")
 			print(optimal_conf)
-			tmp_combinations=sort_configs(workers,sorted_combinations)
+			tmp_combinations=sort_configs(workers,sorted_combinations,cost_aware=False)
 			failed_range=tmp_combinations.index(optimal_conf)
 			for i in range(0, failed_range):
 				possible_removal=tmp_combinations[i]
-				if _resource_cost(workers, possible_removal) < (_resource_cost(workers, optimal_conf) ):
+				if _resource_cost(workers, possible_removal, cost_aware=False) < (_resource_cost(workers, optimal_conf, cost_aware=False) ):
 					print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
@@ -231,9 +229,9 @@ def sort_results(results):
 	return sorted(results,key=score_for_sort)
 
 
-def sort_configs(workers,combinations):
+def sort_configs(workers,combinations,cost_aware=True):
 	def cost_for_sort(elem):
-                return _resource_cost(workers,elem)
+                return _resource_cost(workers,elem,cost_aware)
 
 	sorted_list=sorted(combinations, key=cost_for_sort)
 	return sorted_list
@@ -259,12 +257,13 @@ def _sort(workers,base):
 
 
 
-def _resource_cost(workers, conf):
+def _resource_cost(workers, conf, cost_aware=True):
         cost=0
         for w,c in zip(workers,conf):
             worker_cost=0
             for resource_name in w.resources.keys():
-                 worker_cost+=w.resources[resource_name]*w.weights[resource_name]*c
+                 weight=w.costs[resource_name] if cost_aware else 1 
+                 worker_cost+=w.resources[resource_name]*weight*c
             cost+=worker_cost
         return cost
 
@@ -317,13 +316,13 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 		min_replica_count=utils.array_to_delimited_str(sorted_combinations[min_replica_count_index], " ")
 		experiment=[]
 		for replicas,worker in zip(constant_ws_replicas,tmp_workers[:-nb_of_variable_workers]):
-			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.weights,replicas,replicas)
+			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.costs,replicas,replicas)
 			experiment.append(new_worker)
 		for i in reversed(range(0,nb_of_variable_workers)):
 			l=i+1
 			worker_min=min(map(lambda a: int(a[-l]),v))
 			worker_max=max(map(lambda a: int(a[-l]),v))
-			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].weights,worker_min,worker_max)
+			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].costs,worker_min,worker_max)
 			experiment.append(new_worker)
 		workers_exp.append([experiment, elementstr, min_replica_count,max_replica_count,nb_of_samples])
 		print("Min replicacount:" + min_replica_count)

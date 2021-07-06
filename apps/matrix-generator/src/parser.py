@@ -50,7 +50,7 @@ class ConfigParser:
 							'max':worker.max_replicas
 						},
 						'resources': worker.resources,
-						'weights': worker.weights
+						'costs': worker.costs
 					} for worker in sla.workers]
 				} 
 				for sla in self.slas]
