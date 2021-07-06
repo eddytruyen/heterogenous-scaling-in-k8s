@@ -20,13 +20,19 @@ NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
 
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c, resources, weights, dominant_resources, nodes):
+	def __init__(self, coef_a, coef_b, coef_c, resources, costs, dominant_resources, nodes):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
 		self.resources=resources
-		self.weights=weights
+		self.costs=costs
+		self.maxWeights={}
+		self.minWeights={}
+		for i in resources.keys():
+			self.maxWeights[i]=max([c[i] for  c in self.costs])
+		for i in resources.keys():
+			self.minWeights[i]=min([c[i] for  c in self.costs])
 		self.DominantResources=dominant_resources
 		self.Nodes = nodes
 		self.workersScaledDown = [] 

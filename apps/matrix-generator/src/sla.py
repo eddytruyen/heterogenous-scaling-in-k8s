@@ -7,17 +7,17 @@ class SLAConf:
 
 
 class WorkerConf:
-	def __init__(self, worker_id, resources, weights, min_replicas,max_replicas):
+	def __init__(self, worker_id, resources, costs, min_replicas,max_replicas):
 		self.worker_id = worker_id
 		self.resources = resources
-		self.weights = weights
+		self.costs = costs
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
 		self._flag = False
 		self._tested = False
 
 	def clone(self):
-		w2=WorkerConf(self.worker_id, self.resources.copy(), self.weights.copy(), self.min_replicas, self.max_replicas)
+		w2=WorkerConf(self.worker_id, self.resources.copy(), self.costs.copy(), self.min_replicas, self.max_replicas)
 		if self.isFlagged():
 			w2.flag()
 		if self.isTested():
@@ -51,21 +51,22 @@ class WorkerConf:
 
 	def equals(self, other):
 		if self.worker_id == other.worker_id and self.min_replicas == other.min_replicas and self.max_replicas == other.max_replicas:
-			if len(self.resources) != len(other.resources) or len(self.weights) != len(other.weights):
+			if len(self.resources) != len(other.resources) or len(self.costs) != len(other.costs):
 				return False
 			for i in self.resources.keys():
-				if not (i in other.resources.keys()) or not (i in other.weights.keys()):
+				if not (i in other.resources.keys()) or not (i in other.costs.keys()):
 					return False
 				if self.resources[i] != other.resources[i]:
 					return False
-				if self.weights[i] !=  other.weights[i]:
+				if self.costs[i] !=  other.costs[i]:
 					return False
 			return True
 		else:
 			return False
 	def str(self):
-		return_str =  "{workerId=" + str(self.worker_id)
-		for i in self.resources:
-			return_str+= ", " + i + "=" + str(self.resources[i]) 
-		return_str+= ", min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
+		return_str =  "{workerId=" + str(self.worker_id) + ", resources: {"
+		for i in self.resources.keys():
+			return_str+=i + ": { size: " + str(self.resources[i]) + ", cost: " + str(self.costs[i]) + "}, "
+		return_str=return_str[:-2]
+		return_str+= "}, min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
 		return return_str

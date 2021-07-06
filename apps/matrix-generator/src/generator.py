@@ -14,12 +14,11 @@ SAMPLING_RATE=1.0
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=-1.0
 NODES=[{"cpu": 4,"memory": 8},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 3,"memory": 6}]
 
-def create_workers(elements, weights, base):
+def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
-    weights=weights
     workers=[]
     for i in range(0,len(resources)):
-        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], weights=weights, min_replicas=0,max_replicas=base-1)
+        worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], costs=costs[i], min_replicas=0,max_replicas=base-1)
         workers.append(worker_conf)
     return workers
 
@@ -138,8 +137,8 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['weights'], ["cpu"],NODES)
-		workers=create_workers(alphabet['elements'], alphabet['weights'], base)
+		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES)
+		workers=create_workers(alphabet['elements'], alphabet['costs'], base)
                 #workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
 		workers[0].setReplicas(min_replicas=0,max_replicas=0)
@@ -282,9 +281,8 @@ def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, win
            return []
        target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
        total_cost=0
-       weights=adaptive_scaler.workers[0].weights
        for i in target.keys():
-           total_cost+=target[i]*weights[i]
+           total_cost+=target[i]
        print("total_cost = " + str(total_cost))
        index=0
        conf=combinations[index]
@@ -498,8 +496,8 @@ def generate_matrix2(initial_conf):
                 window=alphabet['searchWindow']
                 adaptive_window=AdaptiveWindow(window)
                 base=alphabet['base']
-                scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['weights'], ["cpu"],NODES)
-                workers=create_workers(alphabet['elements'], alphabet['weights'], base)
+                scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES)
+                workers=create_workers(alphabet['elements'], alphabet['costs'], base)
                 for w in workers:
                         print(w.resources)
                 # HARDCODED => make more generic by putting workers into an array
@@ -509,9 +507,11 @@ def generate_matrix2(initial_conf):
                 workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
                 #print(smallest_worker_of_conf(workers, [1,0,0,0]).worker_id)
                 w2=workers[3].clone()
-                print(w2.equals(workers[2]))
+                print(w2.equals(workers[3]))
                 for w in workers:
                         print(w.resources)
+                        print(w.costs)
+                print(workers[0].str())
                 print("scalingFunction.scale_worker_down(workers,0,2)")
                 scalingFunction.scale_worker_down(workers,0,2)
                 for w in workers:
@@ -574,7 +574,7 @@ def resource_cost(workers, conf):
         for w,c in zip(workers,conf):
             worker_cost=0
             for resource_name in w.resources.keys():
-                 worker_cost+=w.resources[resource_name]*w.weights[resource_name]*c
+                 worker_cost+=w.resources[resource_name]*w.costs[resource_name]*c
             cost+=worker_cost
         return cost
 
@@ -625,13 +625,13 @@ def _find_next_exp(sorted_combinations, workers, results, next_conf, base, windo
 		min_replica_count=utils.array_to_delimited_str(sorted_combinations[min_replica_count_index], " ")
 		experiment=[]
 		for replicas,worker in zip(constant_ws_replicas,tmp_workers[:-nb_of_variable_workers]):
-			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.weights,replicas,replicas)
+			new_worker=WorkerConf(worker.worker_id,worker.resources,worker.costs,replicas,replicas)
 			experiment.append(new_worker)
 		for i in reversed(range(0,nb_of_variable_workers)):
 			l=i+1
 			worker_min=min(map(lambda a: int(a[-l]),v))
 			worker_max=max(map(lambda a: int(a[-l]),v))
-			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].weights,worker_min,worker_max)
+			new_worker=WorkerConf(tmp_workers[-l].worker_id,tmp_workers[-l].resources,tmp_workers[-l].costs,worker_min,worker_max)
 			experiment.append(new_worker)
 		workers_exp.append([experiment, elementstr, min_replica_count,max_replica_count,nb_of_samples])
 		print("Min replicacount:" + min_replica_count)
