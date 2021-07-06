@@ -7,10 +7,10 @@ class SLAConf:
 
 
 class WorkerConf:
-	def __init__(self, worker_id, resources, weights, min_replicas,max_replicas):
+	def __init__(self, worker_id, resources, costs, min_replicas,max_replicas):
 		self.worker_id = worker_id
 		self.resources = resources
-		self.weights = weights
+		self.costs = costs
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
 
