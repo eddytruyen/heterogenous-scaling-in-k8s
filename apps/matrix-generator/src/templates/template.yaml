@@ -33,7 +33,7 @@ slas:
           max: {{value}}
           granularity: 1
         prefix:
-        suffix:
+        suffix: {% if key == "memory" %}Gi{% endif %} 
        {% endfor %}{% endfor %}
 {% endfor %}
 namespaceStrategy: NSPSLA
