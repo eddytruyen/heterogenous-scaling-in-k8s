@@ -23,6 +23,9 @@ def create_workers(elements, costs, base):
     return workers
 
 
+# update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
+# and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
+# tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
 def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf):
 	def get_start_and_window_for_next_experiments(opt_conf=None):
                                     nonlocal result
@@ -160,16 +163,21 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 	if str(startTenants) in d[sla['name']]:
 		currentResult=d[sla['name']][str(startTenants)]
 	elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
+		#copy result for startTenants-1 but set an artificial high  completion time
+		#so that a later actual result will always outperform this completion time.
 		startTenants=startTenants-1
 		previousResult=d[sla['name']][str(startTenants)]
 		tmp_result=previousResult.copy()
 		tmp_result['CompletionTime']=str(slo+float(999999))
 		d[sla['name']][str(startTenants+1)]=tmp_result
 	else:
+		# using curve-fitted scaling function to estimate configuration for tenants
 		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window)
 	if int(previous_tenants) > 0 and float(completion_time) > 0:
+		#if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
 		evaluate=True
 		if (currentResult or previousResult) and int(previous_tenants) == int(startTenants):
+		#a special case is when the lastly completed set of jobs has a cardinality that is the same as the  nr of tenants as queried by the scaler
 			if currentResult:
 				evaluate_current=True
 			if previousResult:
