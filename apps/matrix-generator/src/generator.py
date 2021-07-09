@@ -38,6 +38,8 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                     nonlocal adaptive_window
                                     nonlocal results
                                     nonlocal startTenants
+                                    nonlocal tenants
+                                    nonlocal previous_tenants
 
                                     only_failed_results=False if result else True
 
@@ -50,6 +52,8 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                         nonlocal adaptive_scaler
                                         nonlocal nr_of_experiments
                                         nonlocal startTenants
+                                        nonlocal tenants
+                                        nonlocal previous_tenants
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
@@ -66,7 +70,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                             previous_tenant_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb-1)])
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
-                                                    start_and_window=filter_samples(lst, adaptive_scaler.workers,previous_tenant_conf, start, window, adaptive_scaler.ScaledWorkerIndex)
+                                                    start_and_window=filter_samples(lst,adaptive_scaler.workers,previous_tenant_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, adaptive_scaler.ScaledWorkerIndex)
                                                     print([utils.array_to_str(el) for el in lst])
                                                     return start_and_window
                                             else:
@@ -96,7 +100,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                             previous_tenant_conf=[]
                                                             if str(tenant_nb-1) in d[sla['name']]:
                                                                   previous_tenant_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb-1)])
-                                                            start_and_window=filter_samples(lst,[],previous_tenant_conf, 0, window)
+                                                            start_and_window=filter_samples(lst,[],previous_tenant_conf, int(tenants) > int(previous_tenants), 0, window)
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                             print([utils.array_to_str(el) for el in lst])
                                                             return start_and_window
@@ -131,7 +135,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 	exp_path=initial_conf['output']
 	util_func=initial_conf['utilFunc']
 	slas=initial_conf['slas']
-	adaptive_scaler=adaptive_scalers[init]
+	adaptive_scaler=adaptive_scalers['init']
 
 	d={}
 	sla={}
@@ -214,6 +218,12 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 			print("Measured completion time is " + str(metric))
 			conf=get_conf(adaptive_scaler.workers,result)
 			print(conf)
+			tested_configuration=utils.array_to_delimited_str(conf,delimiter='_')
+			if not (tested_configuration in adaptive_scalers.keys()):
+				adaptive_scaler=AdaptiveScaler(adaptive_scaler.workers, adaptive_scaler.ScalingFunction)
+				adaptive_scalers[tested_configuration]=adaptive_scaler
+			else:
+				adaptive_scaler=adaptive_scalers[tested_configuration]
 		print("New cycle")
 		for w in adaptive_scaler.workers:
 			print(w.resources)
@@ -341,9 +351,6 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		next_conf=lst[start_and_window[0]]
 		d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
 	#create adaptive_scaler for the configuration if it does not yet exist
-	found_configuration=utils.array_to_delimited_str(get_conf(adaptive_scaler.workers, d[sla['name']][tenants]),delimiter='_')
-	if not (found_configuration in adaptive_scalers.keys()):
-		adaptive_scalers[found_configuration]=AdaptiveScaler(adaptive_scaler.workers, adaptive_scaler.ScalingFunction)
 	print("Saving filtered results into matrix")
 	utils.saveToYaml(d,'Results/result-matrix.yaml')
 

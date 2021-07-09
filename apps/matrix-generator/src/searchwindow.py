@@ -5,7 +5,7 @@ from . import utils
 MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
-OPT_IN_FOR_RESTART = False
+OPT_IN_FOR_RESTART = True
 CAREFUL_SCALING= False
 SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
 
@@ -176,14 +176,14 @@ class AdaptiveScaler:
 		for w in workers:
 			self._tested[w.worker_id]=False
 
-	def isTested(worker):
-                return self._tested[w.worker_id]
+	def isTested(self, worker):
+		return self._tested[worker.worker_id]
 
-	def tested(worker):
-                self._tested[w.worker_id]=True
+	def tested(self, worker):
+		self._tested[worker.worker_id]=True
 
-	def untest(worker):
-                self._tested[w.worker_id]=False
+	def untest(self, worker):
+                self._tested[worker.worker_id]=False
 
 	def status(self):
                 print("ScalingDownPhase, ScalingUpPhase, Tipped_over_confs, Current_tipped_over_conf, initial_confs")
@@ -225,7 +225,7 @@ class AdaptiveScaler:
 		def tag_tested_workers(conf):
                         for k,v in enumerate(conf):
                                 if v > 0:
-                                        self.workers[k].tested()
+                                        self.tested(self.workers[k])
 
 		tag_tested_workers(conf)
 		states = []
@@ -264,7 +264,7 @@ class AdaptiveScaler:
 		def isTestable(worker, conf):
                       nonlocal scale_down
                       if scale_down:
-                          if worker.isTested():
+                          if self.isTested(worker):
                                 return True
                           w = largest_worker_of_conf(conf)
                           return worker.worker_id >= w.worker_id
