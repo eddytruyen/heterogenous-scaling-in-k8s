@@ -14,8 +14,7 @@ def home():
     previous_tenants = request.args.get('previoustenants')
     previous_conf = request.args.get('previousconf')
 
-    adaptive_scaler=current_app.config["adaptive_scaler"]
-    print(adaptive_scaler.ScalingFunction.CoefA)
+    adaptive_scalers=current_app.config["adaptive_scalers"]
     initial_config=current_app.config["initial_config"]
 
     slas=initial_config['slas']
@@ -23,7 +22,7 @@ def home():
         if s['name'] == namespace:
             sla=s
     previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
-    generate_matrix(initial_config, adaptive_scaler, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
+    generate_matrix(initial_config, adaptive_scalers, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
 
     config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
     print(config_data)

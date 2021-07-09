@@ -37,9 +37,8 @@ def create_app():
     workers[3].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
     #workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
     adaptive_scalers={}
-    for w in workers:
-        adaptive_scalers[w.worker_id]=AdaptiveScaler(workers, scalingFunction)
-    app.config["adaptive_scaler"] = adaptive_scalers
+    adaptive_scalers["init"]=AdaptiveScaler(workers, scalingFunction)
+    app.config["adaptive_scalers"] = adaptive_scalers
     app.config["initial_config"] = initial_config
     app.config["nodes"] = NODES
 

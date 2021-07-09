@@ -131,7 +131,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 	exp_path=initial_conf['output']
 	util_func=initial_conf['utilFunc']
 	slas=initial_conf['slas']
-	adaptive_scaler=list(d.adaptive_scalers)[0]
+	adaptive_scaler=adaptive_scalers[init]
 
 	d={}
 	sla={}
@@ -340,6 +340,10 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		print([utils.array_to_str(el) for el in lst])
 		next_conf=lst[start_and_window[0]]
 		d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
+	#create adaptive_scaler for the configuration if it does not yet exist
+	found_configuration=utils.array_to_delimited_str(get_conf(adaptive_scaler.workers, d[sla['name']][tenants]),delimiter='_')
+	if not (found_configuration in adaptive_scalers.keys()):
+		adaptive_scalers[found_configuration]=AdaptiveScaler(adaptive_scaler.workers, adaptive_scaler.ScalingFunction)
 	print("Saving filtered results into matrix")
 	utils.saveToYaml(d,'Results/result-matrix.yaml')
 
