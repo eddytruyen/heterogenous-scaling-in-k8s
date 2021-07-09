@@ -26,7 +26,7 @@ def create_workers(elements, costs, base):
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
-def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf):
+def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completion_time, previous_tenants, previous_conf):
 	def get_start_and_window_for_next_experiments(opt_conf=None):
                                     nonlocal result
                                     nonlocal slo
@@ -131,6 +131,7 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 	exp_path=initial_conf['output']
 	util_func=initial_conf['utilFunc']
 	slas=initial_conf['slas']
+	adaptive_scaler=list(d.adaptive_scalers)[0]
 
 	d={}
 	sla={}
@@ -160,6 +161,7 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 	evaluate_previous=False
 	currentResult={}
 	previousResult={}
+	unflag_all_workers(adaptive_scaler.workers)
 	if str(startTenants) in d[sla['name']]:
 		currentResult=d[sla['name']][str(startTenants)]
 	elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
@@ -187,6 +189,8 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 		tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
 		next_conf=get_conf(adaptive_scaler.workers, tmp_result)
 		results=[tmp_result]
+                #flag the workers of the previous_conf
+		flag_workers(adaptive_scaler.workers, previous_conf)
 
 	#tenant_nb=1
 	retry_attempt=0
@@ -199,6 +203,7 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 	start=0
 	if next_conf:
 		start=lst.index(next_conf)
+	nr_of_experiments=1
 	while tenant_nb <= maxTenants and evaluate:
 		#slo=float(sla['slos']['completionTime'])
 		print("SLO is " + str(slo))
@@ -320,6 +325,12 @@ def generate_matrix(initial_conf, adaptive_scaler, namespace, tenants, completio
 		d[sla['name']][tenants]=results[0]
 	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
+        #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
+        #we search from the known optimal for the requested nr of jobs until a configuration is found that meets
+        #the different constraints of transition cost and shared number of replicas. 
+        #However this config should not be stored in the matrix because we need to remember the current found optimimum
+	#therefore we store it in a different yaml file
+	#Note: transition cost only applies when scaling up to a higher number of tenants.
 	if previous_conf and not (evaluate_current or evaluate_previous):
 		print("Moving filtered samples in sorted combinations after the window")
 		print([utils.array_to_str(el) for el in lst])
@@ -393,6 +404,10 @@ def all_flagged_conf(workers, conf):
 		if w.isFlagged() and c == 0:
 			result=False
 	return  result
+
+def unflag_all_workers(workers):
+    for w in workers:
+        w.unflag()
 
 def flag_workers(workers, conf):
 	for k,v in enumerate(conf):
