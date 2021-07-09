@@ -70,7 +70,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                             previous_tenant_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb-1)])
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
-                                                    start_and_window=filter_samples(lst,adaptive_scaler.workers,previous_tenant_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, adaptive_scaler.ScaledWorkerIndex)
+                                                    start_and_window=filter_samples(lst,adaptive_scaler.workers,previous_tenant_conf, int(tenants) > int(previous_tenants), start, window, adaptive_scaler.ScaledWorkerIndex) 
                                                     print([utils.array_to_str(el) for el in lst])
                                                     return start_and_window
                                             else:
@@ -218,9 +218,9 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 			print("Measured completion time is " + str(metric))
 			conf=get_conf(adaptive_scaler.workers,result)
 			print(conf)
-			tested_configuration=utils.array_to_delimited_str(conf,delimiter='_')
+			tested_configuration=str(tenant_nb)+ "X" + utils.array_to_delimited_str(conf,delimiter='_')
 			if not (tested_configuration in adaptive_scalers.keys()):
-				adaptive_scaler=AdaptiveScaler(adaptive_scaler.workers, adaptive_scaler.ScalingFunction)
+				adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
 				adaptive_scalers[tested_configuration]=adaptive_scaler
 			else:
 				adaptive_scaler=adaptive_scalers[tested_configuration]

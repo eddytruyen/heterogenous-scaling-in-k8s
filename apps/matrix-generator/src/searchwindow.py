@@ -43,6 +43,9 @@ class ScalingFunction:
 		self.LastScaledDownWorker = []
 		self.LastScaledUpWorker = []
 
+	def clone(self):
+		return ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+
 	def maximum(self,x1,x2):
 		fprojection=[self.eval(x) for x in range(x1,x2+1,1)]
 		fprojectionmax=max(fprojection)
