@@ -172,6 +172,18 @@ class AdaptiveScaler:
 		self.current_tipped_over_conf = None
 		self.failed_results=[]
 		self.initial_confs=[]
+		self._tested={}
+		for w in workers:
+			self._tested[w.worker_id]=False
+
+	def isTested(worker):
+		return self._tested[w.worker_id]
+
+	def tested(worker):
+		self._tested[w.worker_id]=True
+
+	def untest(worker):
+                self._tested[w.worker_id]=False
 
 	def status(self):
                 print("ScalingDownPhase, ScalingUpPhase, Tipped_over_confs, Current_tipped_over_conf, initial_confs")
@@ -213,7 +225,7 @@ class AdaptiveScaler:
 		def tag_tested_workers(conf):
                         for k,v in enumerate(conf):
                                 if v > 0:
-                                        self.workers[k].tested()
+                                        self.tested(workers[k])
 
 		tag_tested_workers(conf)
 		states = []

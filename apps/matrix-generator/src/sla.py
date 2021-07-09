@@ -14,7 +14,6 @@ class WorkerConf:
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
 		self._flag = False
-		self._tested = False
 
 	def clone(self):
 		w2=WorkerConf(self.worker_id, self.resources.copy(), self.costs.copy(), self.min_replicas, self.max_replicas)
@@ -30,15 +29,6 @@ class WorkerConf:
 
 	def scale(self, resource, amount):
 		self.resources[resource] = amount
-
-	def isTested(self):
-		return self._tested
-
-	def tested(self):
-		self._tested=True
-
-	def untest(self):
-		self._tested=False
 
 	def isFlagged(self):
 		return self._flag

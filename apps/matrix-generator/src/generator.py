@@ -261,7 +261,7 @@ def generate_matrix(initial_conf):
 						retry_attempt+=nr_of_experiments
 
 			for w in adaptive_scaler.workers:
-				w.untest()
+				adaptive_scaler.untest(w)
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 	print("Saving results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
