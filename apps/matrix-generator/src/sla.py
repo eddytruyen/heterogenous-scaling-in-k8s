@@ -19,8 +19,6 @@ class WorkerConf:
 		w2=WorkerConf(self.worker_id, self.resources.copy(), self.costs.copy(), self.min_replicas, self.max_replicas)
 		if self.isFlagged():
 			w2.flag()
-		if self.isTested():
-			w2.tested()
 		return w2
 
 	def setReplicas(self, min_replicas, max_replicas):
@@ -58,5 +56,5 @@ class WorkerConf:
 		for i in self.resources.keys():
 			return_str+=i + ": { size: " + str(self.resources[i]) + ", cost: " + str(self.costs[i]) + "}, "
 		return_str=return_str[:-2]
-		return_str+= "}, min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged()) + ", tested=" + str(self.isTested()) + "}" 
+		return_str+= "}, min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged())  + "}" 
 		return return_str
