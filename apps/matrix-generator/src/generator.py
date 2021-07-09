@@ -291,7 +291,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					result={}
 					retry_attempt+=nr_of_experiments
 		for w in adaptive_scaler.workers:
-			w.untest()
+			adaptive_scaler.untest(w)
 		if state == COST_EFFECTIVE_RESULT and evaluate_previous:
 			 d[sla['name']][str(tenant_nb+1)]=d[sla['name']][str(tenant_nb)].copy()
 		if state != COST_EFFECTIVE_RESULT and not str(tenant_nb) in d[sla['name']]:
