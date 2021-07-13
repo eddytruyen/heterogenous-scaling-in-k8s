@@ -83,7 +83,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                     if not only_failed_results:
-                                                            d[sla['name']][str(tenant_nb)]=result
+                                                            d[sla['name']][str(tenant_nb)]=result.copy()
                                                             tenant_nb+=1
                                                             retry_attempt=0
                                                             next_conf=opt_conf
@@ -173,6 +173,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		previousResult=d[sla['name']][str(startTenants)]
 		tmp_result=previousResult.copy()
 		tmp_result['CompletionTime']=str(slo+float(999999))
+		print(str(startTenants+1))
 		d[sla['name']][str(startTenants+1)]=tmp_result
 	else:
 		# using curve-fitted scaling function to estimate configuration for tenants
@@ -214,6 +215,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 	print("Starting at: " + str(start))
 	nr_of_experiments=1
 	while tenant_nb <= maxTenants and evaluate:
+		print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
 		#slo=float(sla['slos']['completionTime'])
 		print("SLO is " + str(slo))
 		result=find_optimal_result(adaptive_scaler.workers,results,slo)
@@ -260,7 +262,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 			adaptive_scaler.failed_results=[]
 			if str(tenant_nb) in d[sla['name']]:
 				x=d[sla['name']][str(tenant_nb)]
-				if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, x)) >= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)) or float(x['CompletionTime']) > slo:
+				if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, x)) >= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)) or float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo:
 					d[sla['name']][str(tenant_nb)]=result.copy()
 			else:
 				d[sla['name']][str(tenant_nb)]=result.copy()
@@ -322,22 +324,22 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 					results.append(create_result(adaptive_scaler,str(float(slo)+999999.000), res, sla['name']))
 			sort_results(adaptive_scaler.workers,slo,results)
-			d[sla['name']][str(tenant_nb)]=results[0]
+			d[sla['name']][str(tenant_nb)]=results[0].copy()
 		tenant_nb+=1
 	if predictedConf:
 		next_exp=_find_next_exp(lst,adaptive_scaler.workers,predictedConf,base,adaptive_window.adapt_search_window([],window,False))
 		nr_of_experiments=len(next_exp)
 		for i,ws in enumerate(next_exp):
 			#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
-			sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+			sla_conf=SLAConf(sla['name'],int(tenants),ws[0],sla['slos'])
 			samples=int(ws[4]*SAMPLING_RATE)
 			if samples == 0:
 				samples=1
 			results=[]
-			for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+			for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+tenants+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
 				results.append(create_result(adaptive_scaler, str(float(slo)+999999.000), res, sla['name']))
 		sort_results(adaptive_scaler.workers,slo,results)
-		d[sla['name']][tenants]=results[0]
+		d[sla['name']][tenants]=results[0].copy()
 	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
         #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
@@ -364,7 +366,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 
 def flag_all_workers(results, nb_tenants,adaptive_scaler, slo):
     for t in results.keys():
-        if int(t) < nb_tenants and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
+        if int(t) < nb_tenants: # and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
             conf=get_conf(adaptive_scaler.workers, results[t])
             flag_workers(adaptive_scaler.workers, conf)
 
