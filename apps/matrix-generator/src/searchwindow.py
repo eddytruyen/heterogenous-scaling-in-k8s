@@ -5,7 +5,7 @@ from . import utils
 MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
-OPT_IN_FOR_RESTART = True
+OPT_IN_FOR_RESTART = False
 CAREFUL_SCALING= False
 SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
 
@@ -178,6 +178,9 @@ class AdaptiveScaler:
 		self._tested={}
 		for w in workers:
 			self._tested[w.worker_id]=False
+
+	def hasScaled(self):
+		return self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)
 
 	def isTested(self, worker):
 		return self._tested[worker.worker_id]
