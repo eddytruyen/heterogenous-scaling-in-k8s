@@ -21,7 +21,10 @@ def home():
     for s in slas:
         if s['name'] == namespace:
             sla=s
-    previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
+    if previous_conf:
+        previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
+    else:
+        previous_conf_array=[]
     generate_matrix(initial_config, adaptive_scalers, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
 
     config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
