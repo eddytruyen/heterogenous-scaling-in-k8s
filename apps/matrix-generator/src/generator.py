@@ -3,7 +3,7 @@ from .parser import ConfigParser
 from .experiment import SLAConfigExperiment
 from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
-from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_EFFECTIVE_RESULT, NO_RESULT, NO_COST_EFFECTIVE_RESULT, UNDO_SCALE_ACTION, REDO_SCALE_ACTION, RETRY_WITH_ANOTHER_WORKER_CONFIGURATION,NO_COST_EFFECTIVE_ALTERNATIVE,SCALING_DOWN_TRESHOLD,SCALING_UP_THRESHOLD
+from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_EFFECTIVE_RESULT, NO_RESULT, NO_COST_EFFECTIVE_RESULT, UNDO_SCALE_ACTION, REDO_SCALE_ACTION, RETRY_WITH_ANOTHER_WORKER_CONFIGURATION,NO_COST_EFFECTIVE_ALTERNATIVE,SCALING_DOWN_TRESHOLD,SCALING_UP_THRESHOLD,MINIMUM_RESOURCES
 from functools import reduce
 import yaml
 import sys
@@ -45,6 +45,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                         nonlocal previous_conf
                                         nonlocal maxTenants
                                         nonlocal opt_conf
+                                        nonlocal start
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
@@ -102,10 +103,31 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                             print([utils.array_to_str(el) for el in lst])
                                                             return start_and_window
                                             else:
-                                                    adaptive_scaler.reset()
-                                                    adaptive_scaler.set_tipped_over_failed_confs(results, slo)
-                                                    conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
-                                                    return process_states(conf_and_states)
+                                                    #changePhase=True
+                                                    #for w in adaptive_scaler.workers:
+                                                    #        for res in w.resources.keys():
+                                                    #              if w.resources[res] ==  MINIMUM_RESOURCES[res]:
+                                                    #                   changePhase=False
+                                                    #if changePhase:
+                                                            adaptive_scaler.reset()
+                                                            adaptive_scaler.set_tipped_over_failed_confs(results, slo)
+                                                            conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                                            return process_states(conf_and_states)
+                                                    #else:
+                                                    #        adaptive_scaler.redo_scale_action()
+                                                    #        adaptive_scaler.reset(changePhase=False)
+                                                    #        print("Moving filtered samples in sorted combinations after the window")
+                                                    #        print([utils.array_to_str(el) for el in lst])
+                                                    #        previous_tenant_conf=[]
+                                                    #        previous_nb_of_tenants=maxTenants
+                                                    #        if previous_conf:
+                                                    #              previous_tenant_conf=previous_conf
+                                                    #              previous_nb_of_tenants=int(previous_tenants)
+                                                    #        start_and_window=filter_samples(lst,[],previous_tenant_conf, int(tenants) > previous_nb_of_tenants, start, window)
+                                                    #        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                                    #        print([utils.array_to_str(el) for el in lst])
+                                                    #       return start_and_window
+
 
                                     if not opt_conf and result:
                                             opt_conf=get_conf(adaptive_scaler.workers, result)
