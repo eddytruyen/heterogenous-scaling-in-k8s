@@ -191,11 +191,15 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		maxTenants=int(previous_tenants)
 		tested_configuration=str(tenant_nb)+ "X" + utils.array_to_delimited_str(previous_conf,delimiter='_')
 		if not (tested_configuration in adaptive_scalers.keys()):
+			print("NOT THE SECOND TIME")
 			adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
 			adaptive_scalers[tested_configuration]=adaptive_scaler
 		else:
+			print("THE SECOND TIME!!!")
 			adaptive_scaler=adaptive_scalers[tested_configuration]
 			unflag_all_workers(adaptive_scaler.workers)
+		print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+		print(adaptive_scaler.ScalingFunction.workersScaledDown)
 		flag_all_workers(d[sla['name']], tenant_nb, adaptive_scaler, slo)
 		tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
 		next_conf=get_conf(adaptive_scaler.workers, tmp_result)
@@ -254,6 +258,16 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					d[sla['name']][str(tenant_nb)]=create_result(adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name']) 
 			else:
 				d[sla['name']][str(tenant_nb)]=create_result(adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+			if next_conf != previous_conf:	
+				print("REALLY!!")
+				tested_configuration2=str(tenant_nb)+ "X" + utils.array_to_delimited_str(next_conf,delimiter='_')
+				if not (tested_configuration2 in adaptive_scalers.keys()):
+					adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
+					adaptive_scalers[tested_configuration2]=adaptive_scaler
+				else:
+					adaptive_scaler2=adaptive_scalers[tested_configuration2]
+					adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone()
+					adaptive_scaler=adaptive_scaler2
 		elif state == COST_EFFECTIVE_RESULT:
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:
