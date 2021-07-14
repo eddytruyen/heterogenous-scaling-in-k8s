@@ -512,27 +512,30 @@ def generate_matrix2(initial_conf):
                         print(w.resources)
                         print(w.costs)
                 print(workers[0].str())
-                print("scalingFunction.scale_worker_down(workers,0,2)")
-                scalingFunction.scale_worker_down(workers,0,2)
+                print("scalingFunction.scale_worker_down(workers,0,1)")
+                scalingFunction.scale_worker_down(workers,0,1)
+                print(scalingFunction.workersScaledDown)
                 for w in workers:
                         print(w.resources)
-             
+                print("scalingFunction.scale_worker_down(workers,0,1)")
+                scalingFunction.scale_worker_down(workers,0,1)
+                print(scalingFunction.workersScaledDown)
+                for w in workers:
+                        print(w.resources)
+                print("scalingFunction.undo_scaled_down(workers)")
+                scalingFunction.undo_scaled_down(workers)
+                print(scalingFunction.workersScaledDown)
+                for w in workers:
+                        print(w.resources)
                 print("scalingFunction.scale_worker_down(workers,0,1)")
                 scalingFunction.scale_worker_down(workers,0,1)
                 for w in workers:
                         print(w.resources)
-
+                print(scalingFunction.workersScaledDown)
                 print("scalingFunction.undo_scaled_down(workers)")
                 scalingFunction.undo_scaled_down(workers)
                 for w in workers:
                         print(w.resources)
-                
-                print("scalingFunction.undo_scaled_down(workers)")
-                failed_worker=scalingFunction.undo_scaled_down(workers)
-                for w in workers:
-                        print(w.resources)
-                print(failed_worker.resources)
-                
 
 def sort_results(results):
 	def score_for_sort(result):
