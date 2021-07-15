@@ -351,7 +351,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
         #However this config should not be stored in the matrix because we need to remember the current found optimimum
 	#therefore we store it in a different yaml file
 	#Note: transition cost only applies when scaling up to a higher number of tenants.
-	if previous_conf and not (evaluate_current or evaluate_previous) and not adaptive_scaler.hasScaled():
+	if previous_conf and not (evaluate_current or evaluate_previous): #and not adaptive_scaler.hasScaled():
 		print("Moving filtered samples in sorted combinations after the window")
 		print([utils.array_to_str(el) for el in lst])
 		next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])
