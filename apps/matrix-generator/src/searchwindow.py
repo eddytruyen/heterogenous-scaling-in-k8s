@@ -43,6 +43,9 @@ class ScalingFunction:
 		self.LastScaledDownWorker = []
 		self.LastScaledUpWorker = []
 
+	def clone(self):
+		return ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+
 	def maximum(self,x1,x2):
 		fprojection=[self.eval(x) for x in range(x1,x2+1,1)]
 		fprojectionmax=max(fprojection)
@@ -176,6 +179,9 @@ class AdaptiveScaler:
 		for w in workers:
 			self._tested[w.worker_id]=False
 
+	def hasScaled(self):
+		return self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)
+
 	def isTested(self, worker):
 		return self._tested[worker.worker_id]
 
@@ -261,7 +267,7 @@ class AdaptiveScaler:
 
 	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True): #only_failed_results=False):
 
-		def isTestable(worker, conf):
+		def is_testable(worker, conf):
                       nonlocal scale_down
                       if scale_down:
                           if self.isTested(worker):
@@ -314,19 +320,32 @@ class AdaptiveScaler:
                                         offset+=int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[res]*float(self.ScalingFunction.Max[res]))
                                     return total_cost + 1 - conf_cost + offset 
 
-		def is_worker_scaleable(worker_index):
+		def is_worker_scaleable(worker):
                         nonlocal scale_down
                         if scale_down:
                                 for res in self.ScalingFunction.DominantResources:
-                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                    if worker.resources[res] == MINIMUM_RESOURCES[res]:
                                         return False
                                 return True
                         else:
                                 max_resources = self.ScalingFunction.Max
                                 for res in self.ScalingFunction.DominantResources:
-                                    if self.workers[worker_index].resources[res] == max_resources[res]:
+                                    if worker.resources[res] == max_resources[res]:
                                         return False
                                 return True
+                
+		def worker_is_notflagged_testable_and_scaleable(worker,conf):
+                       if not (worker.isFlagged() and not OPT_IN_FOR_RESTART) and is_testable(worker,conf) and is_worker_scaleable(worker):
+                                return True
+                       else:
+                                return False
+
+		def workers_are_notflagged_testable_and_scaleable(conf):
+			for w in self.workers:
+				if worker_is_notflagged_testable_and_scaleable(w,conf):
+					print("Worker " + str(w.worker_id) + " is still scaleable")
+					return True
+			return False
 
 		def scale_worker(workers, worker_index, nb_of_scaling_units):
                         nonlocal scale_down
@@ -367,7 +386,7 @@ class AdaptiveScaler:
 		L=len(self.workers)
 		while diff > 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
-			if not (self.workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and isTestable(self.workers[wi],opt_conf) and is_worker_scaleable(wi):
+			if worker_is_notflagged_testable_and_scaleable(self.workers[wi],opt_conf):
 				if not self.workers[wi].worker_id in [fs.worker_id for fs in self.FailedScalings]:
 					scale_worker(new_workers, wi, 1)
 					diff = difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
@@ -384,10 +403,33 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
-			states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
+			if scale_down and workers_are_notflagged_testable_and_scaleable(opt_conf):
+				self.redo_scale_action()
+				self.initial_confs=[]
+				return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
+			else:
+				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
 		return states
 
+	def is_worker_scaleable(self,worker_index):
+                        if self.ScalingDownPhase:
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                        return False
+                                return True
+                        else:
+                                max_resources = self.ScalingFunction.Max
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == max_resources[res]:
+                                        return False
+                                return True
 
+	def workers_are_scaleable(self):
+		for i,w in enumerate(self.workers):
+			if self.is_worker_scaleable(i):
+				print("Worker " + str(i) + " is still scaleable")
+				return True
+		return False
 
 	def redo_scale_action(self):
                 print("CURRENT CONFS")
@@ -445,7 +487,6 @@ class AdaptiveScaler:
                         state=states.pop(0)
                         #result_and_conf=self.initial_confs[-1]
                 if self.ScalingUpPhase and self.initial_confs:
-                        print("YEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSS")
                         copy_of_states+=[REDO_SCALE_ACTION]
                         result_conf_and_workers=self.redo_scale_action()
                 return [result_conf_and_workers, copy_of_states]
