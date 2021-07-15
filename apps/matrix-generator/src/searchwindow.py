@@ -267,7 +267,7 @@ class AdaptiveScaler:
 
 	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True): #only_failed_results=False):
 
-		def isTestable(worker, conf):
+		def is_testable(worker, conf):
                       nonlocal scale_down
                       if scale_down:
                           if self.isTested(worker):
@@ -320,19 +320,27 @@ class AdaptiveScaler:
                                         offset+=int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[res]*float(self.ScalingFunction.Max[res]))
                                     return total_cost + 1 - conf_cost + offset 
 
-		def is_worker_scaleable(worker_index):
+		def is_worker_scaleable(worker):
                         nonlocal scale_down
                         if scale_down:
                                 for res in self.ScalingFunction.DominantResources:
-                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                    if worker.resources[res] == MINIMUM_RESOURCES[res]:
                                         return False
                                 return True
                         else:
                                 max_resources = self.ScalingFunction.Max
                                 for res in self.ScalingFunction.DominantResources:
-                                    if self.workers[worker_index].resources[res] == max_resources[res]:
+                                    if worker.resources[res] == max_resources[res]:
                                         return False
                                 return True
+
+		def testable_workers_are_scaleable(conf):
+			for w in self.workers:
+				if is_testable(w,conf) and is_worker_scaleable(w):
+					print("Worker " + str(w.worker_id) + " is still scaleable")
+					return True
+			print("YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES")
+			return False
 
 		def scale_worker(workers, worker_index, nb_of_scaling_units):
                         nonlocal scale_down
@@ -373,7 +381,7 @@ class AdaptiveScaler:
 		L=len(self.workers)
 		while diff > 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
-			if not (self.workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and isTestable(self.workers[wi],opt_conf) and is_worker_scaleable(wi):
+			if not (self.workers[wi].isFlagged() and not OPT_IN_FOR_RESTART) and is_testable(self.workers[wi],opt_conf) and is_worker_scaleable(self.workers[wi]):
 				if not self.workers[wi].worker_id in [fs.worker_id for fs in self.FailedScalings]:
 					scale_worker(new_workers, wi, 1)
 					diff = difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
@@ -390,10 +398,34 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
-			states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
+			if testable_workers_are_scaleable(opt_conf):
+				self.redo_scale_action()
+				self.initial_confs=[]
+				return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
+			else:
+				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
 		return states
 
+	def is_worker_scaleable(self,worker_index):
+                        if self.ScalingDownPhase:
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                        return False
+                                return True
+                        else:
+                                max_resources = self.ScalingFunction.Max
+                                for res in self.ScalingFunction.DominantResources:
+                                    if self.workers[worker_index].resources[res] == max_resources[res]:
+                                        return False
+                                return True
 
+	def workers_are_scaleable(self):
+		for i,w in enumerate(self.workers):
+			if self.is_worker_scaleable(i):
+				print("Worker " + str(i) + " is still scaleable")
+				return True
+		print("YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES")
+		return False
 
 	def redo_scale_action(self):
                 print("CURRENT CONFS")
