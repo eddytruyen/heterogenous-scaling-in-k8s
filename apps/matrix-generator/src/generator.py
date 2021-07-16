@@ -164,7 +164,6 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 
 	lst=_sort(adaptive_scaler.workers,base)
 	print([utils.array_to_str(el) for el in lst])
-
 	startTenants = int(tenants)
 	tenant_nb=startTenants
 	maxTenants = -1
@@ -178,25 +177,26 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 	previousResult={}
 	if str(startTenants) in d[sla['name']]:
 		currentResult=d[sla['name']][str(startTenants)]
-	elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
+	if startTenants > 1 and str(startTenants-1) in d[sla['name']]:
 		#copy result for startTenants-1 but set an artificial high  completion time
 		#so that a later actual result will always outperform this completion time.
-		startTenants=startTenants-1
-		previousResult=d[sla['name']][str(startTenants)]
-		tmp_result=previousResult.copy()
-		tmp_result['CompletionTime']=str(slo+float(999999))
-		d[sla['name']][str(startTenants+1)]=tmp_result
+		previousResult=d[sla['name']][str(startTenants-1)]
+		if not currentResult:
+			startTenants=startTenants-1
+			transfer_result(d, sla, adaptive_scalers, startTenants,startTenants+1,slo)
 	else:
 		# using curve-fitted scaling function to estimate configuration for tenants
 		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window)
 	if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
 		#if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
 		evaluate=True
-		if (currentResult or previousResult) and int(previous_tenants) == int(startTenants):
+		if (currentResult or previousResult):
 		#a special case is when the lastly completed set of jobs has a cardinality that is the same as the  nr of tenants as queried by the scaler
-			if currentResult:
+			if currentResult and int(previous_tenants) == int(startTenants):
 				evaluate_current=True
-			if previousResult:
+			if previousResult and currentResult and int(previous_tenants) == int(startTenants-1):
+				evaluate_previous=True
+			if previousResult and not currentResult and int(previous_tenants) == int(startTenants):
 				evaluate_previous=True
 		tenant_nb=int(previous_tenants)
 		maxTenants=int(previous_tenants)
@@ -256,19 +256,14 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 			#add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,next_conf=next_conf,result=result)
 			if next_conf != previous_conf:
 				adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-			add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,next_conf=next_conf,result=result)
+			add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
 		elif state == COST_EFFECTIVE_RESULT:
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:
 				lst=sort_configs(adaptive_scalers.workers,lst)
 			#remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,adaptive_scaler.failed_results,tenant_nb == startTenants)
 			adaptive_scaler.failed_results=[]
-			if str(tenant_nb) in d[sla['name']]:
-				x=d[sla['name']][str(tenant_nb)]
-				if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, x)) >= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)) or float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo:
-					d[sla['name']][str(tenant_nb)]=result.copy()
-			else:
-				d[sla['name']][str(tenant_nb)]=result.copy()
+			add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
 			retry_attempt=0
 			next_conf=get_conf(adaptive_scaler.workers, result)
 			new_window=window
@@ -313,7 +308,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		for w in adaptive_scaler.workers:
 			adaptive_scaler.untest(w)
 		if state == COST_EFFECTIVE_RESULT and evaluate_previous:
-			 d[sla['name']][str(tenant_nb+1)]=d[sla['name']][str(tenant_nb)].copy()
+			transfer_result(d, sla, adaptive_scalers, tenant_nb, tenant_nb+1,slo)
 		if state != COST_EFFECTIVE_RESULT and not (str(tenant_nb) in d[sla['name']].keys()):
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 			nr_of_experiments=len(next_exp)
@@ -359,8 +354,10 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 		print([utils.array_to_str(el) for el in lst])
 		next_conf=lst[start_and_window[0]]
-		print(next_conf)
-		d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
+		if currentResult and next_conf != get_conf(adaptive_scaler.workers, currentResult):
+			current_conf=get_conf(adaptive_scaler.workers, currentResult)
+			adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),current_conf,slo)
+			d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
 	print("Saving filtered results into matrix")
 	utils.saveToYaml(d,'Results/result-matrix.yaml')
 
@@ -378,25 +375,41 @@ def get_matrix_and_sla(initial_conf,namespace):
         return {"matrix": d, "sla":sla}
 
 
-def add_incremental_result(tenant_nb, d, sla, adaptive_scaler, slo, next_conf=None, result=None):
+#precondition: d[sla['name'][str(source_tenant_nb)] exists
+def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tenant_nb,slo):
+	import pdb; pdb.set_trace()
+	sourceResult=d[sla['name']][str(source_tenant_nb)]
+	adaptive_scaler=adaptive_scalers['init']
+	source_conf=get_conf(adaptive_scaler.workers, sourceResult)
+	source_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],source_tenant_nb,source_conf,slo)
+	destination_adaptive_scaler=None
+	if str(destination_tenant_nb) in d[sla['name']].keys():
+		destination_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(destination_tenant_nb)])
+		destination_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],destination_tenant_nb,destination_conf,slo)
+	else:
+		sourceResult=None
+	add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+
+def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultCostEffective, destination_adaptive_scaler=None, next_conf=None, result=None):
 	if result:
-		result_conf=get_conf(adaptive_scaler.workers, result)
+		result_conf=get_conf(source_adaptive_scaler.workers, result)
 		if next_conf:
 			if next_conf != result_conf:
 				result={}
 		else:
 			next_conf=result_conf
-	if str(tenant_nb) in d[sla['name']]:
-		x=d[sla['name']][str(tenant_nb)]
-		if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, x)) >= resource_cost(adaptive_scaler.workers, next_conf) or float(x['CompletionTime']) > slo:
-           		d[sla['name']][str(tenant_nb)]=result.copy() if result else create_result(adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+	if not destination_adaptive_scaler:
+		destination_adaptive_scaler=source_adaptive_scaler
+	if str(destination_tenant_nb) in d[sla['name']]:
+		x=d[sla['name']][str(destination_tenant_nb)]
+		if resource_cost(destination_adaptive_scaler.workers, get_conf(destination_adaptive_scaler.workers, x)) >= resource_cost(source_adaptive_scaler.workers, next_conf) or isExistingResultCostEffective(x,slo):
+           		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
 	else:
-		d[sla['name']][str(tenant_nb)]=result.copy() if result else create_result(adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
 
 
 
 def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False):
-       adaptive_scalers['init'] 
        tested_configuration=str(tenant_nb)+ "X" + utils.array_to_delimited_str(conf,delimiter='_')
        if not (tested_configuration in adaptive_scalers.keys()):
                 adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
