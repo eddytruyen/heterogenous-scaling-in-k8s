@@ -377,7 +377,6 @@ def get_matrix_and_sla(initial_conf,namespace):
 
 #precondition: d[sla['name'][str(source_tenant_nb)] exists
 def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tenant_nb,slo):
-	import pdb; pdb.set_trace()
 	sourceResult=d[sla['name']][str(source_tenant_nb)]
 	adaptive_scaler=adaptive_scalers['init']
 	source_conf=get_conf(adaptive_scaler.workers, sourceResult)
@@ -388,9 +387,10 @@ def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tena
 		destination_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],destination_tenant_nb,destination_conf,slo)
 	else:
 		sourceResult=None
-	add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	return add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
 
 def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultCostEffective, destination_adaptive_scaler=None, next_conf=None, result=None):
+	import pdb; pdb.set_trace()
 	if result:
 		result_conf=get_conf(source_adaptive_scaler.workers, result)
 		if next_conf:
@@ -406,7 +406,7 @@ def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler
            		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
 	else:
 		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
-
+	return d
 
 
 def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False):
