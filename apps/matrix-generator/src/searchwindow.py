@@ -219,7 +219,6 @@ class AdaptiveScaler:
 	def validate_result(self,result,conf,slo):
 
 		def undo_scale_action(only_failed_results=False):
-			import pdb; pdb.set_trace()
 			if self.ScaledUp:
 				failed_worker=self.ScalingFunction.undo_scaled_up(self.workers) 
 				self.ScaledUp=False
@@ -433,9 +432,11 @@ class AdaptiveScaler:
 		return False
 
 	def redo_scale_action(self):
+                old_workers=[]
                 print("CURRENT CONFS")
                 for w in self.workers:
                         print(w.str())
+                        old_workers.append(w.clone())
                 worker_confs=[]
                 print("INITIAL CONFS:")
                 print(self.initial_confs)
@@ -454,9 +455,18 @@ class AdaptiveScaler:
                 print("Going back to worker configuration with lowest cost for combination " + utils.array_to_delimited_str(self.initial_confs[cheapest_worker_index][1]) + ": ")
                 for w in self.workers:
                         print(w.str())
+                print("Updating scaling function")
+                for i,w in enumerate(self.workers):
+                        for res in self.ScalingFunction.DominantResources:
+                                existing_amount=old_workers[i].resources[res]
+                                while w.resources[res] < existing_amount:
+                                        self.ScalingFunction.scale_worker_down(self.workers, i, 1)
+                                        existing_amount=-1
                 print("Double checking worker configuration:")
                 for w in self.initial_confs[cheapest_worker_index][2]:
                         print(w.str())
+                print("Double checking scaling function:")
+                print(self.ScalingFunction.workersScaledDown)
                 return self.initial_confs[cheapest_worker_index]
 
 
