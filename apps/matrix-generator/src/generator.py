@@ -184,7 +184,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		if not currentResult:
 			startTenants=startTenants-1
 			transfer_result(d, sla, adaptive_scalers, startTenants,startTenants+1,slo)
-	else:
+	if not (currentResult or previousResult):
 		# using curve-fitted scaling function to estimate configuration for tenants
 		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window)
 	if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
@@ -413,6 +413,7 @@ def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler
 def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False):
        tested_configuration=str(tenant_nb)+ "X" + utils.array_to_delimited_str(conf,delimiter='_')
        if not (tested_configuration in adaptive_scalers.keys()):
+                import pdb; pdb.set_trace()
                 adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
                 adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
        else:
@@ -437,7 +438,7 @@ def update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, con
 
 def flag_all_workers(results, nb_tenants,adaptive_scaler, slo):
     for t in results.keys():
-        if int(t) < nb_tenants: # and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
+        if int(t) != nb_tenants: # and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
             conf=get_conf(adaptive_scaler.workers, results[t])
             flag_workers(adaptive_scaler.workers, conf)
 

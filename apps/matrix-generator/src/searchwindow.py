@@ -219,6 +219,7 @@ class AdaptiveScaler:
 	def validate_result(self,result,conf,slo):
 
 		def undo_scale_action(only_failed_results=False):
+			import pdb; pdb.set_trace()
 			if self.ScaledUp:
 				failed_worker=self.ScalingFunction.undo_scaled_up(self.workers) 
 				self.ScaledUp=False
