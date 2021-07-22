@@ -48,6 +48,7 @@ def generate_matrix(initial_conf):
                                         nonlocal adaptive_scaler
                                         nonlocal nr_of_experiments
                                         nonlocal startTenant
+                                        nonlocal only_failed_results
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
@@ -77,6 +78,7 @@ def generate_matrix(initial_conf):
                                                     lst=sort_configs(adaptive_scaler.workers,lst)
                                                     opt_conf=conf[1] 
                                                     result=conf[0]
+                                                    only_failed_results=False
                                             if adaptive_scaler.ScalingUpPhase:
                                                     remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results,tenant_nb == startTenant)
                                                     if not adaptive_scaler.tipped_over_confs:
@@ -87,7 +89,7 @@ def generate_matrix(initial_conf):
                                                             retry_attempt=0
                                                             next_conf=opt_conf
                                                             flag_workers(adaptive_scaler.workers,next_conf)
-                                                            return [lst.index(next_conf),window]
+                                                            return [lst.index(next_conf),1]
                                                     else:
                                                             print("Moving filtered samples in sorted combinations after the window")
                                                             print([utils.array_to_str(el) for el in lst])
@@ -194,7 +196,7 @@ def generate_matrix(initial_conf):
 			state=states.pop(0)
 			print("State of adaptive_scaler")
 			adaptive_scaler.status()
-			if not adaptive_scaler.ScalingUpPhase and not adaptive_scaler.ScaledDown:
+			if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
 				adaptive_scaler.failed_results += return_failed_confs(workers, results, lambda r: float(r['score']) < THRESHOLD and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 			if state == NO_COST_EFFECTIVE_RESULT:
 				print("NO COST EFFECTIVE RESULT")

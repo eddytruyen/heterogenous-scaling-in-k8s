@@ -164,6 +164,7 @@ class AdaptiveScaler:
 	
 	def __init__(self, workers, scalingFunction):
 		self.ScalingDownPhase = True
+		self.StartScalingDown = True
 		self.ScalingUpPhase = False
 		self.ScaledDown = False
 		self.ScaledUp = False
@@ -203,6 +204,7 @@ class AdaptiveScaler:
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
 		if self.ScalingDownPhase:
+			self.StartScalingDown = True
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
 			self.tipped_over_confs = []
@@ -398,6 +400,7 @@ class AdaptiveScaler:
 					print("Passing over worker in previously failed scaling")
 			worker_index += 1
 		if is_scaled() and not equal_workers(self.workers, new_workers):
+			self.StartScalingDown=False
 			self.workers=new_workers
 			for w in self.workers:
 				print(w.resources)
