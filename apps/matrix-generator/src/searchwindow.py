@@ -16,7 +16,7 @@ COST_EFFECTIVE_RESULT = 50240434322
 NO_RESULT = 9880593853
 RETRY_WITH_ANOTHER_WORKER_CONFIGURATION = 15845949549
 NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
-OFFLINE= True
+#OFFLINE= True
 
 
 class ScalingFunction:
@@ -409,8 +409,8 @@ class AdaptiveScaler:
 			self.FailedScalings=[]
 			if scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
 				self.redo_scale_action()
-				if not OFFLINE:
-					self.initial_confs=[]
+				#if not OFFLINE:
+				#	self.initial_confs=[]
 				return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
 			else:
 				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
