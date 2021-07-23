@@ -16,7 +16,7 @@ COST_EFFECTIVE_RESULT = 50240434322
 NO_RESULT = 9880593853
 RETRY_WITH_ANOTHER_WORKER_CONFIGURATION = 15845949549
 NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
-
+OFFLINE= True
 
 
 class ScalingFunction:
@@ -164,6 +164,7 @@ class AdaptiveScaler:
 	
 	def __init__(self, workers, scalingFunction):
 		self.ScalingDownPhase = True
+		self.StartScalingDown = True
 		self.ScalingUpPhase = False
 		self.ScaledDown = False
 		self.ScaledUp = False
@@ -203,6 +204,7 @@ class AdaptiveScaler:
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
 		if self.ScalingDownPhase:
+			self.StartScalingDown = True
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
 			self.tipped_over_confs = []
@@ -384,6 +386,7 @@ class AdaptiveScaler:
 		print(diff)
 		worker_index=1
 		L=len(self.workers)
+		scaling=True if diff > 0 else False
 		while diff > 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
 			if worker_is_notflagged_testable_and_scaleable(self.workers[wi],opt_conf):
@@ -397,15 +400,17 @@ class AdaptiveScaler:
 					print("Passing over worker in previously failed scaling")
 			worker_index += 1
 		if is_scaled() and not equal_workers(self.workers, new_workers):
+			self.StartScalingDown=False
 			self.workers=new_workers
 			for w in self.workers:
 				print(w.resources)
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
-			if scale_down and workers_are_notflagged_testable_and_scaleable(opt_conf):
+			if scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
 				self.redo_scale_action()
-				self.initial_confs=[]
+				if not OFFLINE:
+					self.initial_confs=[]
 				return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
 			else:
 				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
@@ -456,11 +461,15 @@ class AdaptiveScaler:
                 for w in self.workers:
                         print(w.str())
                 print("Updating scaling function")
+                tmp_workers=[]
+                for w in self.workers:
+                        print(w.str())
+                        tmp_workers.append(w.clone())
                 for i,w in enumerate(self.workers):
                         for res in self.ScalingFunction.DominantResources:
                                 existing_amount=old_workers[i].resources[res]
                                 while w.resources[res] < existing_amount:
-                                        self.ScalingFunction.scale_worker_down(self.workers, i, 1)
+                                        self.ScalingFunction.scale_worker_down(tmp_workers, i, 1)
                                         existing_amount=-1
                 print("Double checking worker configuration:")
                 for w in self.initial_confs[cheapest_worker_index][2]:

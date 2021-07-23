@@ -47,6 +47,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                         nonlocal maxTenants
                                         nonlocal opt_conf
                                         nonlocal start
+                                        nonlocal only_failed_results
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
@@ -80,6 +81,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                     opt_conf=conf[1] 
                                                     result=conf[0]
                                                     start=lst.index(opt_conf)
+                                                    only_failed_results=False
                                             if adaptive_scaler.ScalingUpPhase:
                                                     #remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results,tenant_nb == startTenant)
                                                     if not adaptive_scaler.tipped_over_confs:
@@ -87,7 +89,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                                     if not only_failed_results:
                                                             #add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,result=result)
                                                             next_conf=opt_conf
-                                                            return [lst.index(next_conf),window]
+                                                            return [lst.index(next_conf),1]
                                                     else:
                                                             print("Moving filtered samples in sorted combinations after the window")
                                                             print([utils.array_to_str(el) for el in lst])
@@ -237,7 +239,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		state=states.pop(0)
 		print("State of adaptive_scaler")
 		adaptive_scaler.status()
-		if not adaptive_scaler.ScalingUpPhase:
+		if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
 			adaptive_scaler.failed_results += return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo  and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 		if state == NO_COST_EFFECTIVE_RESULT:
 			print("NO COST EFFECTIVE RESULT")
@@ -307,7 +309,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					retry_attempt+=nr_of_experiments
 		for w in adaptive_scaler.workers:
 			adaptive_scaler.untest(w)
-		if state == COST_EFFECTIVE_RESULT and evaluate_previous:
+		if state != NO_RESULT and evaluate_previous:
 			transfer_result(d, sla, adaptive_scalers, tenant_nb, tenant_nb+1,slo)
 		if state != COST_EFFECTIVE_RESULT and not (str(tenant_nb) in d[sla['name']].keys()):
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
@@ -438,7 +440,7 @@ def update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, con
 
 def flag_all_workers(results, nb_tenants,adaptive_scaler, slo):
     for t in results.keys():
-        if int(t) != nb_tenants: # and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
+        if int(t) < nb_tenants: # and float(results[t]['CompletionTime']) <= slo and float(results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD > slo:
             conf=get_conf(adaptive_scaler.workers, results[t])
             flag_workers(adaptive_scaler.workers, conf)
 
