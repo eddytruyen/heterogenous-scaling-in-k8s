@@ -299,14 +299,6 @@ class AdaptiveScaler:
                       else:
                                return False
 
-		def equal_workers(workersA, workersB):
-                      if len(workersA) != len(workersB):
-                               return False
-                      for a,b in zip(workersA,workersB):
-                               if not a.equals(b):
-                                       return False
-                      return True
-
 		def difference(conf_cost, total_cost):
                         nonlocal scale_down
                         if scale_down:
@@ -386,8 +378,8 @@ class AdaptiveScaler:
 		print(diff)
 		worker_index=1
 		L=len(self.workers)
-		scaling=True if diff > 0 else False
-		while diff > 0 and (worker_index <= L) and not is_scaled():
+		scaling=True if diff >= 0 else False
+		while diff >= 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
 			if worker_is_notflagged_testable_and_scaleable(self.workers[wi],opt_conf):
 				if not self.workers[wi].worker_id in [fs.worker_id for fs in self.FailedScalings]:
@@ -399,7 +391,7 @@ class AdaptiveScaler:
 				else:
 					print("Passing over worker in previously failed scaling")
 			worker_index += 1
-		if is_scaled() and not equal_workers(self.workers, new_workers):
+		if is_scaled() and not self.equal_workers(new_workers):
 			self.StartScalingDown=False
 			self.workers=new_workers
 			for w in self.workers:
@@ -510,6 +502,16 @@ class AdaptiveScaler:
                         copy_of_states+=[REDO_SCALE_ACTION]
                         result_conf_and_workers=self.redo_scale_action()
                 return [result_conf_and_workers, copy_of_states]
+
+
+	def equal_workers(self,workersB):
+                if len(self.workers) != len(workersB):
+                        return False
+                for a,b in zip(self.workers,workersB):
+                        if not a.equals(b):
+                              return False
+                return True
+
 
 class AdaptiveWindow:
 	def __init__(self, initial_window):
