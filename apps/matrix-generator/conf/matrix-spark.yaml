@@ -23,10 +23,10 @@ slas:
             memory: 4
         - size:
             cpu: 4
-            memory: 2
+            memory: 3
         - size:
             cpu: 3
-            memory: 2
+            memory: 3
         - size:
             cpu: 2
             memory: 2
