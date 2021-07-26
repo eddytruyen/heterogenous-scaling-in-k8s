@@ -203,7 +203,6 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 				evaluate_previous=True
 		tenant_nb=int(previous_tenants)
 		maxTenants=int(previous_tenants)
-		import pdb; pdb.set_trace()
 		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scaler, d[sla['name']], tenant_nb, previous_conf,slo)
 		print(adaptive_scaler.ScalingFunction.workersScaledDown)
 		tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
