@@ -156,6 +156,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 	d=tmp_dict["matrix"]
 	sla=tmp_dict["sla"]
 	alphabet=sla['alphabet']
+	supTenants=sla['maxTenants']
 	window=alphabet['searchWindow']
 	exps_path=exp_path+'/'+sla['name']
 	base=alphabet['base']
@@ -309,11 +310,12 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 		for w in adaptive_scaler.workers:
 			adaptive_scaler.untest(w)
 		if state != NO_RESULT:
-			if evaluate_previous:
+			if tenant_nb < supTenants:
 				transfer_result(d, sla, adaptive_scalers, tenant_nb, tenant_nb+1,slo)
-				update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb+1, base, window,slo)
-			else:
-				 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
+				if tenant_nb < supTenants -1:
+					update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb+1, base, window,slo)
+			#else:
+			#	 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
 		if state != COST_EFFECTIVE_RESULT and not (str(tenant_nb) in d[sla['name']].keys()):
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 			nr_of_experiments=len(next_exp)
