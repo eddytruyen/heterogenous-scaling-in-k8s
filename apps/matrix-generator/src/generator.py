@@ -299,7 +299,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 				else: 
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst,[],previous_conf, 0, window)
+					start_and_window=filter_samples(lst,[],previous_conf, True, 0, window)
 					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 					print([utils.array_to_str(el) for el in lst])
 					next_conf=lst[start_and_window[0]]
@@ -316,7 +316,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb+1, base, window,slo)
 			#else:
 			#	 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
-		if state != COST_EFFECTIVE_RESULT and not (str(tenant_nb) in d[sla['name']].keys()):
+		if state == NO_RESULT:
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 			nr_of_experiments=len(next_exp)
 			for i,ws in enumerate(next_exp):
@@ -906,7 +906,9 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	# 	samples= samples,
 	# 	output= exp_path+'/exh',
 	# 	slas=slas)
-	return [[2,0,0,0]]
+	conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
+	import random
+	return [random.choice(conf_array)]
 	conf_op=ConfigParser(
 		optimizer='bestconfig',
 		chart_dir=chart_dir,
