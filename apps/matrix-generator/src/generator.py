@@ -57,7 +57,8 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
                                             print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                             retry_attempt+=nr_of_experiments
                                             lst=sort_configs(adaptive_scaler.workers,lst)
-                                            start=lst.index(opt_conf)
+                                            if opt_conf != None:
+                                                    start=lst.index(opt_conf)
                                             result={}
                                             if adaptive_scaler.ScalingDownPhase:
                                                     previous_tenant_conf=[]
@@ -296,6 +297,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					start=start_and_window[0]
 					new_window=start_and_window[1]
 					next_conf=lst[start]
+					add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				else: 
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
@@ -316,7 +318,7 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 					update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb+1, base, window,slo)
 			#else:
 			#	 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
-		if state == NO_RESULT:
+		if state == NO_RESULT and adaptive_scaler.ScalingDownPhase:
 			next_exp=_find_next_exp(lst,adaptive_scaler.workers,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
 			nr_of_experiments=len(next_exp)
 			for i,ws in enumerate(next_exp):
