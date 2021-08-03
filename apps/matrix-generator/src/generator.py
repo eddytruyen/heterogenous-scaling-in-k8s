@@ -328,7 +328,12 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 				if samples == 0:
 					samples=1
 				results=[]
-				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+				previous_result=None
+				previous_replicas=None
+				if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+					previous_result=float(completion_time)
+					previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
+				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3],previous_result=previous_result, previous_replicas=previous_replicas):
 					results.append(create_result(adaptive_scaler,str(float(slo)+999999.000), res, sla['name']))
 			sort_results(adaptive_scaler.workers,slo,results)
 			d[sla['name']][str(tenant_nb)]=results[0].copy()
@@ -900,7 +905,7 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 
 
 
-def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, conf, minimum_repl, maximum_repl):
+def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, conf, minimum_repl, maximum_repl, previous_result=None, previous_replicas=None):
 	# conf_ex=ConfigParser(
 	# 	optimizer='exhaustive',
 	# 	chart_dir=chart_dir,
@@ -908,9 +913,9 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	# 	samples= samples,
 	# 	output= exp_path+'/exh',
 	# 	slas=slas)
-	conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
-	import random
-	return [random.choice(conf_array)]
+	#conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
+	#import random
+	#return [random.choice(conf_array)]
 	conf_op=ConfigParser(
 		optimizer='bestconfig',
 		chart_dir=chart_dir,
@@ -922,11 +927,16 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 		slas=slas,
 		maximum_replicas='"'+maximum_repl+'"',
 		minimum_replicas='"'+minimum_repl+'"',
-		configs='"'+conf+'"')
+		configs='"'+conf+'"',
+		previous_result=previous_result,
+		previous_replicas=previous_replicas)
 
 	# exp_ex=SLAConfigExperiment(conf_ex,bin_path,exp_path+'/exh')
 	exp_op=SLAConfigExperiment(conf_op,bin_path,exp_path+'/op/')
 
+	conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
+	import random
+	return [random.choice(conf_array)]
 	# exp_ex.runExperiment()
 	exp_op.runExperiment()
 
