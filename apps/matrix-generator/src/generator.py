@@ -928,17 +928,17 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 		maximum_replicas='"'+maximum_repl+'"',
 		minimum_replicas='"'+minimum_repl+'"',
 		configs='"'+conf+'"',
-		previous_result=previous_result,
-		previous_replicas=previous_replicas)
+		previous_result='"'+str(previous_result)+'"',
+		previous_replicas='"'+previous_replicas+'"')
 
 	# exp_ex=SLAConfigExperiment(conf_ex,bin_path,exp_path+'/exh')
 	exp_op=SLAConfigExperiment(conf_op,bin_path,exp_path+'/op/')
 
+	# exp_ex.runExperiment()
+	exp_op.runExperiment()
 	conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
 	import random
 	return [random.choice(conf_array)]
-	# exp_ex.runExperiment()
-	exp_op.runExperiment()
 
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
 
