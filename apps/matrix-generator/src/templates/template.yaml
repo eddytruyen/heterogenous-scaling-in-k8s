@@ -15,8 +15,8 @@ slas:
       maximumReplicas: {{sla.slos.maximumReplicas}}
       minimumReplicas: {{sla.slos.minimumReplicas}}
       configs: {{sla.slos.configs}}
-{% if sla.slos.previousResult %}
-      previousResult: {{sla.slos.previousResult}}
+{% if sla.slos.previousCompletionTime %}
+      previousCompletionTime: {{sla.slos.previousCompletionTime}}
       previousReplicas: {{sla.slos.previousReplicas}}{% endif %} 
     nbOfTenants: {{sla.tenants}}
     parameters:

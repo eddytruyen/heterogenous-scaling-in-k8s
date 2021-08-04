@@ -47,7 +47,7 @@ class ConfigParser:
                                                 'completionTime': sla.slos['completionTime'],
 						'maximumReplicas': self.maximum_replicas,
 						'minimumReplicas': self.minimum_replicas,
-						'previousResult': self.previous_result,
+						'previousCompletionTime': self.previous_result,
  						'previousReplicas': self.previous_replicas,
 						'configs': self.configs
 					},

@@ -7,6 +7,7 @@ from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_
 from functools import reduce
 import yaml
 import sys
+import os
 #import pdb; pdb.set_trace()
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
@@ -916,6 +917,9 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	#conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
 	#import random
 	#return [random.choice(conf_array)]
+	results_json_file=exp_path+'/op/results.json'
+	if not os.path.isfile(exp_path+'/op/results.json'):
+		results_json_file=None	
 	conf_op=ConfigParser(
 		optimizer='bestconfig',
 		chart_dir=chart_dir,
@@ -923,7 +927,7 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 		samples= samples,
 		sampling_rate=SAMPLING_RATE,
 		output= exp_path+'/op/',
-		# prev_results=exp_path+'/exh/results.json',
+                prev_results=results_json_file,
 		slas=slas,
 		maximum_replicas='"'+maximum_repl+'"',
 		minimum_replicas='"'+minimum_repl+'"',
@@ -936,11 +940,9 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 
 	# exp_ex.runExperiment()
 	exp_op.runExperiment()
-	conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
-	import random
-	return [random.choice(conf_array)]
+	#conf_array=list(map(lambda c: list(map(lambda x: int(x),c.split('[')[1].split(']')[0].split(',',-1))),conf[1:][:-1].split(';',-1)))
+	#import random
+	#return [random.choice(conf_array)]
 
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
-
-
-
+	return results
