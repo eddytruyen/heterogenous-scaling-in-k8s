@@ -16,6 +16,7 @@ def home():
 
     adaptive_scalers=current_app.config["adaptive_scalers"]
     initial_config=current_app.config["initial_config"]
+    runtime_manager=current_app.config["runtime_manager"]
 
     slas=initial_config['slas']
     for s in slas:
@@ -25,7 +26,7 @@ def home():
         previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
     else:
         previous_conf_array=[]
-    generate_matrix(initial_config, adaptive_scalers, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
+    generate_matrix(initial_config, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants,previous_conf_array)
 
     config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
     print(config_data)
@@ -33,8 +34,8 @@ def home():
     return json.dumps(conf)
 
 
-def generate_matrix(initial_config, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf):
+def generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
 
-	_generate_matrix(initial_config, adaptive_scaler, namespace, tenants, completion_time, previous_tenants, previous_conf)
+	_generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf)
 
 #generate_matrix()

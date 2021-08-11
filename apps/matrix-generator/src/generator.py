@@ -4,6 +4,7 @@ from .experiment import SLAConfigExperiment
 from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
 from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_EFFECTIVE_RESULT, NO_RESULT, NO_COST_EFFECTIVE_RESULT, UNDO_SCALE_ACTION, REDO_SCALE_ACTION, RETRY_WITH_ANOTHER_WORKER_CONFIGURATION,NO_COST_EFFECTIVE_ALTERNATIVE,SCALING_DOWN_TRESHOLD,SCALING_UP_THRESHOLD,MINIMUM_RESOURCES
+from . import runtimemanager
 from functools import reduce
 import yaml
 import sys
@@ -13,8 +14,8 @@ import os
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
-SAMPLING_RATE=0.1
-SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=-1.0
+SAMPLING_RATE=0.75
+SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -28,7 +29,7 @@ def create_workers(elements, costs, base):
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
-def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completion_time, previous_tenants, previous_conf):
+def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
 	def get_start_and_window_for_next_experiments(opt_conf=None):
 
                                     only_failed_results=False if result else True
@@ -340,19 +341,21 @@ def generate_matrix(initial_conf, adaptive_scalers, namespace, tenants, completi
 			d[sla['name']][str(tenant_nb)]=results[0].copy()
 		tenant_nb+=1
 	if predictedConf:
-		next_exp=_find_next_exp(lst,adaptive_scaler.workers,predictedConf,base,adaptive_window.adapt_search_window([],window,False))
-		nr_of_experiments=len(next_exp)
-		for i,ws in enumerate(next_exp):
-			#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
-			sla_conf=SLAConf(sla['name'],int(tenants),ws[0],sla['slos'])
-			samples=int(ws[4]*SAMPLING_RATE)
-			if samples == 0:
-				samples=1
-			results=[]
-			for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+tenants+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
-				results.append(create_result(adaptive_scaler, str(float(slo)+999999.000), res, sla['name']))
-		sort_results(adaptive_scaler.workers,slo,results)
-		d[sla['name']][tenants]=results[0].copy()
+		rm=runtimemanager.instance(runtime_manager,int(tenants))
+		if rm.no_experiments_left():
+			next_exp=_find_next_exp(lst,adaptive_scaler.workers,predictedConf,base,adaptive_window.adapt_search_window([],window,False))
+			nr_of_experiments=len(next_exp)
+			for i,ws in enumerate(next_exp):
+				#samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
+				sla_conf=SLAConf(sla['name'],int(tenants),ws[0],sla['slos'])
+				samples=int(ws[4]*SAMPLING_RATE)
+				if samples == 0:
+					samples=1
+				results=[]
+				sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+tenants+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3])
+				rm.set_experiment_list(i,sample_list)
+		#sort_results(adaptive_scaler.workers,slo,results)
+		d[sla['name']][tenants]=rm.get_next_sample()
 	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
         #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
@@ -760,6 +763,8 @@ def sort_results(workers, slo, results):
 	def cost_for_sort(elem):
 		if float(elem['CompletionTime']) > slo:
 			return 999999999*float(float(elem['CompletionTime'])/slo)
+		if float(elem['CompletionTime']) == 1:
+			return 100*resource_cost(workers,get_conf(workers,elem)) 
 		return resource_cost(workers,get_conf(workers,elem))
 	return sorted(results,key=cost_for_sort)
 
@@ -919,21 +924,35 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	#return [random.choice(conf_array)]
 	results_json_file=exp_path+'/op/results.json'
 	if not os.path.isfile(exp_path+'/op/results.json'):
-		results_json_file=None	
-	conf_op=ConfigParser(
-		optimizer='bestconfig',
-		chart_dir=chart_dir,
-		util_func= util_func,
-		samples= samples,
-		sampling_rate=SAMPLING_RATE,
-		output= exp_path+'/op/',
-                prev_results=results_json_file,
-		slas=slas,
-		maximum_replicas='"'+maximum_repl+'"',
-		minimum_replicas='"'+minimum_repl+'"',
-		configs='"'+conf+'"',
-		previous_result='"'+str(previous_result)+'"',
-		previous_replicas='"'+previous_replicas+'"')
+		results_json_file=None
+	if previous_result:	
+		conf_op=ConfigParser(
+			optimizer='bestconfig',
+			chart_dir=chart_dir,
+			util_func= util_func,
+			samples= samples,
+			sampling_rate=SAMPLING_RATE,
+			output= exp_path+'/op/',
+		        prev_results=results_json_file,
+			slas=slas,
+			maximum_replicas='"'+maximum_repl+'"',
+			minimum_replicas='"'+minimum_repl+'"',
+			configs='"'+conf+'"',
+			previous_result='"'+str(previous_result)+'"',
+			previous_replicas='"'+previous_replicas+'"')
+	else:
+		conf_op=ConfigParser(
+                        optimizer='bestconfig',
+                        chart_dir=chart_dir,
+                        util_func= util_func,
+                        samples= samples,
+                        sampling_rate=SAMPLING_RATE,
+                        output= exp_path+'/op/',
+                        prev_results=results_json_file,
+                        slas=slas,
+                        maximum_replicas='"'+maximum_repl+'"',
+                        minimum_replicas='"'+minimum_repl+'"',
+                        configs='"'+conf+'"')
 
 	# exp_ex=SLAConfigExperiment(conf_ex,bin_path,exp_path+'/exh')
 	exp_op=SLAConfigExperiment(conf_op,bin_path,exp_path+'/op/')
