@@ -8,22 +8,36 @@ class RuntimeManager:
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
     
-    def set_experiment_list(self, experiment_nr, samples):
+    def set_experiment_list(self, experiment_nb, experiment_specification, samples):
         self.finished=False
-        import pdb; pdb.set_trace()
-        self.experiments[experiment_nr]=samples
+        self.experiments[experiment_nb]=[experiment_specification,samples]
+
+    def update_experiment_list(self, experiment_nb, experiment_specification, samples):
+        self.experiments[experiment_nb]=[experiment_specification,samples]
+
+    def get_current_experiment_specification(self):
+        experiment_nb=self.get_current_experiment_nb()
+        return self.experiments[experiment_nb][0]
+
+    def get_current_experiment_nb(self):
+        return self.current_experiment["experiment_nb"]
+
+    def get_total_nb_of_experiments(self):
+        return len(self.experiments.keys())
+
+    def get_total_nb_of_samples(self, experiment_nb):
+        return len(self.experiments[experiment_nb][1])
 
     def get_next_sample(self):
-        experiment_nb=self.current_experiment["experiment_nb"]
+        experiment_nb=self.get_current_experiment_nb()
         sample_nb=self.current_experiment["sample_nb"]
-        next_exp=self.experiments[experiment_nb][sample_nb]
-        if sample_nb < len(self.experiments[experiment_nb]):
+        next_exp=self.experiments[experiment_nb][1][sample_nb]
+        if sample_nb < self.get_total_nb_of_samples(experiment_nb)-1:
             self.current_experiment["sample_nb"]=sample_nb + 1
-        elif experiment_nb < len(self.experiments.keys()):
+        elif experiment_nb < self.get_total_nb_of_experiments()-1:
             self.current_experiment["experiment_nb"]=experiment_nb + 1
             self.current_experiment["sample_nb"]=0
         else:
-            self.experiments={}
             self.finished=True
             self.current_experiment={"experiment_nb":0,"sample_nb":0}
         return next_exp
