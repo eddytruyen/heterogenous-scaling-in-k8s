@@ -207,14 +207,15 @@ class AdaptiveScaler:
 			self.StartScalingDown = True
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
-			self.tipped_over_confs = []
-			self.current_tipped_over_conf = None
-		elif self.ScalingUpPhase and (not self.tipped_over_confs):
+		elif self.ScalingUpPhase:
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
 			self.failed_results = []
 			self.failed_scaled_workers=[]
 			self.initial_confs=[]
+			self.StartScalingDown = True
+		self.tipped_over_confs = []
+		self.current_tipped_over_conf = None
 		self.ScaledDown=False
 		self.ScaledUp=False
 
@@ -253,11 +254,14 @@ class AdaptiveScaler:
 			elif self.ScaledUp:
 				self.ScaledUp=False
 				self.ScaledWorkerIndex=-1
-			if self.ScalingUpPhase:
-				self.ScalingUpPhase=False
-				self.ScalingDownPhase=True
+			#if self.ScalingUpPhase:
+			#	self.ScalingUpPhase=False
+			#	self.ScalingDownPhase=True
+			self.StartScalingDown=True
 			self.FailedScalings=[]
 			self.initial_confs=[]
+			self.tipped_over_conf=[]
+			self.current_tipped_over_conf = None
 			states+=[COST_EFFECTIVE_RESULT]
 			return states
 		else:
