@@ -197,7 +197,6 @@ def generate_matrix(initial_conf):
 			print(states)
 			state=states.pop(0)
 			print("State of adaptive_scaler")
-			import pdb; pdb.set_trace()
 			adaptive_scaler.status()
 			if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
 				adaptive_scaler.failed_results = return_failed_confs(workers, results, lambda r: float(r['score']) < THRESHOLD and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
