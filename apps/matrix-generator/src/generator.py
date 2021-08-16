@@ -350,7 +350,7 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 					print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
-		elif not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
+		elif not tipped_over_results and not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
 			failed_range=start+window
 			print("Removing all configs in window going over the scaling_up_threshold because no optimal config has been found at all")
 			index=0 if startingTenant else start

@@ -6,8 +6,8 @@ MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
 OPT_IN_FOR_RESTART = False
-CAREFUL_SCALING= False
-SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
+CAREFUL_SCALING= True
+SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 0.1, 'memory': 0.1}
 
 UNDO_SCALE_ACTION =  8544343532
 REDO_SCALE_ACTION = 999767537
@@ -354,6 +354,7 @@ class AdaptiveScaler:
 			return False
 
 		def scale_worker(workers, worker_index, nb_of_scaling_units):
+                        import pdb; pdb.set_trace()
                         nonlocal scale_down
                         if scale_down:
                                 self.ScalingFunction.scale_worker_down(workers, worker_index, nb_of_scaling_units)
@@ -391,6 +392,7 @@ class AdaptiveScaler:
 		worker_index=1
 		L=len(self.workers)
 		scaling=True if diff > 0 else False
+		import pdb; pdb.set_trace()
 		while diff > 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
 			if worker_is_notflagged_testable_and_scaleable(self.workers[wi],opt_conf):
