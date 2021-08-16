@@ -114,7 +114,7 @@ def generate_matrix(initial_conf):
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
                                     if adaptive_scaler.ScalingDownPhase:
-                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb)
+                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
                                             return process_states([[],states])
