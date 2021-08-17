@@ -177,11 +177,13 @@ class AdaptiveScaler:
 		self.failed_results=[]
 		self.initial_confs=[]
 		self._tested={}
+		self.scale_action_re_undone=False
+		self.only_failed_results=True
 		for w in workers:
 			self._tested[w.worker_id]=False
 
 	def hasScaled(self):
-		return self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)
+		return (self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)) or self.scale_action_re_undone
 
 	def isTested(self, worker):
 		return self._tested[worker.worker_id]
@@ -205,20 +207,20 @@ class AdaptiveScaler:
 		self.FailedScalings = []
 		self.ScaledWorkerIndex=-1
 		if self.ScalingDownPhase:
-			#self.StartScalingDown = True
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
-			self.tipped_over_confs = []
-			self.current_tipped_over_conf = None
-		elif self.ScalingUpPhase and (not self.tipped_over_confs):
+			self.ScaledUp=False
+		elif self.ScalingUpPhase:
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
 			self.failed_results = []
 			self.failed_scaled_workers=[]
 			self.initial_confs=[]
+			self.ScaledDown=False
 		self.StartScalingDown=True
-		self.ScaledDown=False
-		self.ScaledUp=False
+		self.tipped_over_confs = []
+		self.current_tipped_over_conf = None
+		self.only_failed_results=True
 
 	def validate_result(self,result,conf,slo):
 
@@ -229,6 +231,7 @@ class AdaptiveScaler:
 			elif self.ScaledDown:
                                 failed_worker=self.ScalingFunction.undo_scaled_down(self.workers)
                                 self.ScaledDown=False
+			self.scale_action_re_undone=True
 			self.ScaledWorkerIndex=-1
 			self.FailedScalings+=[failed_worker]
 
@@ -239,6 +242,7 @@ class AdaptiveScaler:
 
 		tag_tested_workers(conf)
 		states = []
+		self.scale_action_re_undone=False
 
 		if result and slo > float(result['CompletionTime']) * SCALING_DOWN_TRESHOLD:
 			states+=[NO_COST_EFFECTIVE_RESULT]
@@ -255,11 +259,14 @@ class AdaptiveScaler:
 			elif self.ScaledUp:
 				self.ScaledUp=False
 				self.ScaledWorkerIndex=-1
-			if self.ScalingUpPhase:
-				self.ScalingUpPhase=False
-				self.ScalingDownPhase=True
+			#if self.ScalingUpPhase:
+			#	self.ScalingUpPhase=False
+			#	self.ScalingDownPhase=True
+			self.StartScalingDown=True
 			self.FailedScalings=[]
 			self.initial_confs=[]
+			self.tipped_over_conf=[]
+			self.current_tipped_over_conf = None
 			states+=[COST_EFFECTIVE_RESULT]
 			return states
 		else:
@@ -269,7 +276,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True): #only_failed_results=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False):
 
 		def is_testable(worker, conf):
                       nonlocal scale_down
@@ -366,7 +373,8 @@ class AdaptiveScaler:
 			else:
 				self.ScaledUp=True
 
-
+		if not only_failed_results:
+			self.only_failed_results=False
 		states=[]
 		totalcost = self.ScalingFunction.target(slo,tenant_nb)
 		new_workers=[w.clone() for w in self.workers]
@@ -404,9 +412,9 @@ class AdaptiveScaler:
 			self.FailedScalings=[]
 			if scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
 				self.redo_scale_action()
-				#if not OFFLINE:
-				#	self.initial_confs=[]
-				return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
+				#self.initial_confs=[]
+				if not self.only_failed_results:
+					return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
 			else:
 				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
 		return states
@@ -432,6 +440,7 @@ class AdaptiveScaler:
 		return False
 
 	def redo_scale_action(self):
+                self.scale_action_re_undone=True
                 old_workers=[]
                 print("CURRENT CONFS")
                 for w in self.workers:
