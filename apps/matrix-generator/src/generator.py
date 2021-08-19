@@ -31,7 +31,7 @@ def create_workers(elements, costs, base):
 def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
 
 	def get_next_exps(conf):
-                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base,adaptive_window.adapt_search_window({},window,False))
+                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base,adaptive_window.adapt_search_window({},new_window,False))
                         nr_of_experiments=len(next_exp)
                         for i,ws in enumerate(next_exp):
                                 #samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
@@ -318,7 +318,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				else: 
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
-					start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
+					previous_tenant_results={}
+					if tenant_nb > 1:
+						previous_tenant_results=d[sla['name']]
+					start_and_window=filter_samples(lst,adaptive_scaler.workers,start, window, previous_tenant_results, 1, tenant_nb-1)
+					#start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
 					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 					print([utils.array_to_str(el) for el in lst])
 					next_conf=lst[start_and_window[0]]
@@ -615,7 +619,57 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 
 
 
-def filter_samples(sorted_combinations, workers, previous_tenant_conf, costIsRelevant, start, window, ScaledWorkerIndex=-1):
+def filter_samples(sorted_combinations, workers, start, window, previous_results, start_tenant, tenant_nb, check_workers=False, ScaledDownWorkerIndex=-1):
+        i=start_tenant
+        new_window=window
+        start_window=window
+        if previous_results:
+                while i <= tenant_nb:
+                        previous_tenant_conf=get_conf(workers, previous_results[str(i)])
+                        if previous_tenant_conf:
+                                for el in range(start, start+window):
+                                        result_conf=sorted_combinations[el-(window-new_window)]
+                               	        print(result_conf)
+                                        qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
+                                        cost=qualitiesOfSample['cost']
+                                        nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
+                                        if isinstance(MINIMUM_SHARED_REPLICAS,int):
+                                                minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
+                                        else:
+                                                minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
+                                        if (check_workers and all_flagged_conf(workers, result_conf)) or cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas or not (not check_workers or involves_worker(workers, result_conf, ScaledDownWorkerIndex)):
+                                                print("removed")
+                                                sorted_combinations.remove(result_conf)
+                                                sorted_combinations.insert(new_window+el-1,result_conf)
+                                                new_window-=1
+                                        else:
+                                                print("not removed")
+                                if new_window == 0:
+                                        return filter_samples(sorted_combinations, workers, start+start_window, start_window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
+                                else:
+                                        i+=1
+                                        window=new_window
+                                        while i <= tenant_nb and equal_conf(previous_tenant_conf,get_conf(workers, previous_results[str(i)])):
+                                                i+=1
+                        else:
+                                i+=1
+        else:
+                for el in range(start, start+window):
+                        result_conf=sorted_combinations[el-(window-new_window)]
+                        print(result_conf)
+                        if not (not check_workers or involves_worker(workers, result_conf, ScaledDownWorkerIndex)):
+                                print("removed")
+                                sorted_combinations.remove(result_conf)
+                                sorted_combinations.insert(start+new_window+el-1,result_conf)
+                                new_window-=-1
+                        else:
+                                print("not removed")
+                if new_window == 0:
+                        return filter_samples(sorted_combinations, workers, start+window, window, previous_results, start_tenant, tenant_nb, check_workers, ScaledDownWorkerIndex)
+        return [start, new_window]
+
+
+def filter_samples_1t(sorted_combinations, workers, previous_tenant_conf, costIsRelevant, start, window, ScaledWorkerIndex=-1):
 	new_window=window
 	for el in range(start, start+window):
 		result_conf=sorted_combinations[el-(window-new_window)]
