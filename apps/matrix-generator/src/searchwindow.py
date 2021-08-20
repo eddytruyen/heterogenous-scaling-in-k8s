@@ -372,7 +372,6 @@ class AdaptiveScaler:
 				self.ScaledDown=True
 			else:
 				self.ScaledUp=True
-
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
@@ -484,7 +483,7 @@ class AdaptiveScaler:
 
 
 
-	def set_tipped_over_failed_confs(self, results, slo):
+	def set_tipped_over_failed_confs(self):
 		if not self.tipped_over_confs:
                         self.tipped_over_confs = self.failed_results[:]
                         print("TIPPED_OVER_CONFS")
@@ -497,7 +496,7 @@ class AdaptiveScaler:
                 states=[]
                 state=None
                 while len(self.tipped_over_confs) > 0:
-                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False) #, only_failed_results=True)
+                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True)
                         copy_of_states=states[:]
                         state=states.pop(0)
                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:

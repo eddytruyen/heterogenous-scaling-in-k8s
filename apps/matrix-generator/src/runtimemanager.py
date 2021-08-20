@@ -7,6 +7,21 @@ class RuntimeManager:
         self.experiments={}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
+        self.sorted_combinations=[]
+
+    def set_sorted_combinations(self, combinations):
+        if not self.sorted_combinations:
+            self.sorted_combinations=combinations
+            return self.sorted_combinations
+        else:
+            return self.sorted_combinations
+
+    def get_sorted_combinations(self):
+        return self.sorted_combinations
+
+    def update_sorted_combinations(self, combinations):
+        self.sorted_combinations=combinations
+        return self.sorted_combinations
     
     def set_experiment_list(self, experiment_nb, experiment_specification, samples):
         self.finished=False
