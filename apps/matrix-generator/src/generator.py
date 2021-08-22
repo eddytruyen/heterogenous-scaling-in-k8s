@@ -30,8 +30,8 @@ def create_workers(elements, costs, base):
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
 def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
 
-	def get_next_exps(conf):
-                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base,adaptive_window.adapt_search_window({},new_window,False))
+	def get_next_exps(conf, window):
+                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base,adaptive_window.adapt_search_window({},window,False))
                         nr_of_experiments=len(next_exp)
                         for i,ws in enumerate(next_exp):
                                 #samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
@@ -164,7 +164,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         k=tenants-1
                         while k >= 1:
                                 if str(k) in d[sla['name']].keys():
-                                        asPredictedConf=get_adaptive_scaler_for_tenant_nb_and_conf(adaptive_scalers, adaptive_scaler, d[sla['name']], k, get_conf(adaptive_scaler.workers,d[sla['name']][str(k)]),slo)
+                                        as_predictedConf=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scaler, d[sla['name']], k, get_conf(adaptive_scaler.workers,d[sla['name']][str(k)]),slo)
                                         k=0
                                 else:
                                         k-=1
@@ -382,7 +382,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		if state == NO_RESULT and adaptive_scaler.ScalingDownPhase:
 			rm=runtimemanager.instance(runtime_manager,int(tenants))
 			if rm.no_experiments_left():
-				get_next_exps(next_conf)
+				get_next_exps(next_conf, new_window)
 			else:
 				ws=rm.get_current_experiment_specification()
 				i=rm.get_current_experiment_nb()
@@ -405,7 +405,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		rm=runtimemanager.instance(runtime_manager,int(tenants))
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
 		if rm.no_experiments_left():
-			get_next_exps(predictedConf)
+			get_next_exps(predictedConf, window)
 		d[sla['name']][tenants]=rm.get_next_sample()
 	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
