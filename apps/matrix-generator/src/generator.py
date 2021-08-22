@@ -99,7 +99,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
                                                     if do_remove:
-                                                            remove_failed_confs(lst, adaptive_scaler.workers, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results)
+                                                            remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,int(tenants)), results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results)
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                     if not only_failed_results:
@@ -324,7 +324,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:
 				lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-			remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,adaptive_scaler.failed_results,startingTenant=True)
+			remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,adaptive_scaler.failed_results,startingTenant=True)
 			if adaptive_scaler.ScalingUpPhase:
                                 adaptive_scaler.reset()
 			adaptive_scaler.failed_results=[]
@@ -356,7 +356,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 					next_conf=lst[start]
 					add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				else: 
-					start=remove_failed_confs(lst, adaptive_scaler.workers, results, slo, [], start, adaptive_window.get_current_window(),False,[])
+					start=remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, [], start, adaptive_window.get_current_window(),False,[])
 					print("Moving filtered samples in sorted combinations after the window")
 					print([utils.array_to_str(el) for el in lst])
 					previous_tenant_results={}
@@ -631,7 +631,7 @@ def equal_conf(conf1, conf2):
         return True
 
 
-def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results,startingTenant=False):
+def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results,startingTenant=False):
 		#if optimal_conf and optimal_conf_is_cost_effective:
 		#	if tipped_over_results and optimal_conf in tipped_over_results:
 		#		tipped_over_results.remove(optimal_conf)
@@ -674,6 +674,7 @@ def remove_failed_confs(sorted_combinations, workers, results, slo, optimal_conf
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							sorted_combinations.remove(possible_removal)
+							rm.remove_sample(possible_removal)
 				print("Removing failed conf")
 				print(failed_conf)
 				if sorted_combinations.index(failed_conf)-1 > next_index:
