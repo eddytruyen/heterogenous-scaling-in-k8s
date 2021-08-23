@@ -25,27 +25,27 @@ class RuntimeManager:
         return self.sorted_combinations
     
     def set_experiment_list(self, experiment_nb, experiment_specification, samples):
-        import pdb; pdb.set_trace()
         self.finished=False
         self.experiments[experiment_nb]=[experiment_specification,samples]
 
-    def conf_in_results(self, conf, results):
-        return conf in [generator.get_conf(self.adaptive_scalers["init"].workers,r) for r in results]
+    def conf_in_samples(self, conf, samples):
+        return conf in [generator.get_conf(self.adaptive_scalers["init"].workers,r) for r in samples]
 
     def conf_in_experiments(self,conf):
         for exp in self.experiments.values():
-            if  self.conf_in_results(conf,exp[1]):
+            if  self.conf_in_samples(conf,exp[1]):
                 return True
         return False
 
     def remove_sample_for_conf(self,conf):
-        import pdb; pdb.set_trace()
         for exp_nb in self.experiments.keys():
-            if self.conf_in_results(conf,self.experiments[exp_nb][1]):
+            if self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 if exp_nb == self.get_current_experiment_nb():
                     if self.get_nb_of_sample_for_conf(exp_nb,conf) < self.get_current_sample_nb():
                         self.previous_current_experiment()
                 (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
+                if self.get_total_nb_of_samples(exp_nb) == 0:
+                    self.next_current_experiment()
 
     def update_experiment_list(self, experiment_nb, experiment_specification, samples):
         experiment=self.experiments[experiment_nb]
@@ -82,7 +82,6 @@ class RuntimeManager:
         return len(self.experiments[experiment_nb][1])
 
     def get_next_sample(self):
-        import pdb; pdb.set_trace()
         experiment_nb=self.get_current_experiment_nb()
         sample_nb=self.current_experiment["sample_nb"]
         next_exp=self.experiments[experiment_nb][1][sample_nb]
@@ -105,7 +104,6 @@ class RuntimeManager:
             self.current_experiment={"experiment_nb":0,"sample_nb":0}
 
     def previous_current_experiment(self):
-        import pdb; pdb.set_trace()
         experiment_nb=self.get_current_experiment_nb()
         sample_nb=self.current_experiment["sample_nb"]
         if sample_nb > 0:

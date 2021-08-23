@@ -301,13 +301,16 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 next_conf=lst[start_and_window[0]]
                                 start=start_and_window[0]
                                 new_window=start_and_window[1]
+                                #store-cost-effective-result-in-rm!!!
+                                result={}
+                                state=NO_RESULT
                                 conf_array=lst[start:start+new_window]
                                 print("Back tracking to window:")
                                 print([utils.array_to_str(c) for c in conf_array])
-                                import random
-                                next_conf=random.choice(conf_array)
-                                new_window=1
-                                start=lst.index(next_conf)
+                                #import random
+                                #next_conf=random.choice(conf_array)
+                                #new_window=1
+                                #start=lst.index(next_conf)
                                 print("Selected config: " + utils.array_to_str(next_conf))
 			else:
                                 start=lst.index(get_conf(adaptive_scaler.workers, result))
