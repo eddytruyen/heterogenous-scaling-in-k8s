@@ -39,6 +39,7 @@ def create_app():
     adaptive_scalers={}
     runtime_manager={}
     adaptive_scalers["init"]=AdaptiveScaler(workers, scalingFunction)
+    runtime_manager["adaptive_scalers"]=adaptive_scalers
     app.config["adaptive_scalers"] = adaptive_scalers
     app.config["runtime_manager"] = runtime_manager
     app.config["initial_config"] = initial_config

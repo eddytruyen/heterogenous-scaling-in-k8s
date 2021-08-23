@@ -99,7 +99,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
                                                     if do_remove:
-                                                            remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,int(tenants)), results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results)
+                                                            remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results)
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                     if not only_failed_results:
@@ -632,17 +632,9 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results,startingTenant=False):
-		#if optimal_conf and optimal_conf_is_cost_effective:
-		#	if tipped_over_results and optimal_conf in tipped_over_results:
-		#		tipped_over_results.remove(optimal_conf)
-		#	tmp_combinations=sort_configs(workers,sorted_combinations)
-		#	failed_range=tmp_combinations.index(optimal_conf)
-		#	for i in range(0, failed_range):
-		#		possible_removal=tmp_combinations[i]
-		#		if resource_cost(workers, possible_removal) < resource_cost(workers, optimal_conf) :
-		#			print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
-		#			print(possible_removal)
-		#			sorted_combinations.remove(possible_removal)
+		if optimal_conf and optimal_conf_is_cost_effective:
+			if tipped_over_results and optimal_conf in tipped_over_results:
+				tipped_over_results.remove(optimal_conf)
 		#elif not tipped_over_results and not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
 		#	failed_range=start+window
 		#	print("Removing  in window going over the scaling_up_threshold because no optimal config has been found at all")
@@ -674,12 +666,15 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							sorted_combinations.remove(possible_removal)
-							rm.remove_sample(possible_removal)
+							if rm.conf_in_experiments(possible_removal):
+								rm.remove_sample_for_conf(possible_removal)
 				print("Removing failed conf")
 				print(failed_conf)
 				if sorted_combinations.index(failed_conf)-1 > next_index:
 					next_index=sorted_combinations.index(failed_conf)-1
 				sorted_combinations.remove(failed_conf)
+				if rm.conf_in_experiments(failed_conf):
+ 					rm.remove_sample_for_conf(failed_conf)
 		return next_index
 
 
