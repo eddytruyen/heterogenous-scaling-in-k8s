@@ -288,41 +288,44 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				if next_conf != previous_conf:
 					adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
 				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
-			elif resource_cost(adaptive_scaler.workers, lst[0]) < resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
-                                print("Moving filtered samples in sorted combinations after the window")
-                                print([utils.array_to_str(el) for el in lst])
-                                previous_tenant_results={}
-                                if tenant_nb > 1:
-                                        previous_tenant_results=d[sla['name']]
-                                start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb-1)
-                                #start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
-                                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                                print([utils.array_to_str(el) for el in lst])
-                                next_conf=lst[start_and_window[0]]
-                                start=start_and_window[0]
-                                new_window=start_and_window[1]
-                                #store-cost-effective-result-in-rm!!!
-                                result={}
-                                state=NO_RESULT
-                                conf_array=lst[start:start+new_window]
-                                print("Back tracking to window:")
-                                print([utils.array_to_str(c) for c in conf_array])
-                                #import random
-                                #next_conf=random.choice(conf_array)
-                                #new_window=1
-                                #start=lst.index(next_conf)
-                                print("Selected config: " + utils.array_to_str(next_conf))
 			else:
-                                start=lst.index(get_conf(adaptive_scaler.workers, result))
-                                start_and_window=get_start_and_window_for_next_experiments()
-                                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                                start=start_and_window[0]
-                                new_window=start_and_window[1]
-                                next_conf=lst[start]
-                                print(next_conf)
-                                if next_conf != previous_conf:
-                                        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-			add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
+                                rm=runtimemanager.instance(runtime_manager,tenant_nb)
+                                rm.add_not_cost_effective_result(result)
+                                conf_array=sort_configs(adaptive_scaler.workers,rm.get_left_over_configs())
+                                if conf_array and resource_cost(adaptive_scaler.workers, conf_array[0]) <= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
+                                        print("Moving filtered samples in sorted combinations after the window")
+                                        print([utils.array_to_str(el) for el in lst])
+                                        previous_tenant_results={}
+                                        if tenant_nb > 1:
+                                                 previous_tenant_results=d[sla['name']]
+                                        start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb-1)
+                                        #start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
+                                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                        print([utils.array_to_str(el) for el in lst])
+                                        next_conf=lst[start_and_window[0]]
+                                        start=start_and_window[0]
+                                        new_window=start_and_window[1]
+                                        runtimemanager.instance(runtime_manager,tenant_nb).add_not_cost_effective_result(result)
+                                        result={}
+                                        state=NO_RESULT
+                                        conf_array=lst[start:start+new_window]
+                                        print("Back tracking to window:")
+                                        print([utils.array_to_str(c) for c in conf_array])
+                                        print("Selected config: " + utils.array_to_str(next_conf))
+                                else:
+                                        tmp_results=sort_results(adaptive_scaler.workers, slo, rm.get_not_cost_effective_results())
+                                        if len(tmp_results) > 0:
+                                                result=tmp_results[0]
+                                                start=lst.index(get_conf(adaptive_scaler.workers, result))
+                                                start_and_window=get_start_and_window_for_next_experiments()
+                                                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                                start=start_and_window[0]
+                                                new_window=start_and_window[1]
+                                                next_conf=lst[start]
+                                                print(next_conf)
+                                                if next_conf != previous_conf:
+                                                         adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
+                                                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
 		elif state == COST_EFFECTIVE_RESULT:
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:

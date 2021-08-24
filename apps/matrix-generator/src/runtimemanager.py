@@ -9,6 +9,7 @@ class RuntimeManager:
         self.finished=True
         self.sorted_combinations=[]
         self.adaptive_scalers=adaptive_scalers
+        self.not_cost_effective_results=[]
 
     def set_sorted_combinations(self, combinations):
         if not self.sorted_combinations:
@@ -79,7 +80,10 @@ class RuntimeManager:
         return len(self.experiments.keys())
 
     def get_total_nb_of_samples(self, experiment_nb):
-        return len(self.experiments[experiment_nb][1])
+        if experiment_nb < self.get_total_nb_of_experiments():
+            return len(self.experiments[experiment_nb][1])
+        else:
+            return -1
 
     def get_next_sample(self):
         experiment_nb=self.get_current_experiment_nb()
@@ -87,6 +91,19 @@ class RuntimeManager:
         next_exp=self.experiments[experiment_nb][1][sample_nb]
         self.next_current_experiment()
         return next_exp
+
+    def get_left_over_configs(self):
+        experiment_nb=self.get_current_experiment_nb()
+        sample_nb=self.current_experiment["sample_nb"]
+        if sample_nb < self.get_total_nb_of_samples(experiment_nb):
+            lst=self.experiments[experiment_nb][1][sample_nb:]
+        else:
+            lst=[]
+        while experiment_nb < self.get_total_nb_of_experiments()-1:
+            experiment_nb+=1
+            lst+=self.experiments[experiment_nb][1]
+        return [generator.get_conf(self.adaptive_scalers["init"].workers,s) for s in lst]   
+
 
     def next_current_experiment(self):
         experiment_nb=self.get_current_experiment_nb()
@@ -120,6 +137,12 @@ class RuntimeManager:
 
     def no_experiments_left(self):
         return self.finished
+
+    def add_not_cost_effective_result(self, result):
+        self.not_cost_effective_results+=[result]
+
+    def get_not_cost_effective_results(self):
+        return self.not_cost_effective_results
 
 
 def instance(runtime_manager, tenant_nb):
