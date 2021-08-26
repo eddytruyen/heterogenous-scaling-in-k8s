@@ -104,7 +104,7 @@ def generate_matrix(initial_conf):
                                                             return start_and_window
                                             else:
                                                     adaptive_scaler.reset()
-                                                    adaptive_scaler.set_tipped_over_failed_confs(results, slo)
+                                                    adaptive_scaler.set_tipped_over_failed_confs()
                                                     conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
                                                     return process_states(conf_and_states)
 
@@ -114,12 +114,12 @@ def generate_matrix(initial_conf):
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
                                     if adaptive_scaler.ScalingDownPhase:
-                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, only_failed_results)
+                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
                                             return process_states([[],states])
                                     elif adaptive_scaler.ScalingUpPhase:
-                                            adaptive_scaler.set_tipped_over_failed_confs(results, slo)
+                                            adaptive_scaler.set_tipped_over_failed_confs()
                                             conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
