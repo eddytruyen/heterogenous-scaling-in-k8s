@@ -10,6 +10,7 @@ class RuntimeManager:
         self.sorted_combinations=[]
         self.adaptive_scalers=adaptive_scalers
         self.not_cost_effective_results=[]
+        self.tipped_over_results=[]
 
     def set_sorted_combinations(self, combinations):
         if not self.sorted_combinations:
@@ -142,7 +143,17 @@ class RuntimeManager:
         self.not_cost_effective_results+=[result]
 
     def get_not_cost_effective_results(self):
-        return self.not_cost_effective_results
+        results=self.not_cost_effective_results
+        self.not_cost_effective_results=[]
+        return results
+
+    def add_tipped_over_result(self, result):
+        self.tipped_over_results+=[result]
+
+    def get_tipped_over_results(self):
+        results=self.tipped_over_results
+        self.tipped_over_results=[]
+        return results
 
 
 def instance(runtime_manager, tenant_nb):
