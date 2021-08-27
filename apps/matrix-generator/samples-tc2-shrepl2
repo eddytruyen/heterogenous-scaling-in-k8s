@@ -4,5 +4,6 @@ search ration 1.0: 52
 #search ratio 0.75 - vertical scaling careful-up-scaling: 32
 search ratio 0.75 - vertical scaling careful-up-scaling-filtering-full-closure: 32
 search ratio 0.75 -verticalscaling-down-up-offset_noderesources0.10.1_filtering-full-closure:24
+search ratio 0.40-search-window2 -verticalscaling-down-up offset_noderesouces1.01.0_-filtering-full-closure:26
 search ratio 0.75 -verticalscaling-down-up offset_noderesouces1.01.0_-filtering-full-closure:24
-#search ratio 1.0 -verticalscaling-down-up offset_noderesouces1.01.0_-filtering-full-closure:34
+#search ratio 1.i0 -verticalscaling-down-up offset_noderesouces1.01.0_-filtering-full-closure:34
