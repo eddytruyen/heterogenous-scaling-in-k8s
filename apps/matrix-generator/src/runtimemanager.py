@@ -12,6 +12,14 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
 
+    def reset(self):
+        self.experiments={}
+        self.current_experiment={"experiment_nb":0,"sample_nb":0}
+        self.finished=True
+        self.sorted_combinations=[]
+        self.not_cost_effective_results=[]
+        self.tipped_over_results=[]
+
     def set_sorted_combinations(self, combinations):
         if not self.sorted_combinations:
             self.sorted_combinations=combinations
@@ -147,8 +155,8 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         return results
 
-    def add_tipped_over_result(self, result):
-        self.tipped_over_results+=[result]
+    def add_tipped_over_result(self, results):
+        self.tipped_over_results+=results
 
     def get_tipped_over_results(self):
         results=self.tipped_over_results

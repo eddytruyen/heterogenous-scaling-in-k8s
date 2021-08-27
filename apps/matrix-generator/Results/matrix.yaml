@@ -23,7 +23,7 @@ silver:
     SLAName: silver
     Successfull: 'true'
     best_score: '-0.16'
-    config: '1'
+    config: '0'
     score: '-0.16'
     worker1.replicaCount: '0'
     worker1.resources.requests.cpu: '6'
@@ -35,24 +35,5 @@ silver:
     worker3.resources.requests.cpu: '3'
     worker3.resources.requests.memory: '2'
     worker4.replicaCount: '0'
-    worker4.resources.requests.cpu: '2'
-    worker4.resources.requests.memory: '2'
-  '3':
-    CompletionTime: 1000149.0
-    SLAName: silver
-    Successfull: 'true'
-    best_score: n/a
-    config: '0'
-    score: n/a
-    worker1.replicaCount: '0'
-    worker1.resources.requests.cpu: '6'
-    worker1.resources.requests.memory: '4'
-    worker2.replicaCount: '1'
-    worker2.resources.requests.cpu: '4'
-    worker2.resources.requests.memory: '2'
-    worker3.replicaCount: '0'
-    worker3.resources.requests.cpu: '3'
-    worker3.resources.requests.memory: '2'
-    worker4.replicaCount: '1'
     worker4.resources.requests.cpu: '2'
     worker4.resources.requests.memory: '2'
