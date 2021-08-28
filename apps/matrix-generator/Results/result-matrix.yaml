@@ -1,6 +1,6 @@
 silver:
   '1':
-    CompletionTime: '140'
+    CompletionTime: '120'
     SLAName: silver
     Successfull: 'true'
     best_score: n/a
@@ -10,16 +10,16 @@ silver:
     worker1.resources.requests.cpu: '6'
     worker1.resources.requests.memory: '4'
     worker2.replicaCount: '1'
-    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.cpu: '1'
     worker2.resources.requests.memory: '2'
     worker3.replicaCount: '1'
-    worker3.resources.requests.cpu: '3'
+    worker3.resources.requests.cpu: '1'
     worker3.resources.requests.memory: '2'
     worker4.replicaCount: '1'
-    worker4.resources.requests.cpu: '2'
+    worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
   '2':
-    CompletionTime: '15839589450'
+    CompletionTime: 1000149.0
     SLAName: silver
     Successfull: 'true'
     best_score: n/a
@@ -29,30 +29,11 @@ silver:
     worker1.resources.requests.cpu: '6'
     worker1.resources.requests.memory: '4'
     worker2.replicaCount: '1'
-    worker2.resources.requests.cpu: '4'
+    worker2.resources.requests.cpu: '1'
     worker2.resources.requests.memory: '2'
     worker3.replicaCount: '1'
-    worker3.resources.requests.cpu: '3'
+    worker3.resources.requests.cpu: '1'
     worker3.resources.requests.memory: '2'
     worker4.replicaCount: '1'
-    worker4.resources.requests.cpu: '2'
-    worker4.resources.requests.memory: '2'
-  '9':
-    CompletionTime: '140'
-    SLAName: silver
-    Successfull: 'true'
-    best_score: n/a
-    config: '0'
-    score: n/a
-    worker1.replicaCount: '1'
-    worker1.resources.requests.cpu: '6'
-    worker1.resources.requests.memory: '4'
-    worker2.replicaCount: '2'
-    worker2.resources.requests.cpu: '4'
-    worker2.resources.requests.memory: '2'
-    worker3.replicaCount: '1'
-    worker3.resources.requests.cpu: '3'
-    worker3.resources.requests.memory: '2'
-    worker4.replicaCount: '0'
-    worker4.resources.requests.cpu: '2'
+    worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
