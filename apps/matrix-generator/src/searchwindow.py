@@ -1,6 +1,7 @@
 import math
 from . import generator
 from . import utils
+import copy
 
 MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
@@ -36,15 +37,23 @@ class ScalingFunction:
 		self.DominantResources=dominant_resources
 		self.Nodes = nodes
 		self.workersScaledDown = [] 
+                # self.workersScaledDown=worker_index -> [scalinggRecord=[ nr of scaling records,{res: log of previous scale actions}] for scalingRecord in self.workersScaledDown]
 		self.workersScaledUp = []
+                # self.workersScaledUp:worker_index -> [scalingRecord=[ nr of scaling records,{res: log of previous scale actions}] for scalingRecord in self.workersScaledDown]
 		self.Max={}
 		for i in resources.keys():
 			self.Max[i]=max([c[i] for c in nodes])
 		self.LastScaledDownWorker = []
 		self.LastScaledUpWorker = []
 
-	def clone(self):
-		return ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+	def clone(self, clone_scaling_records=False):
+                sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+                if clone_scaling_records:
+                    sc.workersScaledDown = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledDown]
+                    sc.workersScaledUp = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledUp]
+                    sc.LastScaledDownWorker = self.LastScaledDownWorker[:]
+                    sc.LastScaledUpWorker = self.LastScaledUpWorker[:]
+                return sc
 
 	def maximum(self,x1,x2):
 		fprojection=[self.eval(x) for x in range(x1,x2+1,1)]
@@ -182,6 +191,25 @@ class AdaptiveScaler:
 		for w in workers:
 			self._tested[w.worker_id]=False
 
+	def clone(self):
+            a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True))
+            a_s.ScalingDownPhase=self.ScalingDownPhase
+            a_s.StartScalingDown = self.StartScalingDown
+            a_s.ScalingUpPhase=self.ScalingUpPhase
+            a_s.ScaledDown=self.ScaledDown
+            a_s.ScaledUp=self.ScaledUp
+            a_s.FailedScalings = self.FailedScalings
+            a_s.ScaledWorkerIndex=self.ScaledWorkerIndex
+            a_s.tipped_over_confs=[c[:] for c in self.tipped_over_confs]
+            a_s.current_tipped_over_conf=self.current_tipped_over_conf[:]
+            a_s.failed_results=[c[:] for c in self.failed_results]
+            a_s.initial_confs=[[dict(d[0]),d[1][:],[w.clone() for w in d[2]]] for d in self.initial_confs]
+            a_s._tested=dict(self._tested)
+            a_s.scale_action_re_undone=self.scale_action_re_undone
+            a_s.only_failed_results=self.only_failed_results
+            return a_s
+
+
 	def hasScaled(self):
 		return (self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)) or self.scale_action_re_undone
 
@@ -226,8 +254,8 @@ class AdaptiveScaler:
 
 		def undo_scale_action(only_failed_results=False):
 			if self.ScaledUp:
-				failed_worker=self.ScalingFunction.undo_scaled_up(self.workers) 
-				self.ScaledUp=False
+                                failed_worker=self.ScalingFunction.undo_scaled_up(self.workers)
+                                self.ScaledUp=False
 			elif self.ScaledDown:
                                 failed_worker=self.ScalingFunction.undo_scaled_down(self.workers)
                                 self.ScaledDown=False
@@ -372,6 +400,7 @@ class AdaptiveScaler:
 				self.ScaledDown=True
 			else:
 				self.ScaledUp=True
+		import pdb; pdb.set_trace()
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
@@ -491,6 +520,7 @@ class AdaptiveScaler:
 		return self.tipped_over_confs
 
 	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
+                import pdb; pdb.set_trace()
                 conf_index = 0
                 result_conf_and_workers=[]
                 states=[]
