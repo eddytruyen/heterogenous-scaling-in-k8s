@@ -201,7 +201,10 @@ class AdaptiveScaler:
             a_s.FailedScalings = self.FailedScalings
             a_s.ScaledWorkerIndex=self.ScaledWorkerIndex
             a_s.tipped_over_confs=[c[:] for c in self.tipped_over_confs]
-            a_s.current_tipped_over_conf=self.current_tipped_over_conf[:]
+            if self.current_tipped_over_conf:
+            	a_s.current_tipped_over_conf=self.current_tipped_over_conf[:] 
+            else:
+                a_s.current_tipped_over_conf=None
             a_s.failed_results=[c[:] for c in self.failed_results]
             a_s.initial_confs=[[dict(d[0]),d[1][:],[w.clone() for w in d[2]]] for d in self.initial_confs]
             a_s._tested=dict(self._tested)

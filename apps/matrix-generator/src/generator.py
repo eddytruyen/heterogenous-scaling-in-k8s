@@ -80,6 +80,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
                                                     start_and_window=filter_samples(lst,adaptive_scaler.workers,start, window, previous_tenant_results, 1, tenant_nb-1, True, adaptive_scaler.ScaledWorkerIndex)
+                                                    if start_and_window[0] == -1:
+                                                            return start_and_window
                                                     print([utils.array_to_str(el) for el in lst])
                                                     scaled_conf=lst[start_and_window[0]]
                                                     add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=scaled_conf)
@@ -87,7 +89,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     next_conf=adaptive_scaler.current_tipped_over_conf
                                                     if previous_conf != next_conf:
-                                                            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf)
+                                                            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,next_conf)
                                                     #add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
                                                     return [lst.index(next_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
@@ -169,7 +171,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             print(w.resources['cpu'])
 
 	def get_adaptive_scaler_for_closest_tenant_nb(tenants):
-                        as_predicedConf=None
+                        as_predictedConf=None
                         k=tenants-1
                         while k >= 1:
                                 if str(k) in d[sla['name']].keys():
@@ -181,6 +183,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 return as_predictedConf
                         else:
                                 return adaptive_scalers['init']
+
 
 
 
@@ -222,10 +225,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo)
 	if not (currentResult or previousResult):
 		# using curve-fitted scaling function to estimate configuration for tenants
-		adaptive_scaler=get_adaptive_scaler_for_closest_tenant_nb(startTenants) 
+		adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
 		rm=runtimemanager.instance(runtime_manager,startTenants)
-		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window)
+		lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
+		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window)
+		adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf)
 	if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
 		#if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
 		evaluate=True
@@ -300,7 +304,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 					adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
 				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
 			else:
-                                rm=runtimemanager.instance(runtime_manager,tenant_nb)
+                                #rm=runtimemanager.instance(runtime_manager,tenant_nb)
                                 rm.add_not_cost_effective_result(result)
                                 conf_array=sort_configs(adaptive_scaler.workers,rm.get_left_over_configs())
                                 if conf_array and resource_cost(adaptive_scaler.workers, conf_array[0]) <= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
@@ -309,7 +313,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         previous_tenant_results={}
                                         if tenant_nb > 1:
                                                  previous_tenant_results=d[sla['name']]
-                                        start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb-1)
+                                        start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb-1)
                                         #start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
                                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                         print([utils.array_to_str(el) for el in lst])
@@ -320,9 +324,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         result={}
                                         state=NO_RESULT
                                         conf_array=lst[start:start+new_window]
-                                        print("Back tracking to window:")
-                                        print([utils.array_to_str(c) for c in conf_array])
-                                        print("Selected config: " + utils.array_to_str(next_conf))
+                                        rm_list=rm.get_left_over_configs()
+                                        for conf in rm_list:
+                                            if not conf in conf_array:
+                                                print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
+                                                rm.remove_sample_for_conf(conf)
                                 else:
                                         tmp_results=sort_results(adaptive_scaler.workers, slo, rm.get_not_cost_effective_results())
                                         if len(tmp_results) > 0:
@@ -365,15 +371,16 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				result={}
 			else:
+				import pdb; pdb.set_trace()
 				conf_array=sort_configs(adaptive_scaler.workers,rm.get_left_over_configs())
 				if conf_array:
-                                        #remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),False,[])
+                                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),False,[])
                                         print("Moving filtered samples in sorted combinations after the window")
                                         print([utils.array_to_str(el) for el in lst])
                                         previous_tenant_results={}
                                         if tenant_nb > 1:
                                                  previous_tenant_results=d[sla['name']]
-                                        start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb-1)
+                                        start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb-1)
                                         #start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
                                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                         print([utils.array_to_str(el) for el in lst])
@@ -381,6 +388,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         start=start_and_window[0]
                                         new_window=start_and_window[1]
                                         conf_array=lst[start:start+new_window]
+                                        rm_list=rm.get_left_over_configs()
+                                        for conf in rm_list:
+                                            if not conf in conf_array:
+                                                print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
+                                                rm.remove_sample_for_conf(conf)
 				else:
 					if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
 						remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),False,[])
@@ -421,7 +433,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 			#else:
 			#	 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
 		if state == NO_RESULT and adaptive_scaler.ScalingDownPhase:
-			rm=runtimemanager.instance(runtime_manager,int(tenants))
+			#rm=runtimemanager.instance(runtime_manager,tenant_nb)
 			if rm.no_experiments_left():
 				get_next_exps(next_conf, new_window)
 			else:
@@ -437,16 +449,30 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
 					previous_result=float(completion_time)
 					previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
-				sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+tenants+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], previous_result=previous_result, previous_replicas=previous_replicas)
+				sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], previous_result=previous_result, previous_replicas=previous_replicas)
 				rm.update_experiment_list(i,ws,sort_results(adaptive_scaler.workers, slo, sample_list))
 			d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
 		tenant_nb+=1
 	if predictedConf:
-		adaptive_scaler=get_adaptive_scaler_for_closest_tenant_nb(int(tenants))
+		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),predictedConf,slo)
 		rm=runtimemanager.instance(runtime_manager,int(tenants))
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
 		if rm.no_experiments_left():
-			get_next_exps(predictedConf, window)
+                     start=lst.index(predictedConf)
+                     new_window=window
+                     next_conf=predictedConf
+                     print("Moving filtered samples in sorted combinations after the window")
+                     print([utils.array_to_str(el) for el in lst])
+                     previous_tenant_results={}
+                     if int(tenants) > 1:
+                         previous_tenant_results=d[sla['name']]
+                         start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(predictedConf), window, previous_tenant_results, 1, int(tenants)-1)
+                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                         print([utils.array_to_str(el) for el in lst])
+                         next_conf=lst[start_and_window[0]]
+                         start=start_and_window[0]
+                         new_window=start_and_window[1]
+                     get_next_exps(next_conf, new_window)
 		d[sla['name']][tenants]=rm.get_next_sample()
 	print("Saving optimal results into matrix")
 	utils.saveToYaml(d,'Results/matrix.yaml')
@@ -571,7 +597,7 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
        adaptive_scaler.status()
        return adaptive_scaler
 
-def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf):
+def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf):
 	tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
 	adaptive_scalers[tested_configuration]=adaptive_scaler.clone()
 	print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
@@ -765,6 +791,8 @@ def filter_samples(sorted_combinations, workers, start, window, previous_results
                         if str(i) in previous_results.keys():
                                 previous_tenant_conf=get_conf(workers, previous_results[str(i)])
                                 for el in range(start, start+window):
+                                        if el-(window-new_window) >= len(sorted_combinations):
+                                                return [-1,-1]
                                         result_conf=sorted_combinations[el-(window-new_window)]
                                	        print(result_conf)
                                         qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)

@@ -16,7 +16,7 @@ class RuntimeManager:
         self.experiments={}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
-        self.sorted_combinations=[]
+        #self.sorted_combinations=[]
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
 
