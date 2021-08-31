@@ -158,13 +158,14 @@ class RuntimeManager:
     def add_tipped_over_result(self, results):
         self.tipped_over_results+=[results]
 
-    def get_tipped_over_results(self):
+    def get_tipped_over_results(self, nullify=True):
         results=[]
         workers=[]
         for tor in self.tipped_over_results:
             results+=tor["results"]
             workers+=[[w.clone() for w in tor["workers"]]]
-        self.tipped_over_results=[]
+        if nullify:
+            self.tipped_over_results=[]
         return {"workers": workers, "results": results}
 
 

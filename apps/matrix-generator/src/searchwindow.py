@@ -400,7 +400,6 @@ class AdaptiveScaler:
 				self.ScaledDown=True
 			else:
 				self.ScaledUp=True
-		import pdb; pdb.set_trace()
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
@@ -520,7 +519,6 @@ class AdaptiveScaler:
 		return self.tipped_over_confs
 
 	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
-                import pdb; pdb.set_trace()
                 conf_index = 0
                 result_conf_and_workers=[]
                 states=[]
