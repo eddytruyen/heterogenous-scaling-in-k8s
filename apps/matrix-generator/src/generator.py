@@ -184,6 +184,22 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         else:
                                 return adaptive_scalers['init']
 
+	def get_rm_for_closest_tenant_nb(tenants):
+                        if tenants in runtime_manager.keys():
+                                return runtime_manager[tenants]
+                        rm_tenants=None
+                        k=tenants-1
+                        while k >= 1:
+                                if k in runtime_manager.keys():
+                                        rm_tenants=runtimemanager.instance(runtime_manager, k).copy_to_tenant_nb(tenants)
+                                        k=0
+                                else:
+                                        k-=1
+                        if rm_tenants:
+                                runtime_manager[tenants]=rm_tenants
+                                return rm_tenants
+                        else:
+                                return runtimemanager.instance(runtime_manager, tenants)
 
 
 
@@ -226,7 +242,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 	if not (currentResult or previousResult):
 		# using curve-fitted scaling function to estimate configuration for tenants
 		adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
-		rm=runtimemanager.instance(runtime_manager,startTenants)
+		rm=get_rm_for_closest_tenant_nb(startTenants)
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
 		predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window)
 		adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf)
@@ -242,7 +258,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		tenant_nb=int(previous_tenants)
 		maxTenants=int(previous_tenants)
 		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scalers['init'], d[sla['name']], tenant_nb, previous_conf,slo)
-		rm=runtimemanager.instance(runtime_manager,int(tenant_nb))
+		rm=get_rm_for_closest_tenant_nb(tenant_nb)
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
 		print([utils.array_to_str(el) for el in lst])
 		tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
@@ -371,7 +387,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				result={}
 			else:
-				import pdb; pdb.set_trace()
 				conf_array=sort_configs(adaptive_scaler.workers,rm.get_left_over_configs())
 				if conf_array:
                                         remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),False,[])
@@ -455,7 +470,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		tenant_nb+=1
 	if predictedConf:
 		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),predictedConf,slo)
-		rm=runtimemanager.instance(runtime_manager,int(tenants))
+		rm=get_rm_for_closest_tenant_nb(int(tenants))
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
 		if rm.no_experiments_left():
                      start=lst.index(predictedConf)
@@ -485,7 +500,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 	if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) > tenant_nb-1: #and not adaptive_scaler.hasScaled():
 		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo)
 		print("Moving filtered samples in sorted combinations after the window")
-		rm=runtimemanager.instance(runtime_manager,int(tenants))
+		rm=get_rm_for_closest_tenant_nb(int(tenants))
 		lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
 		print([utils.array_to_str(el) for el in lst])
 		next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])

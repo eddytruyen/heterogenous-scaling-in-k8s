@@ -12,6 +12,11 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
 
+    def copy_to_tenant_nb(self, tenant_nb):
+        rm=RuntimeManager(tenant_nb, self.adaptive_scalers)
+        rm.sorted_combinations=self.sorted_combinations[:]
+        return rm
+
     def reset(self):
         self.experiments={}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
