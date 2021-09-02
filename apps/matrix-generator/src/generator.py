@@ -11,8 +11,8 @@ import sys
 import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-MAXIMUM_TRANSITION_COST=3
-MINIMUM_SHARED_REPLICAS=0.5
+MAXIMUM_TRANSITION_COST=2
+MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
 
@@ -298,8 +298,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 			tipped_over_results=return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
 			if tipped_over_results:
                             rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
+		scaling=False
 		if state == NO_COST_EFFECTIVE_RESULT:
-			scaling=False
 			print("NO COST EFFECTIVE RESULT")
 			if states and states.pop(0) == UNDO_SCALE_ACTION:
 				print("Previous scale down undone")
@@ -385,6 +385,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				next_conf=lst[start]
 				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				result={}
+				scaling=True
 			else:
 				conf_array=rm.get_left_over_configs()#sort_configs(adaptive_scaler.workers,rm.get_left_over_configs())
 				if conf_array:
@@ -446,7 +447,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		#			update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb+1, base, window,slo)
 			#else:
 			#	 update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window,slo)
-		if state == NO_RESULT and adaptive_scaler.ScalingDownPhase:
+		if not scaling and state == NO_RESULT and adaptive_scaler.ScalingDownPhase:
 			#rm=runtimemanager.instance(runtime_manager,tenant_nb)
 			if rm.no_experiments_left():
 				get_next_exps(next_conf, new_window)
@@ -497,7 +498,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 	#therefore we store it in a different yaml file
 	#Note: transition cost only applies when scaling up to a higher number of tenants.
 	if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) > tenant_nb-1: #and not adaptive_scaler.hasScaled():
-		import pdb; pdb.set_trace()
 		adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo)
 		print("Moving filtered samples in sorted combinations after the window")
 		rm=get_rm_for_closest_tenant_nb(int(tenants))
