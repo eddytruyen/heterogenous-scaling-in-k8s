@@ -283,6 +283,24 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 		print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
 		#slo=float(sla['slos']['completionTime'])
 		print("SLO is " + str(slo))
+                if adaptive_scaler.ScalingDownPhase:
+                                ws=rm.get_current_experiment_specification()
+                                i=rm.get_current_experiment_nb()
+                                sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                                samples=int(ws[4]*SAMPLING_RATE)
+                                if samples == 0:
+                                        samples=1
+                                results=[]
+                                previous_result=None
+                                previous_replicas=None
+                                if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+                                        previous_result=float(completion_time)
+                                        previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
+                                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], previous_result=previous_result, previous_replicas=previous_replicas)
+                                rm.update_experiment_list(i,ws,sort_results(adaptive_scaler.workers, slo, sample_list))
+                
+                        d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+
 		result=find_optimal_result(adaptive_scaler.workers,results,slo)
 		if result:
 			print("RESULT FOUND")
