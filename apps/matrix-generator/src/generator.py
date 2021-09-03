@@ -468,7 +468,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 					previous_result=float(completion_time)
 					previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
 				sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], previous_result=previous_result, previous_replicas=previous_replicas)
-				rm.update_experiment_list(i,ws,sort_results(adaptive_scaler.workers, slo, sample_list))
+				if SORT_SAMPLES:
+                                    sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
+				rm.update_experiment_list(i,sample_list)
 			d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
 		tenant_nb+=1
 	if predictedConf:
