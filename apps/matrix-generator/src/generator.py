@@ -15,6 +15,7 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
+SORT_SAMPLES=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -41,6 +42,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         samples=1
                                 results=[]
                                 sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+tenants+'_tenants-ex'+str(i),ws[1],ws[2],ws[3])
+                                if SORT_SAMPLES:
+                                    sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                                 rm.set_experiment_list(i,ws,sample_list)#sort_results(adaptive_scaler.workers,slo,sample_list))
 
 	def get_start_and_window_for_next_experiments(opt_conf=None):
