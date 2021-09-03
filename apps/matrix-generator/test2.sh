@@ -16,6 +16,6 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=120
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_0_2" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_0_1" | jq '.'
 sleep 1
 
