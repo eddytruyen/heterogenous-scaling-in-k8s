@@ -2,8 +2,6 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_0_3" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=2&previousconf=0_0_1_2" | jq '.'
-sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=140&previoustenants=3&previousconf=0_1_0_2" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=140&previoustenants=2&previousconf=0_1_0_2" | jq '.'
@@ -60,8 +58,6 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=10&completiontime=14
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=140&previoustenants=10&previousconf=2_0_0_2" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=190&previoustenants=10&previousconf=1_0_1_2" | jq '.'
-sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=190&previoustenants=9&previousconf=1_0_1_2" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=190&previoustenants=9&previousconf=1_1_0_2" | jq '.'
@@ -69,7 +65,5 @@ sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=140&previoustenants=9&previousconf=1_1_0_3" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=14&completiontime=140&previoustenants=9&previousconf=1_1_0_3" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=14&completiontime=190&previoustenants=14&previousconf=2_0_0_2" | jq '.'
 sleep 1
 
