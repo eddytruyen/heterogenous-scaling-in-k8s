@@ -363,7 +363,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     rm.remove_sample_for_conf(conf)
                                         except IndexError:
                                             run_no_cost_effective=True
-                                if run_co_cost_effective:
+                                if run_no_cost_effective:
                                         tmp_results=sort_results(adaptive_scaler.workers, slo, rm.get_not_cost_effective_results())
                                         if len(tmp_results) > 0:
                                                 result=tmp_results[0]
