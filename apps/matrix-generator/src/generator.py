@@ -15,7 +15,7 @@ MAXIMUM_TRANSITION_COST=2
 MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
-SORT_SAMPLES=False
+SORT_SAMPLES=True
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
