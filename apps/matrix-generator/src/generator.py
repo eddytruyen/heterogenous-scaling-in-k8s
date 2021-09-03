@@ -85,8 +85,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     try:
                                                         start_and_window=filter_samples(lst,adaptive_scaler.workers,start, window, previous_tenant_results, 1, tenant_nb, True, adaptive_scaler.ScaledWorkerIndex)
                                                     except IndexError:
-                                                        opt2_conf=adaptive_scaler.redo_scale_action()
-                                                        if opt2_conf:
+                                                        if adaptive_scaler.initial_confs:
+                                                            opt2_conf=adaptive_scaler.redo_scale_action()
                                                             return [lst.index(opt2_conf), 1]
                                                         elif opt_conf:
                                                             return [lst.index(opt_conf), 1]
@@ -465,10 +465,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 						    result={}
 						    rm.reset()
 						except IndexError:
-                                                    opt_conf=adaptive_scaler.redo_scale_action()
-                                                    if opt_conf:
-                                                            start=lst.index(opt_conf)
-                                                            new_window=1
+                                                    if adaptive_scaler.initial_confs:
+                                                        opt_conf=adaptive_scaler.redo_scale_action()
+                                                        start=lst.index(opt_conf)
+                                                        new_window=1
                                                     else:
                                                             start=lst.index(next_conf)
                                                             new_window=1
