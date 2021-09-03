@@ -4,6 +4,7 @@ from . import utils
 class RuntimeManager:
     def __init__(self, tenant_nb, adaptive_scalers):
         self.tenant_nb=tenant_nb
+        self.raw_experiments=[]
         self.experiments={}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
@@ -38,6 +39,12 @@ class RuntimeManager:
     def update_sorted_combinations(self, combinations):
         self.sorted_combinations=combinations
         return self.sorted_combinations
+
+    def set_raw_experiments(self, experiments):
+        self.raw_experiments=experiments
+
+    def get_raw_experiments(self):
+        return self.raw_experiments
     
     def set_experiment_list(self, experiment_nb, experiment_specification, samples):
         self.finished=False
