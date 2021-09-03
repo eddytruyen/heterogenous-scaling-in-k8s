@@ -12,15 +12,11 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_1_1_1" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_1_0_2" | jq '.'
-sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=140&previoustenants=3&previousconf=0_1_1_1" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=140&previoustenants=3&previousconf=0_1_1_1" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=190&previoustenants=4&previousconf=0_1_1_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=4&previousconf=0_1_1_1" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=140&previoustenants=4&previousconf=0_2_0_1" | jq '.'
 sleep 1
