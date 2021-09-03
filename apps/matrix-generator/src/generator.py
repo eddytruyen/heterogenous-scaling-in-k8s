@@ -379,7 +379,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         new_window=start_and_window[1]
                                         next_conf=lst[start]
 				    else:
-                                        previous_tenant_results=d[sla['name']]
+                                        previous_tenant_results={}
+                                        if tenant_nb > 1:
+                                            previous_tenant_results=d[sla['name']]
                                         print("Moving filtered samples in sorted combinations after the window")
                                         print([utils.array_to_str(el) for el in lst])
                                         start_and_window=filter_samples(lst, adaptive_scaler.workers, 0, window, previous_tenant_results, startTenant, tenant_nb)
@@ -405,7 +407,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("Moving filtered samples in sorted combinations after the window")
                 print([utils.array_to_str(el) for el in lst])
                 previous_tenant_results={}
-                previous_tenant_results=d[sla['name']]
+                if int(tenants) > 1:
+                    previous_tenant_results=d[sla['name']]
                 start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(predictedConf), window, previous_tenant_results, 1, int(tenants))
                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                 print([utils.array_to_str(el) for el in lst])
