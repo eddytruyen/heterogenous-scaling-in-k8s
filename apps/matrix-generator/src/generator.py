@@ -85,8 +85,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     try:
                                                         start_and_window=filter_samples(lst,adaptive_scaler.workers,start, window, previous_tenant_results, 1, tenant_nb, True, adaptive_scaler.ScaledWorkerIndex)
                                                     except IndexError:
-                                                        adaptive_scaler.redo_scale_action()
-                                                        if opt_conf:
+                                                        opt2_conf=adaptive_scaler.redo_scale_action()
+                                                        if opt2_conf:
+                                                            return [lst.index(opt2_conf), 1]
+                                                        elif opt_conf:
                                                             return [lst.index(opt_conf), 1]
                                                         else:
                                                             return [lst.index(next_conf),1]
@@ -314,6 +316,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
 		scaling=False
 		if state == NO_COST_EFFECTIVE_RESULT:
+			import pdb; pdb.set_trace()
 			print("NO COST EFFECTIVE RESULT")
 			if states and states.pop(0) == UNDO_SCALE_ACTION:
 				print("Previous scale down undone")
@@ -462,7 +465,16 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 						    result={}
 						    rm.reset()
 						except IndexError:
+                                                    opt_conf=adaptive_scaler.redo_scale_action()
+                                                    if opt_conf:
+                                                            start=lst.index(opt_conf)
+                                                            new_window=1
+                                                    else:
+                                                            start=lst.index(next_conf)
+                                                            new_window=1
+                                                    state=NO_COST_EFFECTIVE_RESULT
                                                     rm.reset()
+
 		for w in adaptive_scaler.workers:
 			adaptive_scaler.untest(w)
 		#if adaptive_scaler.ScalingUpPhase and adaptive_scaler.hasScaled():
@@ -1238,4 +1250,3 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
 	return results
-import pdb;
