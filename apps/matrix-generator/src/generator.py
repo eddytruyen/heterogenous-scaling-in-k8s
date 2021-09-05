@@ -324,7 +324,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
 		scaling=False
 		if state == NO_COST_EFFECTIVE_RESULT:
-			import pdb; pdb.set_trace()
 			print("NO COST EFFECTIVE RESULT")
 			if states and states.pop(0) == UNDO_SCALE_ACTION:
 				print("Previous scale down undone")
