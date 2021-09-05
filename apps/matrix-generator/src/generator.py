@@ -89,8 +89,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             opt2_conf=adaptive_scaler.redo_scale_action()
                                                             return [lst.index(opt2_conf), 1]
                                                         elif opt_conf:
+                                                            if not opt_conf in lst:
+                                                                lst.append(opt_conf)
                                                             return [lst.index(opt_conf), 1]
                                                         else:
+                                                            if not next_conf in lst:
+                                                                lst.append(next_conf)
                                                             return [lst.index(next_conf),1]
                                                     print([utils.array_to_str(el) for el in lst])
                                                     scaled_conf=lst[start_and_window[0]]
@@ -132,9 +136,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             try:
                                                                 start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb)
                                                             except IndexError:
-                                                                if opt_conf and opt_conf in lst:
+                                                                if opt_conf:
+                                                                    if not opt_conf in lst:
+                                                                        lst.append(opt_conf)
                                                                     return [lst.index(opt_conf),1] 
                                                                 else:
+                                                                    if not next_conf in lst:
+                                                                        lst.append(next_conf)
                                                                     return [lst.index(next_conf),1]
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                             print([utils.array_to_str(el) for el in lst])
@@ -470,8 +478,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         start=lst.index(opt_conf)
                                                         new_window=1
                                                     else:
-                                                            start=lst.index(next_conf)
-                                                            new_window=1
+                                                        d[sla['name']][str(tenant_nb)]=results[0]
+                                                        opt_conf=get_conf(adaptive_scaler.workers, results[0])
+                                                        if not opt_conf in lst:
+                                                            lst.append(opt_conf)
+                                                        start=lst.index(opt_conf)
+                                                        new_window=1
                                                     state=NO_COST_EFFECTIVE_RESULT
                                                     rm.reset()
 
