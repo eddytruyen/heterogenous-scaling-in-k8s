@@ -372,7 +372,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                 # ??else branch is deleted in at-runtime version
                 else:
-                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[], tenant_nb == startTenant)
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[])#, tenant_nb == startTenant)
                 start=lst.index(get_conf(adaptive_scaler.workers, result))
                 start_and_window=get_start_and_window_for_next_experiments()
                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
@@ -387,7 +387,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results())["results"], tenant_nb == startTenant)
+                remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results())["results"])#, tenant_nb == startTenant)
                 if adaptive_scaler.ScalingUpPhase:
                         adaptive_scaler.reset()
                 adaptive_scaler.failed_results=[]
@@ -416,7 +416,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     #retry_attempt+=nr_of_experiments
                 else:
                     if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
-                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[],tenant_nb == startTenant)
+                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[])#,tenant_nb == startTenant)
                         tors=rm.get_tipped_over_results(nullify=False)
                         adaptive_scaler.failed_results=tors["results"]
                         adaptive_scaler.reset()
@@ -427,7 +427,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         next_conf=lst[start]
                         add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
                     else:
-                        start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[],tenant_nb == startTenant)
+                        start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[])#,tenant_nb == startTenant)
                         previous_tenant_results={}
                         if tenant_nb > 1:
                             previous_tenant_results=d[sla['name']]
@@ -730,18 +730,18 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 					if rm.conf_in_experiments(possible_removal):
 						rm.remove_sample_for_conf(possible_removal)
 
-		elif not tipped_over_results and not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
-			failed_range=start+window
-			print("Removing all confs in window going over the scaling_up_threshold because no optimal config has been found at all")
-			index=0 if startingTenant else start
-			possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD and r['Successfull'] == 'true')
-			for i in range(start,failed_range,1):
-				print(sorted_combinations[index])
-				if not sorted_combinations[index] in possible_tipped_over_confs:
-					print(utils.array_to_delimited_str(sorted_combinations[index]) + " is removed")
-					sorted_combinations.remove(sorted_combinations[index])
-				else:
-					index+=1
+		#elif not tipped_over_results and not optimal_conf and SAMPLING_RATE < 1.0 and SAMPLING_RATE >= 0.5:
+		#	failed_range=start+window
+		#	print("Removing all confs in window going over the scaling_up_threshold because no optimal config has been found at all")
+		#	index=0 if startingTenant else start
+		#	possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD and r['Successfull'] == 'true')
+		#	for i in range(start,failed_range,1):
+		#		print(sorted_combinations[index])
+		#		if not sorted_combinations[index] in possible_tipped_over_confs:
+		#			print(utils.array_to_delimited_str(sorted_combinations[index]) + " is removed")
+		#			sorted_combinations.remove(sorted_combinations[index])
+		#		else:
+		#			index+=1
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
