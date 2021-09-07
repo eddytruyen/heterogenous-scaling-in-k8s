@@ -130,7 +130,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
                                                     #if changePhase:
-                                                    tors=rm.get_tipped_over_results()
+                                                    tors=rm.get_tipped_over_results(nullify=False)
                                                     adaptive_scaler.failed_results=tors["results"]
                                                     if adaptive_scaler.failed_results:
                                                         adaptive_scaler.workers=tors["workers"][0]
@@ -380,7 +380,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     print("COST-EFFECTIVE-RESULT")
                     if adaptive_scaler.ScalingUpPhase:
                         lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results(nullify=False))["results"]+adaptive_scaler.failed_results, tenant_nb == startTenant)
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,rm.get_tipped_over_results())["results"], tenant_nb == startTenant)
                     if adaptive_scaler.ScalingUpPhase:
                             adaptive_scaler.reset()
                     d[sla['name']][str(tenant_nb)]=result
