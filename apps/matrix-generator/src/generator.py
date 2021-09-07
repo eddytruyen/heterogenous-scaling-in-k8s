@@ -274,6 +274,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         print("Starting at: " + str(start))
         nr_of_experiments=1
         while tenant_nb <= maxTenants and evaluate:
+            tmp_conf=get_conf(adaptive_scaler.workers, tmp_result) if float(tmp_result['CompletionTime']) < slo and tmp_result['Successfull']=='true' else []
+            start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, tmp_conf, start, adaptive_window.get_current_window(),False,[])
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
