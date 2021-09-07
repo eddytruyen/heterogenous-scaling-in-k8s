@@ -188,7 +188,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         else:
                                 return adaptive_scalers['init']
 
-	def get_rm_for_closest_tenant_nb(tenants):
+        def get_rm_for_closest_tenant_nb(tenants):
                         if tenants in runtime_manager.keys():
                                 return runtime_manager[tenants]
                         rm_tenants=None
@@ -267,6 +267,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
                 next_conf=get_conf(adaptive_scaler.workers, tmp_result)
                 results=[tmp_result]
+                if rm.no_experiments_left():
+                    get_next_exps(next_conf, new_window)
 
         start=0
         if next_conf:
@@ -278,36 +280,38 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                if not rm.no_experiments_left():
+                conf_array=rm.get_left_over_configs()
+                if conf_array:
                     last_experiment=False
                     conf_array=rm.get_left_over_configs()
-                    if resource_cost(adaptive_scaler.workers, sort_configs(adaptive_scaler.workers,conf_array)[0]) <= resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
-                        #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
-                        print("Moving filtered samples in sorted combinations after the window")
+                    # if there are no better samples left in terms of resource cost than the current previous result, end this set of samples
+                    if resource_cost(adaptive_scaler.workers, sort_configs(adaptive_scaler.workers,conf_array)[0]) > resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
+                        last_experiment=True
+                    #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
+                    print("Moving filtered samples in sorted combinations after the window")
+                    print([utils.array_to_str(el) for el in lst])
+                    previous_tenant_results={}
+                    if tenant_nb > 1:
+                        previous_tenant_results=d[sla['name']]
+                    try:
+                        start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb)
+                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                         print([utils.array_to_str(el) for el in lst])
-                        previous_tenant_results={}
-                        if tenant_nb > 1:
-                            previous_tenant_results=d[sla['name']]
-                        try:
-                            start_and_window=filter_samples(lst,adaptive_scaler.workers,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb)
-                            #start_and_window=filter_samples(lst,[],previous_conf, True, start, window)
-                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                            print([utils.array_to_str(el) for el in lst])
-                            next_conf=lst[start_and_window[0]]
-                            start=start_and_window[0]
-                            new_window=start_and_window[1]
-                            conf_array=lst[start:start+new_window]
-                            rm_list=rm.get_left_over_configs()
-                            for conf in rm_list:
-                                if not conf in conf_array:
-                                    print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
-                                    rm.remove_sample_for_conf(conf)
-                        except IndexError:
-                            last_experiment=True
+                        next_conf=lst[start_and_window[0]]
+                        start=start_and_window[0]
+                        new_window=start_and_window[1]
+                        conf_array=lst[start:start+new_window]
+                        rm_list=rm.get_left_over_configs()
+                        for conf in rm_list:
+                            if not conf in conf_array:
+                                print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
+                                rm.remove_sample_for_conf(conf)
+                    except IndexError:
+                        last_experiment=True
                 else:
                     # there is no better experiment sample left than the current result, therefore end this set of samples.
                     last_experiment=True
-                #process the current result
+                #let k8-resource-optimizer process the inputted previous result
                 ws=rm.get_current_experiment_specification()
                 i=rm.get_current_experiment_nb()
                 sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
@@ -323,116 +327,124 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], previous_result=previous_result, previous_replicas=previous_replicas)
                 if SORT_SAMPLES:
                     sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
-                rm.update_experiment_list(i,ws,sample_list))
+                rm.update_experiment_list(i,ws,sample_list)
+                d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                #if we have still samples left for k8-resource-optimizer, yield further processing and exit while loop
                 if not last_experiment:
-                    d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                    tenant_nb+=1
+                    break
                 else:
-                    # since no experiment samples are left, we collect all the samples and get the most optimal result from the set of samples that meet the slo
+                    # since no experiment samples are left, we let k8-resource-optimizer all the samples and we calculate the most optimal result from the set of samples that meet the slo
                     next_exp=rm.get_raw_experiments()
                     results=[]
-		    nr_of_experiments=len(next_exp)
-		    print("Running " + str(nr_of_experiments) + " experiments") 
-		    for i,ws in enumerate(next_exp):
-	                        #samples=reduce(lambda a, b: a * b, [worker.max_replicas-worker.min_replicas+1 for worker in ws[0]])
-				sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-				samples=int(ws[4]*SAMPLING_RATE)
-				if samples == 0:
-					samples=1
-				for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
-					results.append(res)
-                result=find_optimal_result(adaptive_scaler.workers,results,slo)
-                if result:
-                    print("RESULT FOUND")
-                    metric=float(result['CompletionTime'])
-                    print("Measured completion time is " + str(metric))
-                    conf=get_conf(adaptive_scaler.workers,result)
-                    print(conf)
-                    print("New cycle")
-                    for w in adaptive_scaler.workers:
-                        print(w.resources)
-                #validate the found optimal result (could be no one found) to classify the result
-                states=adaptive_scaler.validate_result(result, get_conf(adaptive_scaler.workers,result), slo)
-                print(states)
-                state=states.pop(0)
-                print("State of adaptive_scaler")
-                adaptive_scaler.status()
-                if adaptive_scaler.ScalingDownPhase and if adaptive_scaler.StartScalingDown:
-	            adaptive_scaler.failed_results = return_failed_confs(adaptive_scaler.workers, results, r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
-		if state == NO_COST_EFFECTIVE_RESULT:
-                    print("NO COST EFFECTIVE RESULT")
-                    if states and states.pop(0) == UNDO_SCALE_ACTION:
-                        print("Previous scale down undone")
-                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst)
-                    # ??else branch is deleted in at-runtime version
-                    else:
-                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[], tenant_nb == startTenant)
-                    start=lst.index(get_conf(adaptive_scaler.workers, result))
-                    start_and_window=get_start_and_window_for_next_experiments()
+                    nr_of_experiments=len(next_exp)
+                    print("Running " + str(nr_of_experiments) + " experiments")
+                    for i,ws in enumerate(next_exp):
+                        sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                        samples=int(ws[4]*SAMPLING_RATE)
+                        if samples == 0:
+                            samples=1
+                        for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+                            results.append(res)
+            result=find_optimal_result(adaptive_scaler.workers,results,slo)
+            if result:
+                print("RESULT FOUND")
+                metric=float(result['CompletionTime'])
+                print(get_conf(adaptive_scaler.workers,result))
+                print("Measured completion time is " + str(metric))
+            print("New cycle")
+            for w in adaptive_scaler.workers:
+                print(w.resources)
+            #validate the found optimal result (could be no one found) to classify the result
+            states=adaptive_scaler.validate_result(result, get_conf(adaptive_scaler.workers,result), slo)
+            print(states)
+            state=states.pop(0)
+            print("State of adaptive_scaler")
+            adaptive_scaler.status()
+            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                tipped_over_results=return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * SCALING_UP_THRESHOLD)
+                if tipped_over_results:
+                    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
+            if state == NO_COST_EFFECTIVE_RESULT:
+                print("NO COST EFFECTIVE RESULT")
+                if states and states.pop(0) == UNDO_SCALE_ACTION:
+                    print("Previous scale down undone")
+                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                # ??else branch is deleted in at-runtime version
+                else:
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[], tenant_nb == startTenant)
+                start=lst.index(get_conf(adaptive_scaler.workers, result))
+                start_and_window=get_start_and_window_for_next_experiments()
+                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                start=start_and_window[0]
+                new_window=start_and_window[1]
+                next_conf=lst[start]
+                print(next_conf)
+                if next_conf != previous_conf:
+                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
+                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
+            elif state == COST_EFFECTIVE_RESULT:
+                print("COST-EFFECTIVE-RESULT")
+                if adaptive_scaler.ScalingUpPhase:
+                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results())["results"], tenant_nb == startTenant)
+                if adaptive_scaler.ScalingUpPhase:
+                        adaptive_scaler.reset()
+                adaptive_scaler.failed_results=[]
+                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
+                #d[sla['name']][str(tenant_nb)]=result
+                #tenant_nb+=1
+                #retry_attempt=0
+                next_conf=get_conf(adaptive_scaler.workers, result)
+                #flag_workers(adaptive_scaler.workers,next_conf)
+                new_window=window
+                start=lst.index(next_conf)
+                rm.reset()
+                if not (evaluate_previous or evaluate_current):
+                    result={}
+            elif state == NO_RESULT:
+                print("NO RESULT")
+                if states and states.pop(0) == UNDO_SCALE_ACTION:
+                    print("Previous scale action undone")
+                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                    start_and_window=get_start_and_window_for_next_experiments(opt_conf=lst[start])
                     print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                     start=start_and_window[0]
                     new_window=start_and_window[1]
                     next_conf=lst[start]
-                    print(next_conf)
-                    if next_conf != previous_conf:
-                        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
-                elif state == COST_EFFECTIVE_RESULT:
-                    print("COST-EFFECTIVE-RESULT")
-                    if adaptive_scaler.ScalingUpPhase:
-                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,rm.get_tipped_over_results())["results"], tenant_nb == startTenant)
-                    if adaptive_scaler.ScalingUpPhase:
-                            adaptive_scaler.reset()
-                    d[sla['name']][str(tenant_nb)]=result
-                    tenant_nb+=1
-                    retry_attempt=0
-                    next_conf=get_conf(adaptive_scaler.workers, result)
-                    flag_workers(adaptive_scaler.workers,next_conf)
-                    new_window=window
-                    start=lst.index(next_conf)
-                elif state == NO_RESULT:
-                     print("NO RESULT")
-                     if states and states.pop(0) == UNDO_SCALE_ACTION:
-                        print("Previous scale action undone")
-                        lst=sort_configs(adaptive_scaler.workers,lst)
-                        start_and_window=get_start_and_window_for_next_experiments(opt_conf=lst[0])
+                    result={}
+                    #retry_attempt+=nr_of_experiments
+                else:
+                    if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
+                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[],tenant_nb == startTenant)
+                        tors=rm.get_tipped_over_results(nullify=False)
+                        adaptive_scaler.failed_results=tors["results"]
+                        adaptive_scaler.reset()
+                        start_and_window=get_start_and_window_for_next_experiments()
                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                         start=start_and_window[0]
                         new_window=start_and_window[1]
                         next_conf=lst[start]
+                        add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
+                    else:
+                        start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[],tenant_nb == startTenant)
+                        previous_tenant_results={}
+                        if tenant_nb > 1:
+                            previous_tenant_results=d[sla['name']]
+                        print("Moving filtered samples in sorted combinations after the window")
+                        print([utils.array_to_str(el) for el in lst])
+                        start_and_window=filter_samples(lst, adaptive_scaler.workers, start, window, previous_tenant_results, 1, tenant_nb)
+                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                        print([utils.array_to_str(el) for el in lst])
+                        next_conf=lst[start_and_window[0]]
+                        start=start_and_window[0]
+                        new_window=start_and_window[1]
                         result={}
-                        retry_attempt+=nr_of_experiments
-		    else:
-			remove_failed_confs(lst, adaptive_scaler.workers, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[],tenant_nb == startTenant)
-                        new_window=window
-                        lst=sort_configs(adaptive_scaler.workers,lst)
-                        next_conf=lst[0]
-                        start=0
-                        if adaptive_scaler.ScalingDownPhase and adaptive_scaler.failed_results:
-                            adaptive_scaler.reset()
-                            start_and_window=get_start_and_window_for_next_experiments()
-                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                            start=start_and_window[0]
-                            new_window=start_and_window[1]
-                            next_conf=lst[start]
-			else:
-                            previous_tenant_results={}
-                            if tenant_nb > 1:
-                                previous_tenant_results=d[sla['name']]
-                            print("Moving filtered samples in sorted combinations after the window")
-                            print([utils.array_to_str(el) for el in lst])
-                            start_and_window=filter_samples(lst, adaptive_scaler.workers, 0, window, previous_tenant_results, startTenant, tenant_nb)
-                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                            print([utils.array_to_str(el) for el in lst])
-                            next_conf=lst[start_and_window[0]]
-                            start=start_and_window[0]
-                            new_window=start_and_window[1]
-                            result={}
-                            retry_attempt+=nr_of_experiments
+                        rm.reset()
+                        #retry_attempt+=nr_of_experiments
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
-	    next_exp=_find_next_exp(lst,adaptive_scaler.workers,result,next_conf,base,adaptive_window.adapt_search_window(result,new_window,False))
-            tenant_nb+=1
+            get_next_exps(next_conf, new_window)
         if predictedConf:
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),predictedConf,slo)
             rm=get_rm_for_closest_tenant_nb(int(tenants))
@@ -453,15 +465,15 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 start=start_and_window[0]
                 new_window=start_and_window[1]
                 get_next_exps(next_conf, new_window)
-		d[sla['name']][tenants]=rm.get_next_sample()
-	print("Saving optimal results into matrix")
-	utils.saveToYaml(d,'Results/matrix.yaml')
+                d[sla['name']][tenants]=rm.get_next_sample()
+        print("Saving optimal results into matrix")
+        utils.saveToYaml(d,'Results/matrix.yaml')
         #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
         #we search from the known optimal for the requested nr of jobs until a configuration is found that meets
         #the different constraints of transition cost and shared number of replicas. 
         #However this config should not be stored in the matrix because we need to remember the current found optimimum
-	#therefore we store it in a different yaml file
-	#Note: transition cost only applies when scaling up to a higher number of tenants.
+        #therefore we store it in a different yaml file
+        #Note: transition cost only applies when scaling up to a higher number of tenants.
         if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) > tenant_nb-1: #and not adaptive_scaler.hasScaled():
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo)
             print("Moving filtered samples in sorted combinations after the window")
