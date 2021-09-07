@@ -267,8 +267,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
                 next_conf=get_conf(adaptive_scaler.workers, tmp_result)
                 results=[tmp_result]
-                if rm.no_experiments_left():
-                    get_next_exps(next_conf, window)
 
         start=0
         if next_conf:
@@ -279,14 +277,27 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
+            if rm.no_experiments_left():
+                print("Moving filtered samples in sorted combinations after the window")
+                print([utils.array_to_str(el) for el in lst])
+                previous_tenant_results={}
+                if tenant_nb > 1:
+                     previous_tenant_results=d[sla['name']]
+                start_and_window=filter_samples(lst,adaptive_scaler.workers,start, window, previous_tenant_results, 1, tenant_nb)
+                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                print([utils.array_to_str(el) for el in lst])
+                next_conf=lst[start_and_window[0]]
+                start=start_and_window[0]
+                new_window=start_and_window[1]
+                get_next_exps(next_conf, new_window)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 conf_array=rm.get_left_over_configs()
                 if conf_array:
                     last_experiment=False
-                    conf_array=rm.get_left_over_configs()
-                    # if there are no better samples left in terms of resource cost than the current previous result, end this set of samples
-                    if resource_cost(adaptive_scaler.workers, sort_configs(adaptive_scaler.workers,conf_array)[0]) > resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
-                        last_experiment=True
+                    #??MOVE THIS if there are no better samples left in terms of resource cost than the current previous result, end this set of samples
+                    #if resource_cost(adaptive_scaler.workers, sort_configs(adaptive_scaler.workers,conf_array)[0]) > resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, result)):
+                    #    last_experiment=True
+                    #
                     #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
                     print("Moving filtered samples in sorted combinations after the window")
                     print([utils.array_to_str(el) for el in lst])
@@ -300,13 +311,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         next_conf=lst[start_and_window[0]]
                         start=start_and_window[0]
                         new_window=start_and_window[1]
-                        conf_array=lst[start:start+new_window]
-                        rm_list=rm.get_left_over_configs()
-                        for conf in rm_list:
-                            if not conf in conf_array:
+                        tmp_array=lst[start:start+new_window]
+                        for conf in conf_array:
+                            if not conf in tmp_array:
                                 print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
                                 rm.remove_sample_for_conf(conf)
                     except IndexError:
+                        last_experiment=True
+                    if not rm.get_left_over_configs():
                         last_experiment=True
                 else:
                     # there is no better experiment sample left than the current result, therefore end this set of samples.
@@ -334,7 +346,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     tenant_nb+=1
                     break
                 else:
-                    # since no experiment samples are left, we let k8-resource-optimizer all the samples and we calculate the most optimal result from the set of samples that meet the slo
+                    # since no useful experiment samples are left, we let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo
                     next_exp=rm.get_raw_experiments()
                     results=[]
                     nr_of_experiments=len(next_exp)
@@ -445,6 +457,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
             get_next_exps(next_conf, new_window)
+            tenant_nb+=1
         if predictedConf:
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),predictedConf,slo)
             rm=get_rm_for_closest_tenant_nb(int(tenants))
