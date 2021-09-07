@@ -268,7 +268,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 next_conf=get_conf(adaptive_scaler.workers, tmp_result)
                 results=[tmp_result]
                 if rm.no_experiments_left():
-                    get_next_exps(next_conf, new_window)
+                    get_next_exps(next_conf, window)
 
         start=0
         if next_conf:
