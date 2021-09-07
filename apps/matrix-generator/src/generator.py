@@ -391,7 +391,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:
 				lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-			remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,adaptive_scaler.failed_results,startingTenant=True)
+			remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results(nullify=False))["results"]+adaptive_scaler.failed_results,startingTenant=True)
 			if adaptive_scaler.ScalingUpPhase:
                                 adaptive_scaler.reset()
 			adaptive_scaler.failed_results=[]
