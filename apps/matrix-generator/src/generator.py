@@ -799,7 +799,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 			for i in range(0, failed_range):
 				possible_removal=tmp_combinations[i]
 				if resource_cost(workers, possible_removal) > resource_cost(workers, optimal_conf):
-					print("Removing config because it has a higher resource cost than the optimal result and we assume it will therefore fail for the next tenant")
+					print("Removing config because it has a higher resource cost than the optimal result and we assume it will therefore not be cost-effective for the current tenant")
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
 					if rm.conf_in_experiments(possible_removal):
