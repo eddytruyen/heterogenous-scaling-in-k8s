@@ -344,7 +344,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         samples=int(ws[4]*SAMPLING_RATE)
                         if samples == 0:
                             samples=1
-                        for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i+retry_attempt),ws[1],ws[2],ws[3]):
+                        for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3]):
                             results.append(res)
             result=find_optimal_result(adaptive_scaler.workers,results,slo)
             if result:
