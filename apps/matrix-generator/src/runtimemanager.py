@@ -12,6 +12,7 @@ class RuntimeManager:
         self.adaptive_scalers=adaptive_scalers
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
+        self.last_experiment={}
 
     def copy_to_tenant_nb(self, tenant_nb):
         rm=RuntimeManager(tenant_nb, self.adaptive_scalers)
@@ -25,6 +26,7 @@ class RuntimeManager:
         #self.sorted_combinations=[]
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
+        self.last_experiment={}
 
     def set_sorted_combinations(self, combinations):
         if not self.sorted_combinations:
@@ -78,11 +80,19 @@ class RuntimeManager:
                 experiment[1][sample_index]=sample
 
     def get_current_experiment_specification(self):
-        experiment_nb=self.get_current_experiment_nb()
-        return self.experiments[experiment_nb][0]
+        exp=self.last_experiment_in_queue()
+        if exp:
+            return exp["experiment_spec"]
+        else:
+            experiment_nb=self.get_current_experiment_nb()
+            return self.experiments[experiment_nb][0]
 
     def get_current_experiment_nb(self):
-        return self.current_experiment["experiment_nb"]
+        exp=self.last_experiment_in_queue()
+        if exp:
+            return exp["experiment_nb"]
+        else:
+            return self.current_experiment["experiment_nb"]
 
     def get_nb_of_sample_for_conf(self,experiment_nb,conf):
         if self.conf_in_experiments(conf):
@@ -92,10 +102,18 @@ class RuntimeManager:
         return -1
 
     def get_current_sample(self):
-        return self.experiments[self.get_current_experiment_nb()][1][self.get_current_sample_nb()]
+        exp=self.last_experiment_in_queue()
+        if exp:
+            return exp["sample"]
+        else:
+            return self.experiments[self.get_current_experiment_nb()][1][self.get_current_sample_nb()]
 
     def get_current_sample_nb(self):
-        return self.current_experiment["sample_nb"]
+        exp=self.last_experiment_in_queue()
+        if exp:
+            return exp["sample_nb"]
+        else:
+            return self.current_experiment["sample_nb"]
 
     def get_total_nb_of_experiments(self):
         return len(self.experiments.keys())
@@ -110,8 +128,14 @@ class RuntimeManager:
         experiment_nb=self.get_current_experiment_nb()
         sample_nb=self.current_experiment["sample_nb"]
         next_exp=self.experiments[experiment_nb][1][sample_nb]
+        experiment_spec=self.experiments[experiment_nb][0]
         self.next_current_experiment()
+        if self.no_experiments_left():
+            self.last_experiment={"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
         return next_exp
+
+    def last_experiment_in_queue(self):
+        return self.last_experiment
 
     def get_left_over_configs(self):
         experiment_nb=self.get_current_experiment_nb()
