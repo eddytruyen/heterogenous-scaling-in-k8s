@@ -403,6 +403,7 @@ class AdaptiveScaler:
 				self.ScaledDown=True
 			else:
 				self.ScaledUp=True
+		import pdb; pdb.set_trace()
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
