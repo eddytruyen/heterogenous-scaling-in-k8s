@@ -112,7 +112,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if previous_conf != scaled_conf:
                                                             adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,scaled_conf)
                                                     #add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
-                                                    return [lst.index(next_conf), 1]
+                                                    return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
@@ -140,7 +140,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             previous_tenant_results={}
                                                             if tenant_nb > 1:
                                                                   previous_tenant_results=d[sla['name']]
-                                                            import pdb; pdb.set_trace()
                                                             start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb)
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                             print([utils.array_to_str(el) for el in lst])
@@ -261,7 +260,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             previousResult=d[sla['name']][str(startTenants-1)]
             transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo)
         rm=get_rm_for_closest_tenant_nb(startTenants)
-        import pdb; pdb.set_trace()
         no_exps=False
         if currentResult or previousResult:
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
@@ -604,7 +602,6 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
        return adaptive_scaler
 
 def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf):
-        import pdb; pdb.set_trace()
         tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
         adaptive_scalers[tested_configuration]=adaptive_scaler.clone()
         print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
