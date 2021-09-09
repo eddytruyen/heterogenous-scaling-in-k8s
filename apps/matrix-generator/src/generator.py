@@ -477,7 +477,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #retry_attempt+=nr_of_experiments
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
-            check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
+            if not ((evaluate_current or evaluate_previous) and no_exps):
+                check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
             tenant_nb+=1
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
