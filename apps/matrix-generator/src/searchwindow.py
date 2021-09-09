@@ -513,7 +513,6 @@ class AdaptiveScaler:
                         print(w.str())
                 print("Double checking scaling function:")
                 print(self.ScalingFunction.workersScaledDown)
-                import pdb; pdb.set_trace()
                 if self.ScalingUpPhase:
                     return self.initial_confs[cheapest_worker_index]
                 else:
