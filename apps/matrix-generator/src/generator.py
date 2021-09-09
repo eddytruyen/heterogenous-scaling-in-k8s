@@ -131,7 +131,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                     if not only_failed_results:
-                                                            #add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,result=result)
+                                                            import pdb; pdb.set_trace()
+                                                            if previous_conf != opt_conf:
+                                                                adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
+                                                            add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo,result=result)
                                                             next_conf=opt_conf
                                                             return [lst.index(next_conf),1]
                                                     else:
@@ -443,6 +446,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=start_and_window[0]
                     new_window=start_and_window[1]
                     next_conf=lst[start]
+                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, result=result)
                     result={}
                     #retry_attempt+=nr_of_experiments
                 else:
