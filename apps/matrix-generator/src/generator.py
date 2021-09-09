@@ -140,6 +140,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             previous_tenant_results={}
                                                             if tenant_nb > 1:
                                                                   previous_tenant_results=d[sla['name']]
+                                                            import pdb; pdb.set_trace()
                                                             start_and_window=filter_samples(lst,adaptive_scaler.workers,0, window, previous_tenant_results, 1, tenant_nb)
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                             print([utils.array_to_str(el) for el in lst])
@@ -260,13 +261,19 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             previousResult=d[sla['name']][str(startTenants-1)]
             transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo)
         rm=get_rm_for_closest_tenant_nb(startTenants)
+        import pdb; pdb.set_trace()
+        no_exps=False
         if currentResult or previousResult:
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],startTenants,found_conf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(found_conf)
-            check_and_get_next_exps(found_conf, start, window, startTenants)
-            rm.remove_sample_for_conf(found_conf)
+            if rm.no_experiments_left() and not rm.last_experiment_in_queue():
+                if float(d[sla['name']][str(startTenants)]['CompletionTime']) < slo * SCALING_UP_THRESHOLD and d[sla['name']][str(startTenants)]['Successfull'] == 'true':
+                    no_exps=True
+                else:
+                    check_and_get_next_exps(found_conf, start, window, startTenants)
+                    rm.remove_sample_for_conf(found_conf)
         else:
             # using curve-fitted scaling function to estimate configuration for tenants
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
@@ -306,7 +313,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
-            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+            if not ((evaluate_current or evaluate_previous) and no_exps) and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 conf_array=rm.get_left_over_configs()
                 if conf_array:
                     last_experiment=False
