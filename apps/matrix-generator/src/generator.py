@@ -131,7 +131,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                     if not only_failed_results:
-                                                            import pdb; pdb.set_trace()
                                                             if previous_conf != opt_conf:
                                                                 adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
                                                             add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo,result=result)
@@ -263,16 +262,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             previousResult=d[sla['name']][str(startTenants-1)]
             transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo)
         rm=get_rm_for_closest_tenant_nb(startTenants)
-        no_exps=False
         if currentResult or previousResult:
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],startTenants,found_conf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(found_conf)
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
-                if float(d[sla['name']][str(startTenants)]['CompletionTime']) < slo * SCALING_UP_THRESHOLD and d[sla['name']][str(startTenants)]['Successfull'] == 'true':
-                    no_exps=True
-                else:
+                if float(d[sla['name']][str(startTenants)]['CompletionTime']) >= slo * SCALING_UP_THRESHOLD or d[sla['name']][str(startTenants)]['Successfull'] == 'false':
                     check_and_get_next_exps(found_conf, start, window, startTenants)
                     rm.remove_sample_for_conf(found_conf)
         else:
@@ -295,15 +291,19 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     evaluate_current=True
                 if previousResult and int(previous_tenants) == int(startTenants-1):
                     evaluate_previous=True
-                tenant_nb=int(previous_tenants)
-                maxTenants=int(previous_tenants)
-                adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scalers['init'], d[sla['name']], tenant_nb, previous_conf,slo)
-                rm=get_rm_for_closest_tenant_nb(tenant_nb)
-                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                print([utils.array_to_str(el) for el in lst])
-                tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-                next_conf=get_conf(adaptive_scaler.workers, tmp_result)
-                results=[tmp_result]
+            tenant_nb=int(previous_tenants)
+            maxTenants=int(previous_tenants)
+            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scalers['init'], d[sla['name']], tenant_nb, previous_conf,slo)
+            rm=get_rm_for_closest_tenant_nb(tenant_nb)
+            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+            print([utils.array_to_str(el) for el in lst])
+            no_exps=False
+            if rm.no_experiments_left() and not rm.last_experiment_in_queue():
+                if float(d[sla['name']][str(startTenants)]['CompletionTime']) < slo * SCALING_UP_THRESHOLD and d[sla['name']][str(startTenants)]['Successfull'] == 'true':
+                    no_exps=True
+            tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
+            next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+            results=[tmp_result]
 
         start=0
         if next_conf:
@@ -314,8 +314,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
-            if not ((evaluate_current or evaluate_previous) and no_exps) and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                conf_array=rm.get_left_over_configs()
+            if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                conf_array=sort_configs(adaptive_scaler.workers, rm.get_left_over_configs())
                 if conf_array:
                     last_experiment=False
                     #??MOVE THIS if there are no better samples left in terms of resource cost than the current previous result, end this set of samples
@@ -337,7 +337,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         new_window=start_and_window[1]
                         tmp_array=lst[start:start+new_window]
                         for conf in conf_array:
-                            if not conf in tmp_array:
+                            if resource_cost(adaptive_scaler.workers, conf) > resource_cost(adaptive_scaler.workers, conf_array[0]) and not conf in tmp_array:
                                 print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
                                 rm.remove_sample_for_conf(conf)
                     except IndexError:
@@ -479,8 +479,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #retry_attempt+=nr_of_experiments
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
-            if not ((evaluate_current or evaluate_previous) and no_exps):
-                check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
+            #if not (evaluate_current or evaluate_previous) and not no_exps:
+            #    check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
             tenant_nb+=1
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
