@@ -446,7 +446,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=start_and_window[0]
                     new_window=start_and_window[1]
                     next_conf=lst[start]
-                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, result=result)
+                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
                     result={}
                     #retry_attempt+=nr_of_experiments
                 else:
