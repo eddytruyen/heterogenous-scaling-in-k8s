@@ -132,6 +132,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             remove_failed_confs(lst, adaptive_scaler.workers, runtimemanager.instance(runtime_manager,tenant_nb), results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results)
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
+                                                            rm.reset()
                                                     if not only_failed_results:
                                                             if previous_conf != opt_conf:
                                                                 adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
@@ -595,7 +596,7 @@ def get_conf_of_adaptive_scaler_key(adaptive_scaler_key):
 	str_conf=adaptive_scaler_key.split('X')[1]
 	return list(map(lambda x: int(x),str_conf.split('_',-1)))
 
-def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False):
+def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, log=True):
        tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
        if not (tested_configuration in adaptive_scalers.keys()):
                 adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
@@ -607,8 +608,9 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
                 unflag_all_workers(adaptive_scaler2.workers)
                 adaptive_scaler=adaptive_scaler2
        flag_all_workers_for_tenants_up_to_nb_tenants(results, tenant_nb, adaptive_scaler, slo)
-       print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
-       adaptive_scaler.status()
+       if log:
+                print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
+                adaptive_scaler.status()
        return adaptive_scaler
 
 def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf):
@@ -770,7 +772,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
                                         print("Removing tipped over conf")
                                         print(failed_conf)
                                         sorted_combinations.remove(failed_conf)
-                                rm.reset()
+                                #rm.reset()
 		next_index=0
 		for failed_conf in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo * SCALING_UP_THRESHOLD):
 			if failed_conf in sorted_combinations:
@@ -823,7 +825,7 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
         for t in previous_results.keys():
                 if int(t) > tenant_nb:
                         other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
-                        other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True)
+                        other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True, log=False)
                         if float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
                             return True
                         elif  float(previous_results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
