@@ -233,6 +233,8 @@ class AdaptiveScaler:
                 print(self.current_tipped_over_conf)
                 print(self.initial_confs)
                 print(self.StartScalingDown)
+                for w in self.workers:
+                     print(w.resources)
 
 	def reset(self):
 		self.FailedScalings = []
