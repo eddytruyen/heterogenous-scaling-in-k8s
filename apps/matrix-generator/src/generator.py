@@ -105,15 +105,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             return start_and_window
                                                     print([utils.array_to_str(el) for el in lst])
                                                     scaled_conf=lst[start_and_window[0]]
-                                                    if previous_conf != scaled_conf:
-                                                            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,scaled_conf)
-                                                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=scaled_conf)
+                                                    adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
                                                     return start_and_window
                                             else:
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
-                                                    if previous_conf != scaled_conf:
-                                                            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,scaled_conf)
-                                                    #add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
+                                                    adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
                                                     return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
@@ -136,9 +132,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if  opt_conf and previous_conf != opt_conf:
                                                             adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
                                                     if not only_failed_results:
-                                                            #if  previous_conf != opt_conf:
-                                                            #    adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
-                                                            add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo,result=result)
+                                                            add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo,result=result)
                                                             next_conf=opt_conf
                                                             return [lst.index(next_conf),1]
                                                     else:
@@ -421,9 +415,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 new_window=start_and_window[1]
                 next_conf=lst[start]
                 print(next_conf)
-                if next_conf != previous_conf:
-                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
+                #if next_conf != previous_conf:
+                #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
+                #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,previous_conf=previous_conf,next_conf=next_conf,result=result)
             elif state == COST_EFFECTIVE_RESULT:
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
@@ -432,7 +426,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 if adaptive_scaler.ScalingUpPhase:
                         adaptive_scaler.reset()
                 adaptive_scaler.failed_results=[]
-                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
+                add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
                 #d[sla['name']][str(tenant_nb)]=result
                 #tenant_nb+=1
                 #retry_attempt=0
@@ -453,9 +447,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=start_and_window[0]
                     new_window=start_and_window[1]
                     next_conf=lst[start]
-                    if previous_conf != next_conf:
-                        adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,next_conf)
-                    add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
+                    #if previous_conf != next_conf:
+                    #    adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,next_conf)
+                    #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
                     result={}
                     #retry_attempt+=nr_of_experiments
                 else:
@@ -469,7 +463,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         start=start_and_window[0]
                         new_window=start_and_window[1]
                         next_conf=lst[start]
-                        add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
+                        #adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
                     else:
                         start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[])#,tenant_nb == startTenant)
                         if d[sla['name']]:
@@ -490,7 +484,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:
-            #    check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
+            if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
+                d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
             tenant_nb+=1
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
@@ -567,9 +564,10 @@ def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tena
 		sourceResult=None
 	if source_tenant_nb != destination_tenant_nb:
 		sourceResult=None
-	return add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	add_incremental_result(adaptive_scalers, destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	return d
 
-def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultNotCostEffective, destination_adaptive_scaler=None, next_conf=None, result=None):
+def add_incremental_result(adaptive_scalers,destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultNotCostEffective, destination_adaptive_scaler=None, previous_conf=None, next_conf=None, result=None):
 	if result:
 		result_conf=get_conf(source_adaptive_scaler.workers, result)
 		if next_conf:
@@ -577,6 +575,8 @@ def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler
 				result={}
 		else:
 			next_conf=result_conf
+	if previous_conf and next_conf and previous_conf != next_conf:
+		source_adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,source_adaptive_scaler,destination_tenant_nb,next_conf)
 	if not destination_adaptive_scaler:
 		destination_adaptive_scaler=source_adaptive_scaler
 	if str(destination_tenant_nb) in d[sla['name']]:
@@ -587,7 +587,7 @@ def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler
 	else:
 		print("Adding stronger incremental result")
 		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
-	return d
+	return source_adaptive_scaler
 
 
 def get_adaptive_scaler_key(tenant_nb, conf):
