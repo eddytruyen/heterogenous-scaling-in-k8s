@@ -50,11 +50,4 @@ echo '{
   "worker4.resources.requests.cpu": "1",
   "worker4.resources.requests.memory": "2"
 }' > test2.json
-DIFF=$(diff test.json test2.json)
-count=$(wc -l $DIFF)
-if [ $count -eq 0 ] 
-then
-	echo "PASSED"
-else
-	echo "FAILED"
-fi
+diff test.json test2.json
