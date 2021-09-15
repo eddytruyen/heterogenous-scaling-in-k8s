@@ -62,8 +62,6 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=120
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=140&previoustenants=2&previousconf=0_2_0_0" | jq '.' > test.json
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=160&previoustenants=4&previousconf=0_1_2_0" | jq '.' > test.json
-sleep 1
 echo '{
   "CompletionTime": "1e-09",
   "SLAName": "silver",
