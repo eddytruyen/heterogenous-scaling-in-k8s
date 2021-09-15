@@ -605,7 +605,9 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
                 adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
        else:
                 adaptive_scaler2=adaptive_scalers[tested_configuration]
-                if clone_scaling_function:
+                if conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
+                        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf)
+                elif clone_scaling_function:
                         adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
                 unflag_all_workers(adaptive_scaler2.workers)
                 adaptive_scaler=adaptive_scaler2
