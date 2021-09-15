@@ -453,6 +453,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=start_and_window[0]
                     new_window=start_and_window[1]
                     next_conf=lst[start]
+                    if previous_conf != next_conf:
+                        adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,scaled_conf)
                     add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
                     result={}
                     #retry_attempt+=nr_of_experiments
