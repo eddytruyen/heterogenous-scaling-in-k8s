@@ -63,12 +63,12 @@ sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=140&previoustenants=2&previousconf=0_2_0_0" | jq '.' > test.json
 sleep 1
 echo '{
-  "CompletionTime": "1e-09",
+  "CompletionTime": "140",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.21333333333333335",
+  "best_score": "-0.15384615384615385",
   "config": "0",
-  "score": "-0.21333333333333335",
+  "score": "-0.15384615384615385",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -76,9 +76,9 @@ echo '{
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
   "worker3.replicaCount": "0",
-  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.cpu": "4",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "1",
+  "worker4.replicaCount": "0",
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }' > test2.json
