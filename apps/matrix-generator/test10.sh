@@ -50,4 +50,5 @@ echo '{
   "worker4.resources.requests.cpu": "1",
   "worker4.resources.requests.memory": "2"
 }' > test2.json
+cat test.json
 diff test.json test2.json

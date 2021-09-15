@@ -772,7 +772,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
                                         print("Removing tipped over conf")
                                         print(failed_conf)
                                         sorted_combinations.remove(failed_conf)
-                                #rm.reset()
+                                rm.reset()
 		next_index=0
 		for failed_conf in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo * SCALING_UP_THRESHOLD):
 			if failed_conf in sorted_combinations:
