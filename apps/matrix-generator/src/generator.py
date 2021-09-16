@@ -487,7 +487,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 check_and_get_next_exps(next_conf,start,new_window,tenant_nb)
                 d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
-                update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
             tenant_nb+=1
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
