@@ -121,7 +121,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
                                                         return start_and_window
                                                     except IndexError:
-                                                        if adaptive_scaler.initial_confs:
+                                                        if adaptive_scaler.has_initial_confs_with_results():
                                                             opt2_conf=adaptive_scaler.redo_scale_action(slo)
                                                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                                             return [lst.index(opt2_conf), 1]
@@ -542,7 +542,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                         except IndexError:
-                            if adaptive_scaler.initial_confs:
+                            if adaptive_scaler.has_initial_confs_with_results():
                                 opt_conf=adaptive_scaler.redo_scale_action(slo)
                                 lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                 start=lst.index(opt_conf)
