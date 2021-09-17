@@ -542,12 +542,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                         except IndexError:
-                            if adaptive_scaler.has_initial_confs_with_results():
-                                opt_conf=adaptive_scaler.redo_scale_action(slo)
-                                lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                start=lst.index(opt_conf)
-                                new_window=1
-                            else:
                                 d[sla['name']][str(tenant_nb)]=results[0]
                                 opt_conf=get_conf(adaptive_scaler.workers, results[0])
                                 if not opt_conf in lst:
