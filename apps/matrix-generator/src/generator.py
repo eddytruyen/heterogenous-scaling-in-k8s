@@ -122,7 +122,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         return start_and_window
                                                     except IndexError:
                                                         if adaptive_scaler.initial_confs:
-                                                            opt2_conf=adaptive_scaler.redo_scale_action()
+                                                            opt2_conf=adaptive_scaler.redo_scale_action(slo)
                                                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                                             return [lst.index(opt2_conf), 1]
                                                         elif opt_conf:
@@ -543,7 +543,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             result={}
                         except IndexError:
                             if adaptive_scaler.initial_confs:
-                                opt_conf=adaptive_scaler.redo_scale_action()
+                                opt_conf=adaptive_scaler.redo_scale_action(slo)
                                 lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                 start=lst.index(opt_conf)
                                 new_window=1
