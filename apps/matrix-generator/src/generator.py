@@ -324,7 +324,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if float(d[sla['name']][str(startTenants)]['CompletionTime']) >= slo * SCALING_UP_THRESHOLD or d[sla['name']][str(startTenants)]['Successfull'] == 'false':
                     check_and_get_next_exps(found_conf, start, window, startTenants)
-                    rm.remove_sample_for_conf(lst.index(start))
+                    rm.remove_sample_for_conf(lst[start])
         else:
             # using curve-fitted scaling function to estimate configuration for tenants
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
@@ -335,7 +335,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(predictedConf)
             if start >= window:
-                conf_in_case_of_IndexError=lst.index(start-window)
+                conf_in_case_of_IndexError=lst[start-window]
                 retry_wdw=window
             else:
                 conf_in_case_of_IndexError=lst[0]
