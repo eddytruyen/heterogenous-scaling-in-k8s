@@ -56,12 +56,10 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=160&previoustenants=2&previousconf=0_1_1_0" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_0" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=140&previoustenants=2&previousconf=0_2_0_0" | jq '.' > test.json
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_0" | jq '.' > test.json
 sleep 1
 echo '{
-  "CompletionTime": "140",
+  "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
   "best_score": "-0.15384615384615385",
@@ -70,10 +68,10 @@ echo '{
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "2",
+  "worker2.replicaCount": "1",
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "0",
+  "worker3.replicaCount": "1",
   "worker3.resources.requests.cpu": "4",
   "worker3.resources.requests.memory": "2",
   "worker4.replicaCount": "0",
