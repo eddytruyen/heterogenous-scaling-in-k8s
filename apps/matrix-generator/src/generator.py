@@ -95,13 +95,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         nonlocal opt_conf
                                         nonlocal start
                                         nonlocal only_failed_results
+                                        nonlocal d
+                                        nonlocal sla
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
                                         state=states.pop(0)
 
                                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
-                                            print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                             if opt_conf != None:
                                                     start=lst.index(opt_conf)
@@ -119,26 +120,36 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         print([utils.array_to_str(el) for el in lst])
                                                         scaled_conf=lst[start_and_window[0]]
                                                         adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
+                                                        print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                         return start_and_window
                                                     except IndexError:
-                                                        if adaptive_scaler.has_initial_confs_with_results():
-                                                            opt2_conf=adaptive_scaler.redo_scale_action(slo)
-                                                            lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                            return [lst.index(opt2_conf), 1]
-                                                        elif opt_conf:
-                                                            if not opt_conf in lst:
-                                                                lst.append(opt_conf)
-                                                                lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                            return [lst.index(opt_conf), 1]
-                                                        else:
-                                                            if not next_conf in lst:
-                                                                lst.append(next_conf)
-                                                                lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                            return [lst.index(next_conf),1]
+                                                        for w in adaptive_scaler.workers:
+                                                            adaptive_scaler.untest(w)
+                                                        adaptive_scaler.validate_result({},opt_conf,slo)
+                                                        return process_states(adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results))
                                             else:
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
-                                                    adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
-                                                    return [lst.index(scaled_conf), 1]
+                                                    #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
+                                                    if d[sla['name']]:
+                                                        previous_tenant_results=d[sla['name']]
+                                                    else:
+                                                        previous_tenant_results={}
+                                                    print("Moving filtered samples in sorted combinations after the window")
+                                                    print([utils.array_to_str(el) for el in lst])
+                                                    try:
+                                                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, lst.index(scaled_conf), 1, previous_tenant_results, 1, tenant_nb, slo, True, adaptive_scaler.ScaledWorkerIndex)
+                                                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                                        print([utils.array_to_str(el) for el in lst])
+                                                        scaled_conf=lst[start_and_window[0]]
+                                                        adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
+                                                        print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
+                                                        return start_and_window
+                                                    except IndexError:
+                                                        for w in adaptive_scaler.workers:
+                                                            adaptive_scaler.untest(w)
+                                                        adaptive_scaler.validate_result({},scaled_conf,slo)
+                                                        return process_states(adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb))  
+                                                    #return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
@@ -176,16 +187,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                                 print([utils.array_to_str(el) for el in lst])
                                                                 return start_and_window
                                                             except IndexError:
-                                                                if opt_conf:
-                                                                    if not opt_conf in lst:
-                                                                        lst.append(opt_conf)
-                                                                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                                    return [lst.index(opt_conf),1]
-                                                                else:
-                                                                    if not next_conf in lst:
-                                                                        lst.append(next_conf)
-                                                                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                                    return [lst.index(next_conf),1]
+                                                                import pdb; pdb.set_trace()
+                                                                opt_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(tenant_nb)])
+                                                                if not opt_conf in lst:
+                                                                    lst.append(opt_conf)
+                                                                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                                                                return [lst.index(opt_conf),1]
                                             else:
                                                     #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
                                                     #if changePhase:
@@ -480,7 +487,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
                 #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,previous_conf=previous_conf,next_conf=next_conf,result=result)
             elif state == COST_EFFECTIVE_RESULT:
-                import pdb; pdb.set_trace()
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
@@ -543,8 +549,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                         except IndexError:
-                                d[sla['name']][str(tenant_nb)]=results[0]
-                                opt_conf=get_conf(adaptive_scaler.workers, results[0])
+                                opt_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(tenant_nb)])
                                 if not opt_conf in lst:
                                     lst.append(opt_conf)
                                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
@@ -736,7 +741,7 @@ def flag_all_workers_for_tenants_up_to_nb_tenants(results, nb_tenants,adaptive_s
             flag_workers(adaptive_scaler.workers, conf)
 
 
-def create_result(adaptive_scaler, completion_time, conf, sla_name):
+def create_result(adaptive_scaler, completion_time, conf, sla_name, successfull='true'):
 	result={'config': '0'}
 	for i,w in enumerate(adaptive_scaler.workers):
 		result["worker"+str(i+1)+".replicaCount"]=str(conf[i])
@@ -750,7 +755,7 @@ def create_result(adaptive_scaler, completion_time, conf, sla_name):
 		result['Successfull']='false'
 	else:
 		result['CompletionTime']= completion_time
-		result['Successfull']='true'
+		result['Successfull']=successfull
 	print(result)
 	return result
 
