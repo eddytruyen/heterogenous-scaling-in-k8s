@@ -480,6 +480,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
                 #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,previous_conf=previous_conf,next_conf=next_conf,result=result)
             elif state == COST_EFFECTIVE_RESULT:
+                import pdb; pdb.set_trace()
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
@@ -681,7 +682,7 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
        else:
                 adaptive_scaler2=adaptive_scalers[tested_configuration]
                 if conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
-                        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf)
+                        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
                 elif clone_scaling_function:
                         adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
                 unflag_all_workers(adaptive_scaler2.workers)
