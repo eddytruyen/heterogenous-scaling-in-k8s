@@ -16,7 +16,7 @@ MINIMUM_SHARED_REPLICAS=2
 SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
 SORT_SAMPLES=True
-LOG_FILTERING=False
+LOG_FILTERING=True
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -58,7 +58,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             previous_tenant_results=d[sla['name']]
                         else:
                             previous_tenant_results={}
-                        start_and_window=filter_samples(adaptive_scalers, lst,adaptive_scaler,start_index, window, previous_tenant_results, 1, tenant_nb, slo, log=LOG_FILTERING)
+                        start_and_window=filter_samples(adaptive_scalers, lst,adaptive_scaler,start_index, window, previous_tenant_results, 1, tenant_nb, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING)
                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                         print([utils.array_to_str(el) for el in lst])
                         next_conf=lst[start_and_window[0]]
@@ -124,6 +124,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                         return start_and_window
                                                     except IndexError:
+                                                        import pdb; pdb.set_trace()
+                                                        print("No config exists that meets all filtering constraints")
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
                                                         adaptive_scaler.validate_result({},opt_conf,slo)
@@ -146,6 +148,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                         return start_and_window
                                                     except IndexError:
+                                                        print("No config exists that meets all filtering constraints")
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
                                                         adaptive_scaler.validate_result({},scaled_conf,slo)
@@ -183,12 +186,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             else:
                                                                 previous_tenant_results={}
                                                             try:
-                                                                start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,0, window, previous_tenant_results, 1, tenant_nb, slo, log=LOG_FILTERING)
+                                                                start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,0, window, previous_tenant_results, 1, tenant_nb, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING)
                                                                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                                 print([utils.array_to_str(el) for el in lst])
                                                                 return start_and_window
                                                             except IndexError:
-                                                                import pdb; pdb.set_trace()
                                                                 opt_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(tenant_nb)])
                                                                 if not opt_conf in lst:
                                                                     lst.append(opt_conf)
@@ -398,7 +400,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     else:
                         previous_tenant_results={}
                     try:
-                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, slo, log=LOG_FILTERING)
+                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING)
                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                         print([utils.array_to_str(el) for el in lst])
                         next_conf=lst[start_and_window[0]]
@@ -542,7 +544,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         print("Moving filtered samples in sorted combinations after the window")
                         print([utils.array_to_str(el) for el in lst])
                         try:
-                            start_and_window=filter_samples(adaptive_scalers,lst, adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, slo, log=LOG_FILTERING)
+                            start_and_window=filter_samples(adaptive_scalers,lst, adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING)
                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                             print([utils.array_to_str(el) for el in lst])
                             next_conf=lst[start_and_window[0]]
@@ -969,7 +971,10 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                         else:
                                             previous_tenant_conf=sorted_combinations[el-(window-new_window)]
                                         if log:
-                               	            print(result_conf)
+                                            if i < tenant_nb:
+                               	                print(result_conf)
+                                            else:
+                                                print(previous_tenant_conf)
                                         qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf)
                                         cost=qualitiesOfSample['cost']
                                         nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
@@ -977,21 +982,27 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                 minimum_shared_replicas = min([MINIMUM_SHARED_REPLICAS,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                         else:
                                                 minimum_shared_replicas = max([1,int(MINIMUM_SHARED_REPLICAS*reduce(lambda x, y: x + y, previous_tenant_conf))])
-                                        if tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo) or (check_workers and all_flagged_conf(adaptive_scaler.workers, result_conf)) or (cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas) or not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)):
+                                        if (check_workers and all_flagged_conf(adaptive_scaler.workers, result_conf)) or (cost > MAXIMUM_TRANSITION_COST or nb_shrd_replicas < minimum_shared_replicas) or not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)) or tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo):
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
                                                 print("removed")
-                                            sorted_combinations.remove(result_conf)
-                                            sorted_combinations.insert(new_window+el-1,result_conf)
+                                            if i < tenant_nb:
+                                                tmp_conf=result_conf
+                                            else:
+                                                tmp_conf=previous_tenant_conf
+                                            sorted_combinations.remove(tmp_conf)
+                                            sorted_combinations.insert(new_window+el-1,tmp_conf)
                                             new_window-=1
                                         else:
                                             if log:
                                                 print("not removed")
                                 if new_window == 0:
-                                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+start_window, start_window, previous_results, start_tenant, tenant_nb, slo, check_workers, ScaledDownWorkerIndex)
+                                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+start_window, start_window, previous_results, start_tenant, tenant_nb, slo, check_workers, ScaledDownWorkerIndex, log)
                                 else:
                                         i+=1
+                                        if log:
+                                            print("Going to " + str(i) + " tenants:")
                                         window=new_window
                                         stop=False
                                         while i <= max_tenants and not stop:
