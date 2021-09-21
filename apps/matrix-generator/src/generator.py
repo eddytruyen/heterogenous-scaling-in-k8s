@@ -159,8 +159,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
                                                     print("REDOING_CHEAPEST_SCALED_DOWN")
                                                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                                                    opt_conf=conf[1] 
-                                                    result=conf[0]
+                                                    opt_conf=conf[1]
+                                                    c_time=conf[0]['CompletionTime'] if conf[0] else str(float(slo)+999999.000)
+                                                    result=create_result(adaptive_scaler, c_time, opt_conf, sla['name'])
                                                     start=lst.index(opt_conf)
                                                     only_failed_results=False
                                                     do_remove=False
