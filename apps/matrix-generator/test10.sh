@@ -56,15 +56,15 @@ curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2" | jq '.'
 sleep 1
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=160&previoustenants=2&previousconf=0_1_1_0" | jq '.'
 sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=120&previoustenants=2&previousconf=0_2_1_0" | jq '.' > test.json
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=120&previoustenants=2&previousconf=0_1_2_0" | jq '.' > test.json
 sleep 1
 echo '{
-  "CompletionTime": "1e-09",
+  "CompletionTime": 1000149,
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.21333333333333335",
+  "best_score": "n/a",
   "config": "0",
-  "score": "-0.21333333333333335",
+  "score": "n/a",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
