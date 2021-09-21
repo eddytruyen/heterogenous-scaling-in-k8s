@@ -15,9 +15,9 @@ class WorkerConf:
 		self.max_replicas = max_replicas
 		self._flag = False
 
-	def clone(self):
+	def clone(self, copy_flag=True):
                 w2=WorkerConf(self.worker_id, self.resources.copy(), self.costs.copy(), self.min_replicas, self.max_replicas)
-                if self.isFlagged():
+                if copy_flag and self.isFlagged():
                         w2.flag()
                 return w2
 

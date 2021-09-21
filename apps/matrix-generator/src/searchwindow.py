@@ -215,7 +215,7 @@ class AdaptiveScaler:
 
 	def has_initial_confs_with_results(self):
             for initial_conf in self.initial_confs:
-                if initial_conf[1]:
+                if initial_conf[0]:
                     return True
             return False
 
@@ -521,11 +521,13 @@ class AdaptiveScaler:
                 print("cheapest_worker_index: " + str(cheapest_worker_index))
                 self.workers=worker_confs[cheapest_worker_index] 
                 if self.ScalingUpPhase:
-                    print("Going back to worker configuration with lowest cost for combination " + utils.array_to_delimited_str(self.initial_confs[cheapest_worker_index][1]) + ": ")
+                    print("Going back to worker configuration with lowest cost for combination " + utils.array_to_delimited_str(self.initial_confs[cheapest_worker_index][1]) + " and result")
+                    print(self.initial_confs[cheapest_worker_index][0])
                 else:
                     print("Going back to worker configuration with lowest cost: ")
                 for w in self.workers:
                         print(w.str())
+                print("---------------------------------")
                 print("Updating scaling function")
                 tmp_workers=[]
                 for w in self.workers:
