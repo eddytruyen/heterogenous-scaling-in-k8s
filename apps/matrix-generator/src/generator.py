@@ -160,8 +160,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("REDOING_CHEAPEST_SCALED_DOWN")
                                                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                                     opt_conf=conf[1]
-                                                    #c_time=conf[0]['CompletionTime'] if conf[0] else str(float(slo)+999999.000)
-                                                    #result=create_result(adaptive_scaler, c_time, opt_conf, sla['name'])
                                                     result=conf[0]
                                                     start=lst.index(opt_conf)
                                                     only_failed_results=False

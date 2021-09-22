@@ -213,12 +213,6 @@ class AdaptiveScaler:
             return a_s
 
 
-	def has_initial_confs_with_results(self):
-            for initial_conf in self.initial_confs:
-                if initial_conf[0]:
-                    return True
-            return False
-
 	def hasScaled(self):
 		return (self.ScaledWorkerIndex != -1 and (self.ScaledDown or self.ScaledUp)) or self.scale_action_re_undone
 
