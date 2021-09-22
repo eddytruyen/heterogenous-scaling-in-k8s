@@ -508,6 +508,14 @@ class AdaptiveScaler:
                             worker_confs+=[tmp_workers]
                         elif self.ScalingUpPhase and not v[0]:
                             self.initial_confs.remove(v)
+                if not self.initial_confs:
+                    print("No initial confs left")
+                for i,conf in enumerate(self.initial_confs):
+                    print("Conf " + str(i)+ ":")
+                    if conf[0]:
+                        print(conf[0]['CompletionTime'])
+                    else:
+                        print("No result")
                 print("INITIALS WORKER_CONFS:")
                 for i in worker_confs:
                         for w in i:
@@ -551,8 +559,8 @@ class AdaptiveScaler:
                         completion_time=self.initial_confs[0][0]['CompletionTime']
                     else:
                         completion_time=str(float(slo)+9999999)
-                    self.initial_confs[0][0]=self.create_result(completion_time, self.initial_confs[0][1],self.initial_confs[0][0]['SLAName'])
-                    return [self.initial_confs[0][0],self.initial_confs[0][1],self.workers]
+                    #self.initial_confs[0][0]=self.create_result(completion_time, self.initial_confs[0][1],self.initial_confs[0][0]['SLAName'])
+                    return [self.create_result(completion_time, self.initial_confs[0][1],self.initial_confs[0][0]['SLAName']),self.initial_confs[0][1],self.workers]
 
 	def create_result(self, completion_time, conf, sla_name):
                 result={'config': '0'}
