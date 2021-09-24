@@ -407,7 +407,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 			if adaptive_scaler.ScalingUpPhase:
                                 adaptive_scaler.reset()
 			adaptive_scaler.failed_results=[]
-			add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
+			add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, result=result)
 			next_conf=get_conf(adaptive_scaler.workers, result)
 			new_window=window
 			start=lst.index(next_conf)
