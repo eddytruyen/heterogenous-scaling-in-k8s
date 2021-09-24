@@ -358,9 +358,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				new_window=start_and_window[1]
 				next_conf=lst[start]
 				print(next_conf)
-				if next_conf != previous_conf:
-					adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
 			else:
                                 #rm=runtimemanager.instance(runtime_manager,tenant_nb)
                                 rm.add_not_cost_effective_result(result)
@@ -402,9 +399,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 new_window=start_and_window[1]
                                                 next_conf=lst[start]
                                                 print(next_conf)
-                                                if next_conf != previous_conf:
-                                                         adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
-                                                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,next_conf=next_conf,result=result)
 		elif state == COST_EFFECTIVE_RESULT:
 			print("COST-EFFECTIVE-RESULT")
 			if adaptive_scaler.ScalingUpPhase:
@@ -430,7 +424,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 				start=start_and_window[0]
 				new_window=start_and_window[1]
 				next_conf=lst[start]
-				add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, next_conf=next_conf)
 				result={}
 				scaling=True
 			else:
@@ -668,28 +661,32 @@ def get_conf_of_adaptive_scaler_key(adaptive_scaler_key):
 	str_conf=adaptive_scaler_key.split('X')[1]
 	return list(map(lambda x: int(x),str_conf.split('_',-1)))
 
-def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False):
+
+def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, log=True):
        tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
        if not (tested_configuration in adaptive_scalers.keys()):
                 adaptive_scaler=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
                 adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
        else:
                 adaptive_scaler2=adaptive_scalers[tested_configuration]
-                if clone_scaling_function:
+                if conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
+                        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
+                elif clone_scaling_function:
                         adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
                 unflag_all_workers(adaptive_scaler2.workers)
                 adaptive_scaler=adaptive_scaler2
        flag_all_workers_for_tenants_up_to_nb_tenants(results, tenant_nb, adaptive_scaler, slo)
-       print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
-       adaptive_scaler.status()
+       if log:
+                print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
+                adaptive_scaler.status()
        return adaptive_scaler
 
 def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf):
-	tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
-	adaptive_scalers[tested_configuration]=adaptive_scaler.clone()
-	print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
-	adaptive_scalers[tested_configuration].status()
-	return adaptive_scalers[tested_configuration]
+        tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
+        adaptive_scalers[tested_configuration]=adaptive_scaler.clone()
+        print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
+        adaptive_scalers[tested_configuration].status()
+        return adaptive_scalers[tested_configuration]
 
 
 #def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, check_workers=False):
