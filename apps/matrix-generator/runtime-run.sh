@@ -22,6 +22,8 @@ then
 	for i in `seq 9`
 	do
 		restart
+		echo 'test$i'
+		echo ===============================
 		bash -x ./test$i.sh
 	done
 fi
