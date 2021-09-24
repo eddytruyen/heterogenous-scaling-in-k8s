@@ -662,6 +662,7 @@ def get_conf_of_adaptive_scaler_key(adaptive_scaler_key):
 	return list(map(lambda x: int(x),str_conf.split('_',-1)))
 
 
+
 def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, log=True):
        tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
        if not (tested_configuration in adaptive_scalers.keys()):
@@ -669,7 +670,7 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
                 adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
        else:
                 adaptive_scaler2=adaptive_scalers[tested_configuration]
-                if conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
+                if str(tenant_nb) in results.keys() and conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
                         adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
                 elif clone_scaling_function:
                         adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
