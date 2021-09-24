@@ -627,7 +627,9 @@ def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tena
 		sourceResult=None
 	if source_tenant_nb != destination_tenant_nb:
 		sourceResult=None
-	return add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	add_incremental_result(adaptive_scalers, destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*SCALING_DOWN_TRESHOLD < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	return d
+
 
 
 def add_incremental_result(adaptive_scalers,destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultNotCostEffective, destination_adaptive_scaler=None, previous_conf=None, next_conf=None, result=None):
