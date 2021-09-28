@@ -17,6 +17,8 @@ SAMPLING_RATE=0.75
 SCALINGFUNCTION_TARGET_OFFSET_OF_WINDOW=0.0
 SORT_SAMPLES=True
 LOG_FILTERING=True
+TEST_CONFIG_CODE=7898.89695959
+
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -867,7 +869,13 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 		return next_index
 
 def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
-    return  has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b) or  has_smaller_workers_than(adaptive_scaler_b, conf_b, adaptive_scaler_a, conf_a)
+    if conf_a == [1,1,0,0] or conf_b == [1,1,0,0]:
+        import pdb; pdb.set_trace
+    for worker_index, conf_pair in enumerate(zip(conf_a, conf_b)):
+        if conf_pair[0] > 0 and conf_pair[1] > 0:
+            if not adaptive_scaler_a.workers[worker_index].equals(adaptive_scaler_b.workers[worker_index]):
+                return True
+    return False
 
 def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
     response=False
@@ -884,6 +892,8 @@ def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_
 
 
 def is_smaller_worker_than(worker_a, worker_b):
+    if worker_a.equals(worker_b):
+        return False
     for res in worker_a.resources.keys():
         if worker_a.resources[res] > worker_b.resources[res]:
             return False
@@ -903,7 +913,7 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                 if int(t) > tenant_nb:
                         other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
                         other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True, log=False)
-                        if float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100 and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                        if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
                             return True
                         elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
                             return True
@@ -950,8 +960,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                 else:
                                     result_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
-                                    if result_conf == [1,1,0,0]:
-                                        import pdb; pdb.set_trace()
                                 for el in range(start, start+window):
                                         #if el-(window-new_window) >= len(sorted_combinations):
                                         #        return [-1,-1]

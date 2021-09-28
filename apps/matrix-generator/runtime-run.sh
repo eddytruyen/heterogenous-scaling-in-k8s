@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function restart() {
-	sudo rm -r Results/exp3/silver
+	sudo rm -r Results/exp3/silver/*
 	echo "import pdb;" >> src/generator.py
 	git stash
 }
