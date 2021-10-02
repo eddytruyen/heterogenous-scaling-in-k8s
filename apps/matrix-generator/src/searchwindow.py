@@ -7,7 +7,7 @@ MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
 SCALING_DOWN_TRESHOLD=1.15
 SCALING_UP_THRESHOLD=1.15
 OPT_IN_FOR_RESTART = False
-CAREFUL_SCALING=True
+CAREFUL_SCALING= False
 SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
 
 UNDO_SCALE_ACTION =  8544343532
@@ -320,8 +320,9 @@ class AdaptiveScaler:
                       if scale_down:
                           if self.isTested(worker):
                                 return True
-                          w = largest_worker_of_conf(conf)
-                          return worker.worker_id >= w.worker_id
+                          tmp_workers=[w.clone() for w in self.workers]
+                          tmp_workers[worker.worker_id-1]=worker
+                          return generator.resource_cost(self.workers, opt_conf, cost_aware=True) > generator.resource_cost(tmp_workers, conf, cost_aware=True) 
                       else:
                           return involves_worker(conf, worker.worker_id-1)
 
