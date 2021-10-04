@@ -3,13 +3,6 @@ from . import generator
 from . import utils
 import copy
 
-MINIMUM_RESOURCES={'cpu': 1, 'memory': 2}
-SCALING_DOWN_TRESHOLD=1.15
-SCALING_UP_THRESHOLD=1.15
-OPT_IN_FOR_RESTART = False
-CAREFUL_SCALING= False
-SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES={'cpu': 1.0, 'memory': 1.0}
-
 UNDO_SCALE_ACTION =  8544343532
 REDO_SCALE_ACTION = 999767537
 NO_COST_EFFECTIVE_RESULT = 553583943
@@ -21,7 +14,7 @@ NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
 
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c, resources, costs, dominant_resources, nodes):
+	def __init__(self, coef_a, coef_b, coef_c, resources, costs, dominant_resources, nodes,initial_conf=None):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
@@ -45,6 +38,8 @@ class ScalingFunction:
 			self.Max[i]=max([c[i] for c in nodes])
 		self.LastScaledDownWorker = []
 		self.LastScaledUpWorker = []
+		if initial_conf:
+			self.minimum_resources=initial_conf["minimum_resources"]
 
 	def clone(self, clone_scaling_records=False):
                 sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
@@ -53,6 +48,7 @@ class ScalingFunction:
                     sc.workersScaledUp = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledUp]
                     sc.LastScaledDownWorker = self.LastScaledDownWorker[:]
                     sc.LastScaledUpWorker = self.LastScaledUpWorker[:]
+                sc.minimum_resources=self.minimum_resources
                 return sc
 
 	def maximum(self,x1,x2):
@@ -124,12 +120,12 @@ class ScalingFunction:
                 worker=workers[worker_index]
                 scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
                 for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units >= MINIMUM_RESOURCES[res]:
+                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-nb_of_units)
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
                             scale_down[res]=[nb_of_units] + k[res]
-                        elif scaleSecondaryResource and worker.resources[res] - 1 >= MINIMUM_RESOURCES[res]:
+                        elif scaleSecondaryResource and worker.resources[res] - 1 >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-1)
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
@@ -171,7 +167,7 @@ class ScalingFunction:
 class AdaptiveScaler:
 
 	
-	def __init__(self, workers, scalingFunction):
+	def __init__(self, workers, scalingFunction, initial_conf=None):
 		self.ScalingDownPhase = True
 		self.StartScalingDown = True
 		self.ScalingUpPhase = False
@@ -190,6 +186,12 @@ class AdaptiveScaler:
 		self.only_failed_results=True
 		for w in workers:
 			self._tested[w.worker_id]=False
+		if initial_conf:
+			self.minimum_resources=initial_conf["minimum_resources"]
+			self.node_resources_offset_for_scaling_function=initial_conf["node_resources_offset_for_scaling_function"]
+			self.scaling_down_threshold=initial_conf["scaling_down_threshold"]
+			self.opt_in_for_restart=initial_conf["opt_in_for_restart"]
+			self.careful_scaling=initial_conf["careful_scaling"]
 
 	def clone(self):
             a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True))
@@ -210,6 +212,11 @@ class AdaptiveScaler:
             a_s._tested=dict(self._tested)
             a_s.scale_action_re_undone=self.scale_action_re_undone
             a_s.only_failed_results=self.only_failed_results
+            a_s.minimum_resources=self.minimum_resources
+            a_s.node_resources_offset_for_scaling_function=self.node_resources_offset_for_scaling_function
+            a_s.scaling_down_threshold=self.scaling_down_threshold
+            a_s.opt_in_for_restart=self.opt_in_for_restart
+            a_s.careful_scaling=self.careful_scaling
             return a_s
 
 
@@ -281,7 +288,7 @@ class AdaptiveScaler:
 		if not self.ScalingUpPhase:
 			self.initial_confs+=[[result,conf,[w.clone() for w in self.workers]]]
 
-		if result and slo > float(result['CompletionTime']) * SCALING_DOWN_TRESHOLD:
+		if result and slo > float(result['CompletionTime']) * self.scaling_down_threshold:
 			states+=[NO_COST_EFFECTIVE_RESULT]
 			#if not self.ScalingUpPhase:
 			#	self.initial_confs+=[[result,conf,[w.clone() for w in self.workers]]]
@@ -353,19 +360,19 @@ class AdaptiveScaler:
                                 return conf_cost-total_cost - 1
                         else:
                                 print("SCALE UP DIFF")
-                                if CAREFUL_SCALING:
+                                if self.careful_scaling:
                                     return total_cost + 1 - conf_cost
                                 else:
                                     offset=0
                                     for res in self.ScalingFunction.Max.keys():
-                                        offset+=int(SCALINGFUNCTION_TARGET_OFFSET_OF_NODE_RESOURCES[res]*float(self.ScalingFunction.Max[res]))
+                                        offset+=int(self.node_resources_offset_for_scaling_function[res]*float(self.ScalingFunction.Max[res]))
                                     return total_cost + 1 - conf_cost + offset 
 
 		def is_worker_scaleable(worker):
                         nonlocal scale_down
                         if scale_down:
                                 for res in self.ScalingFunction.DominantResources:
-                                    if worker.resources[res] == MINIMUM_RESOURCES[res]:
+                                    if worker.resources[res] == self.minimum_resources[res]:
                                         return False
                                 return True
                         else:
@@ -376,7 +383,7 @@ class AdaptiveScaler:
                                 return True
                 
 		def worker_is_notflagged_testable_and_scaleable(worker,conf):
-                       if not (worker.isFlagged() and not OPT_IN_FOR_RESTART) and is_testable(worker,conf) and is_worker_scaleable(worker):
+                       if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
                                 return True
                        else:
                                 return False
@@ -459,7 +466,7 @@ class AdaptiveScaler:
 	def is_worker_scaleable(self,worker_index):
                         if self.ScalingDownPhase:
                                 for res in self.ScalingFunction.DominantResources:
-                                    if self.workers[worker_index].resources[res] == MINIMUM_RESOURCES[res]:
+                                    if self.workers[worker_index].resources[res] == self.minimum_resources[res]:
                                         return False
                                 return True
                         else:
