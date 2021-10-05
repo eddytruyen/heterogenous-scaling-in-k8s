@@ -320,9 +320,8 @@ class AdaptiveScaler:
                       if scale_down:
                           if self.isTested(worker):
                                 return True
-                          tmp_workers=[w.clone() for w in self.workers]
-                          tmp_workers[worker.worker_id-1]=worker
-                          return generator.resource_cost(self.workers, opt_conf, cost_aware=True) > generator.resource_cost(tmp_workers, conf, cost_aware=True) 
+                          w = largest_worker_of_conf(conf)
+                          return worker.worker_id >= w.worker_id
                       else:
                           return involves_worker(conf, worker.worker_id-1)
 
