@@ -19,7 +19,7 @@ then
 	done
 elif [ $1 == "0100" ] 
 then
-	for i in `seq 8`
+	for i in `seq 9`
 	do
 		restart
 		echo 'test$i'
