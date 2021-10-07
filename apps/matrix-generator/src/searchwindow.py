@@ -167,7 +167,7 @@ class ScalingFunction:
 class AdaptiveScaler:
 
 	
-	def __init__(self, workers, scalingFunction, initial_conf=None):
+	def __init__(self, workers, scalingFunction, sla_name, initial_conf=None):
 		self.ScalingDownPhase = True
 		self.StartScalingDown = True
 		self.ScalingUpPhase = False
@@ -184,6 +184,7 @@ class AdaptiveScaler:
 		self._tested={}
 		self.scale_action_re_undone=False
 		self.only_failed_results=True
+		self.sla_name=sla_name
 		for w in workers:
 			self._tested[w.worker_id]=False
 		if initial_conf:
@@ -194,7 +195,7 @@ class AdaptiveScaler:
 			self.careful_scaling=initial_conf["careful_scaling"]
 
 	def clone(self):
-            a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True))
+            a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True), self.sla_name)
             a_s.ScalingDownPhase=self.ScalingDownPhase
             a_s.StartScalingDown = self.StartScalingDown
             a_s.ScalingUpPhase=self.ScalingUpPhase
@@ -560,9 +561,9 @@ class AdaptiveScaler:
                     else:
                         completion_time=str(float(slo)+9999999)
                     #self.initial_confs[0][0]=self.create_result(completion_time, self.initial_confs[0][1],self.initial_confs[0][0]['SLAName'])
-                    return [self.create_result(completion_time, self.initial_confs[0][1],self.initial_confs[0][0]['SLAName']),self.initial_confs[0][1],self.workers]
+                    return [self.create_result(completion_time, [1 for w in self.workers]),self.initial_confs[0][1],self.workers]
 
-	def create_result(self, completion_time, conf, sla_name):
+	def create_result(self, completion_time, conf):
                 result={'config': '0'}
                 for i,w in enumerate(self.workers):
                     result["worker"+str(i+1)+".replicaCount"]=str(conf[i])
@@ -570,7 +571,7 @@ class AdaptiveScaler:
                     result["worker"+str(i+1)+".resources.requests.memory"]=str(w.resources['memory'])
                     result['score']='n/a'
                     result['best_score']='n/a'
-                    result['SLAName']=sla_name
+                    result['SLAName']=self.sla_name
                     if completion_time == 0:
                         result['CompletionTime']= '0'
                         result['Successfull']='false'
