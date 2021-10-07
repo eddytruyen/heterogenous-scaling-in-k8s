@@ -437,8 +437,6 @@ def filter_samples(sorted_combinations, adaptive_scaler, start, window, previous
                                         shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                 else:
                                         shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
-                                if result_conf == [0,1,1,0]:
-                                        import pdb; pdb.set_trace()
                                 if (check_workers and all_flagged_conf(adaptive_scaler.workers, result_conf)) or cost > maximum_transition_cost or nb_shrd_replicas < shared_replicas or not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)) or (original_adaptive_scaler and check_workers and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True)):
                                         print("removed")
                                         sorted_combinations.remove(result_conf)
