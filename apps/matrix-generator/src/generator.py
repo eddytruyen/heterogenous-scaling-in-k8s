@@ -113,7 +113,7 @@ def generate_matrix(initial_conf):
                                                                   if d[sla['name']]:
                                                                         previous_tenant_results=d[sla['name']]
                                                             try:
-                                                                  start_and_window=filter_samples(lst,adaptive_scaler,0, window, previous_tenant_results, startTenant, tenant_nb-1, minimum_shared_replicas, maximum_transition_cost)
+                                                                  start_and_window=filter_samples(lst,adaptive_scaler,start, window, previous_tenant_results, startTenant, tenant_nb-1, minimum_shared_replicas, maximum_transition_cost)
                                                                   print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                                   print([utils.array_to_str(el) for el in lst])
                                                                   return start_and_window
