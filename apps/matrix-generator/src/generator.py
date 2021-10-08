@@ -203,8 +203,15 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
                                     if adaptive_scaler.ScalingDownPhase:
                                             original_adaptive_scaler=adaptive_scaler.clone()
-                                            for w in original_adaptive_scaler.workers:
-                                                w.resources=extract_resources_from_result(result,w.worker_id,w.resources.keys())
+                                            if result:
+                                                    tmp_result=result
+                                            elif str(tenant_nb) in d[sla['name']].keys():
+                                                    tmp_result=d[sla['name']][str(tenant_nb)]
+                                            else:
+                                                    tmp_result={}
+                                            if tmp_result:
+                                                    for w in original_adaptive_scaler.workers:
+                                                            w.resources=extract_resources_from_result(result,w.worker_id,w.resources.keys())
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
