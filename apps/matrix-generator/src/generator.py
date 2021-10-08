@@ -239,7 +239,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     tmp_result={}
                                             if tmp_result:
                                                     for w in original_adaptive_scaler.workers:
-                                                            w.resources=extract_resources_from_result(result,w.worker_id,w.resources.keys())
+                                                            w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
@@ -523,7 +523,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 if states and states.pop(0) == UNDO_SCALE_ACTION:
                     print("Previous scale action undone")
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                    start_and_window=get_start_and_window_for_next_experiments(opt_conf=lst[start])
+                    if adaptive_scaler.ScalingDownPhase:
+                        start_and_window=get_start_and_window_for_next_experiments(opt_conf=adaptive_scaler.initial_confs[0][1])
+                    else:
+                        start_and_window=get_start_and_window_for_next_experiments(opt_conf=adaptive_scaler.current_tipped_over_conf)
                     print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                     start=start_and_window[0]
                     new_window=start_and_window[1]
