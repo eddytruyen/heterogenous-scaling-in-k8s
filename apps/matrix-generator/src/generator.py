@@ -268,7 +268,10 @@ def generate_matrix(initial_conf):
 				if states and states.pop(0) == UNDO_SCALE_ACTION:
 					print("Previous scale action undone")
 					lst=sort_configs(adaptive_scaler.workers,lst)
-					start_and_window=get_start_and_window_for_next_experiments(opt_conf=next_conf)
+					if adaptive_scaler.ScalingDownPhase:
+						start_and_window=get_start_and_window_for_next_experiments(opt_conf=adaptive_scaler.initial_confs[0][1])
+					else:
+						start_and_window=get_start_and_window_for_next_experiments(opt_conf=adaptive_scaler.current_tipped_over_conf)
 					print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
 					start=start_and_window[0]
 					new_window=start_and_window[1]
