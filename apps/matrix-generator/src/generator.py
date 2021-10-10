@@ -352,7 +352,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             # using curve-fitted scaling function to estimate configuration for tenants
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
-            predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window)
+            predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window,window_offset_for_scaling_function)
             #adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf)
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],startTenants,predictedConf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
@@ -621,7 +621,7 @@ def extract_resources_from_result(result, worker_id, resource_types):
         resources[key]=int(result["worker"+str(worker_id)+".resources.requests." + key])
     return resources
 
-def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window, slo):
+def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenant_nb, base, window, slo, window_offset_for_scaling_function):
 	for t in d[sla['name']].keys():
 		if int(t) > tenant_nb:
 			other_conf=get_conf(adaptive_scaler.workers, d[sla['name']][t])
@@ -637,7 +637,7 @@ def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenan
                                                 if changed:
                                                         other_as.workers[i]=adaptive_scaler.workers[i].clone()
 				if changed_scaler:
-					d[sla['name']][t]=create_result(other_as, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'])
+					d[sla['name']][t]=create_result(other_as, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
 	return d
 
 
