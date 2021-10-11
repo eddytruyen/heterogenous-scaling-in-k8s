@@ -834,10 +834,10 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				tipped_over_results.remove(optimal_conf)
 			tmp_combinations=sort_configs(workers,sorted_combinations, cost_aware=False)
 			failed_range=tmp_combinations.index(optimal_conf)
-			for i in range(0, failed_range):
+			for i in range(start, start+window):
 				possible_removal=tmp_combinations[i]
 				if resource_cost(workers, possible_removal) > resource_cost(workers, optimal_conf):
-					print("Removing config because it has a higher resource cost than the optimal result and we assume it will therefore not be cost-effective for the current tenant")
+					print("Removing config because it has a higher resource cost than the current cost-effective result and we assume it will therefore not be cost-effective for the current tenant")
 					print(possible_removal)
 					sorted_combinations.remove(possible_removal)
 					if rm.conf_in_experiments(possible_removal):
