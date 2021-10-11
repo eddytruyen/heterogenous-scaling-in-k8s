@@ -54,7 +54,7 @@ class RuntimeManager:
 
     def remove_sample_for_conf(self,conf):
         for exp_nb in self.experiments.keys():
-            if self.conf_in_samples(conf,self.experiments[exp_nb][1]):
+            if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 if exp_nb == self.get_current_experiment_nb():
                     if self.get_nb_of_sample_for_conf(exp_nb,conf) < self.get_current_sample_nb():
                         self.previous_current_experiment()
