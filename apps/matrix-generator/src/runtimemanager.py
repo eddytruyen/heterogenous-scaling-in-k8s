@@ -1,8 +1,9 @@
 from . import generator
 from . import utils
+from .searchwindow import AdaptiveWindow
 
 class RuntimeManager:
-    def __init__(self, tenant_nb, adaptive_scalers):
+    def __init__(self, tenant_nb, adaptive_scalers, adaptive_window):
         self.tenant_nb=tenant_nb
         self.raw_experiments=[]
         self.experiments={}
@@ -13,9 +14,10 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
+        self.adaptive_window=adaptive_window
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(tenant_nb, self.adaptive_scalers)
+        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.adaptive_window.get_current_window()))
         rm.sorted_combinations=self.sorted_combinations[:]
         return rm
 
@@ -212,10 +214,13 @@ class RuntimeManager:
             self.tipped_over_results=[]
         return {"workers": workers, "results": results}
 
+    def get_adaptive_window(self):
+        return self.adaptive_window
 
-def instance(runtime_manager, tenant_nb):
+
+def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
-        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager["adaptive_scalers"])
+        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager["adaptive_scalers"], AdaptiveWindow(window))
     return runtime_manager[tenant_nb]
 
 
