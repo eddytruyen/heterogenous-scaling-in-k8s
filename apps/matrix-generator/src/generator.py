@@ -30,7 +30,7 @@ def create_workers(elements, costs, base):
 def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
 
         def get_next_exps(conf, sampling_ratio, window,tenants):
-                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base, adaptive_window.adapt_search_window({},window,False))
+                        next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base, adaptive_window.adapt_search_window({},window,tenants != 1))
                         rm.set_raw_experiments(next_exp)
                         nr_of_experiments=len(next_exp)
                         for i,ws in enumerate(next_exp):
@@ -328,6 +328,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         evaluate_current=False
         evaluate_previous=False
         currentResult={}
+        rm=get_rm_for_closest_tenant_nb(startTenants)
+        adaptive_window=rm.get_adaptive_window()
         if str(startTenants) in d[sla['name']]:
             currentResult=d[sla['name']][str(startTenants)]
         elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
@@ -335,8 +337,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #so that a later actual result will always outperform this completion time.
             currentResult=d[sla['name']][str(startTenants-1)]
             transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold)
-        rm=get_rm_for_closest_tenant_nb(startTenants)
-        adaptive_window=rm.get_adaptive_window()
+            if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'false':
+                adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)]['CompletionTime'], 1, False)
+
+        #rm=get_rm_for_closest_tenant_nb(startTenants)
+        #adaptive_window=rm.get_adaptive_window()
         if currentResult:
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],startTenants,found_conf,slo)
