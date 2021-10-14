@@ -9,13 +9,13 @@ slas:
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
       tenantGroup: "2"
-      completionTime: 250
+      completionTime: 150
       #jobsize: 10
       #throughput: 0.5
     maxTenants: 10
     startTenant: 1
     alphabet:
-      searchWindow: 30
+      searchWindow: 10
       base: 4
       elements:
         - size:
@@ -42,7 +42,7 @@ slas:
 utilFunc: sparkbenchalphabet
 output: Results/exp3
 sampling_ratio: 0.75
-minimum_shared_replicas: 0.50
+minimum_shared_replicas: 2
 maximum_transition_cost: 2
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:

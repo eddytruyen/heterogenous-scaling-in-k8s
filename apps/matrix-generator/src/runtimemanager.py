@@ -14,10 +14,11 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
+        self.initial_window=adaptive_window.get_current_window()
         self.adaptive_window=adaptive_window
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.adaptive_window.get_current_window()))
+        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.initial_window))
         rm.sorted_combinations=self.sorted_combinations[:]
         return rm
 
@@ -29,6 +30,7 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
+        self.adaptive_window.adapt_search_window({},self.initial_window,self.tenant_nb == 1)
 
     def set_sorted_combinations(self, combinations):
         if not self.sorted_combinations:
