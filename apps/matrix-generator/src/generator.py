@@ -337,8 +337,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #so that a later actual result will always outperform this completion time.
             currentResult=d[sla['name']][str(startTenants-1)]
             transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold)
-            if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'false':
-                adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)]['CompletionTime'], 1, False)
+            if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'true':
+                window=adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)], 1, False)
+
 
         #rm=get_rm_for_closest_tenant_nb(startTenants)
         #adaptive_window=rm.get_adaptive_window()
@@ -352,6 +353,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     check_and_get_next_exps(found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
                     if lst[start] in rm.get_left_over_configs():
                         rm.remove_sample_for_conf(lst[start])
+                    else:
+                        d[sla['name']][str(startTenants)]=rm.get_next_sample()
         else:
             # using curve-fitted scaling function to estimate configuration for tenants
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
@@ -866,19 +869,23 @@ def equal_conf(conf1, conf2):
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False):
 		if optimal_conf and optimal_conf_is_cost_effective:
-			if not intermediate_remove and tipped_over_results and optimal_conf in tipped_over_results:
-				tipped_over_results.remove(optimal_conf)
-			tmp_combinations=sort_configs(workers,sorted_combinations, cost_aware=False)
-			failed_range=tmp_combinations.index(optimal_conf)
-			for i in range(0, failed_range):
-				possible_removal=tmp_combinations[i]
-				if resource_cost(workers, possible_removal) < resource_cost(workers, optimal_conf):
-					print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
-					print(possible_removal)
-					sorted_combinations.remove(possible_removal)
-					if rm.conf_in_experiments(possible_removal):
-						rm.remove_sample_for_conf(possible_removal)
-			if intermediate_remove:
+			if not intermediate_remove:
+				if tipped_over_results and optimal_conf in tipped_over_results:
+					tipped_over_results.remove(optimal_conf)
+				tmp_combinations=sort_configs(workers,sorted_combinations, cost_aware=False)
+				failed_range=tmp_combinations.index(optimal_conf)
+				for i in range(0, failed_range):
+					possible_removal=tmp_combinations[i]
+					if resource_cost(workers, possible_removal) < resource_cost(workers, optimal_conf):
+						print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
+						print(possible_removal)
+						#if not (possible_removal in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) < slo)):
+						if possible_removal == [0,1,0,2]:
+							import pdb; pdb.set_trace()
+						sorted_combinations.remove(possible_removal)
+						if rm.conf_in_experiments(possible_removal):
+							rm.remove_sample_for_conf(possible_removal)
+			else:
 				conf_array=rm.get_left_over_configs()
 				for conf in conf_array:
 					if resource_cost(workers, conf, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False):
@@ -908,28 +915,30 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
                                         print(failed_conf)
                                         sorted_combinations.remove(failed_conf)
                                 #rm.reset()
-		next_index=0
-		for failed_conf in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo * scaling_up_threshold):
-			if failed_conf in sorted_combinations:
-				tmp_combinations=sort_configs(workers,sorted_combinations)
-				failed_range=tmp_combinations.index(failed_conf)
-				for i in range(0, failed_range):
-					possible_removal=tmp_combinations[i]
-					if not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"] and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False):
-						print(possible_removal)
-						if possible_removal in sorted_combinations:
-							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
-							sorted_combinations.remove(possible_removal)
-							if rm.conf_in_experiments(possible_removal):
-								rm.remove_sample_for_conf(possible_removal)
-				print("Removing failed conf")
-				print(failed_conf)
-				if sorted_combinations.index(failed_conf)-1 > next_index:
-					next_index=sorted_combinations.index(failed_conf)-1
-				sorted_combinations.remove(failed_conf)
-				if rm.conf_in_experiments(failed_conf):
- 					rm.remove_sample_for_conf(failed_conf)
-		return next_index
+		if not intermediate_remove:
+			next_index=0
+			for failed_conf in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) > slo * scaling_up_threshold):
+				if failed_conf in sorted_combinations:
+					tmp_combinations=sort_configs(workers,sorted_combinations)
+					failed_range=tmp_combinations.index(failed_conf)
+					for i in range(0, failed_range):
+						possible_removal=tmp_combinations[i]
+						if not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"] and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False):
+							print(possible_removal)
+							if possible_removal in sorted_combinations:
+								print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
+								sorted_combinations.remove(possible_removal)
+								if rm.conf_in_experiments(possible_removal):
+									rm.remove_sample_for_conf(possible_removal)
+					print("Removing failed conf")
+					print(failed_conf)
+					if sorted_combinations.index(failed_conf)-1 > next_index:
+						next_index=sorted_combinations.index(failed_conf)-1
+					sorted_combinations.remove(failed_conf)
+					if rm.conf_in_experiments(failed_conf):
+ 						rm.remove_sample_for_conf(failed_conf)
+			return next_index
+
 
 
 def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
