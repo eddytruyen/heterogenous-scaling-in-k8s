@@ -880,8 +880,6 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 						print("Removing config because it has a lower resource cost than the optimal result and we assume it will therefore fail for the next tenant")
 						print(possible_removal)
 						#if not (possible_removal in return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) < slo)):
-						if possible_removal == [0,1,0,2]:
-							import pdb; pdb.set_trace()
 						sorted_combinations.remove(possible_removal)
 						if rm.conf_in_experiments(possible_removal):
 							rm.remove_sample_for_conf(possible_removal)

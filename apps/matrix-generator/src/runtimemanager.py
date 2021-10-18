@@ -14,6 +14,7 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
+        self.previous_returned_experiment={}
         self.initial_window=adaptive_window.get_current_window()
         self.adaptive_window=adaptive_window
 
@@ -30,6 +31,7 @@ class RuntimeManager:
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
+        self.previous_returned_experiment={}
         self.adaptive_window.adapt_search_window({},self.initial_window,self.tenant_nb == 1)
 
     def set_sorted_combinations(self, combinations):
@@ -70,9 +72,9 @@ class RuntimeManager:
         for exp_nb in self.experiments.keys():
             if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 found=True
-                sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
-                experiment_spec=self.experiments[exp_nb][0]
-                experiment_nb=exp_nb
+                #sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
+                #experiment_spec=self.experiments[exp_nb][0]
+                #experiment_nb=exp_nb
                 next_exp=self.experiments[exp_nb][1][sample_nb]
                 if exp_nb == self.get_current_experiment_nb():
                     if self.get_nb_of_sample_for_conf(exp_nb,conf) < self.get_current_sample_nb():
@@ -80,8 +82,8 @@ class RuntimeManager:
                 (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
                 if self.get_total_nb_of_samples(exp_nb) == 0:
                     self.next_current_experiment()
-        if found and self.no_experiments_left():
-            self.last_experiment={"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
+        if found and self.no_experiments_left() and not self.last_experiment and self.previous_returned_experiment:
+            self.last_experiment=self.previous_returned_experiment
 
     def update_experiment_list(self, experiment_nb, experiment_specification, samples):
         experiment=self.experiments[experiment_nb]
@@ -141,6 +143,7 @@ class RuntimeManager:
         sample_nb=self.current_experiment["sample_nb"]
         next_exp=self.experiments[experiment_nb][1][sample_nb]
         experiment_spec=self.experiments[experiment_nb][0]
+        self.previous_returned_experiment={"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
         self.next_current_experiment()
         if self.no_experiments_left():
             self.last_experiment={"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
