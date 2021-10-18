@@ -72,7 +72,7 @@ class RuntimeManager:
         for exp_nb in self.experiments.keys():
             if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 found=True
-                #sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
+                sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
                 #experiment_spec=self.experiments[exp_nb][0]
                 #experiment_nb=exp_nb
                 next_exp=self.experiments[exp_nb][1][sample_nb]
