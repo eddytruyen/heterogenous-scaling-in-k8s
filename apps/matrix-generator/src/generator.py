@@ -11,7 +11,7 @@ import sys
 import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-SORT_SAMPLES=True
+SORT_SAMPLES=False
 LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 
@@ -95,6 +95,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         nonlocal only_failed_results
                                         nonlocal d
                                         nonlocal sla
+                                        nonlocal window
 
                                         conf=conf_and_states[0]
                                         states=conf_and_states[1]
@@ -168,6 +169,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             adaptive_scaler.reset()
                                                             rm.reset()
+                                                            #window=adaptive_window.get_current_window()
                                                     if  opt_conf and previous_conf != opt_conf:
                                                             adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
                                                     if not only_failed_results:
