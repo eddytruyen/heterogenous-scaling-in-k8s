@@ -332,17 +332,17 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         currentResult={}
         rm=get_rm_for_closest_tenant_nb(startTenants)
         adaptive_window=rm.get_adaptive_window()
+        if startTenants == 4:
+            import pdb; pdb.set_trace()
         if str(startTenants) in d[sla['name']]:
             currentResult=d[sla['name']][str(startTenants)]
         elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
             #copy result for startTenants-1 but set an artificial high  completion time
             #so that a later actual result will always outperform this completion time.
             currentResult=d[sla['name']][str(startTenants-1)]
-            transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold)
+            transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold) #previous_conf, previous_tenants)
             if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'true':
                 window=adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)], 1, False)
-
-
         #rm=get_rm_for_closest_tenant_nb(startTenants)
         #adaptive_window=rm.get_adaptive_window()
         if currentResult:
@@ -373,6 +373,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 conf_in_case_of_IndexError=lst[0]
                 retry_wdw=window-start+1
             check_and_get_next_exps(conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
+            #if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) < startTenants:
+            #    new_d=deep_copy_results(d)
+            #else:
+            #    new_d=d
             d[sla['name']][str(startTenants)]=rm.get_next_sample()
         if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
@@ -672,8 +676,16 @@ def get_matrix_and_sla(initial_conf,namespace):
         return {"matrix": d, "sla":sla}
 
 
+def deep_copy_results(d):
+	new_d = {}
+	for sla_name in d.keys():
+		new_d[sla_name]={}
+		for tenant_nb in d[sla_name].keys():
+			new_d[sla_name][tenant_nb]=dict(d[sla_name][tenant_nb])
+	return new_d
+
 #precondition: d[sla['name'][str(source_tenant_nb)] exists
-def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tenant_nb,slo, scaling_down_threshold):
+def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tenant_nb,slo, scaling_down_threshold):# previous_conf=[], previous_tenants = None):
 	print("Transferring result from " +  str(source_tenant_nb)+ " to " + str(destination_tenant_nb)) 
 	sourceResult=d[sla['name']][str(source_tenant_nb)]
 	adaptive_scaler=adaptive_scalers['init']
@@ -687,6 +699,12 @@ def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tena
 		sourceResult=None
 	if source_tenant_nb != destination_tenant_nb:
 		sourceResult=None
+	if source_tenant_nb == 3:
+		import pdb; pdb.set_trace()
+	#if previous_conf and previous_tenants and source_tenant_nb != destination_tenant_nb  and int(previous_tenants) < destination_tenant_nb:
+		#new_d  =  deep_copy_results(d)
+	#else:
+ 		#new_d = d
 	add_incremental_result(adaptive_scalers, destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo, destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
 	return d
 
