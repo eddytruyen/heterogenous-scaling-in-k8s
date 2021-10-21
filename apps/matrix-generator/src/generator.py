@@ -568,8 +568,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #adaptive_window=rm.get_adaptive_window()
         if currentResult:
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
-            if startTenants == 4:
-                import pdb; pdb.set_trace()
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(found_conf)
@@ -585,10 +583,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
             predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window,window_offset_for_scaling_function)
-            #adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf)
-            if startTenants == 4:
-                import pdb; pdb.set_trace()
-            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,predictedConf,slo)
+            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf, start_fresh=True)
+            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],startTenants,predictedConf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(predictedConf)
             if start >= window:
@@ -751,7 +747,7 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
                 adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
        else:
                 adaptive_scaler2=adaptive_scalers[tested_configuration]
-                if conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
+                if str(tenant_nb) in results.keys() and conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
                         adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
                 elif clone_scaling_function:
                         adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
@@ -763,9 +759,9 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
                 adaptive_scaler.status()
        return adaptive_scaler
 
-def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf):
+def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf, start_fresh=False):
         tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
-        adaptive_scalers[tested_configuration]=adaptive_scaler.clone()
+        adaptive_scalers[tested_configuration]=adaptive_scaler.clone(start_fresh=start_fresh)
         print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
         adaptive_scalers[tested_configuration].status()
         return adaptive_scalers[tested_configuration]
@@ -924,10 +920,9 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				for i in range(tmp_start,failed_range,1):
 					print(tmp_combinations[index])
 					if not tmp_combinations[index] in possible_tipped_over_confs:
-						print(utils.array_to_delimited_str(tmp_combinations[index]) + " is removed")
+						print(utils.array_to_delimited_str(tmp_combinations[index], " ") + " is removed")
 						sorted_combinations.remove(tmp_combinations[index])
-					else:
-						index+=1
+					index+=1
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
