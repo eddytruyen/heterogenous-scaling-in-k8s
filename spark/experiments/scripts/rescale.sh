@@ -47,7 +47,7 @@ for i in `seq 4`
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2)
                         memory_size=$valueMemory
-			if [ $old_replicas -eq 0 ]
+			if [ $nb_of_tenants -gt $previous_tenants && $old_replicas -eq 0 ]
 			then	
 				replace=false
 				if [ ! $cpu_size -eq $old_cpu_size ]
