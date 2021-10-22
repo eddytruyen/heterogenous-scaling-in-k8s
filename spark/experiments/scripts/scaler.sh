@@ -19,7 +19,8 @@ do
      then 
          ./rescale.sh $namespace $i
      else
-	 ./rescale.sh $namespace $i $period $((i-1))
+	 previous_conf=`cat new_previous_conf`
+	 ./rescale.sh $namespace $i $period $((i-1)) $previous_conf
   fi
   #if [ $clientmode -eq 0 ]
   #then`
