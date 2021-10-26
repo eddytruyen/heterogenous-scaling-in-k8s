@@ -7,6 +7,8 @@ previous_conf=${5:-"no"}
 fileName=values.json
 resourcePlannerURL=http://172.17.13.119:80
 
+alphabetLength=$((4))
+
 function str_to_int {
   echo $(( 0x$(echo -n "$1" | sha1sum | cut -d " " -f 1) % $2 ))
 }
@@ -25,20 +27,32 @@ sed -i 's/{//g' $fileName
 sed -i 's/}//g' $fileName
 cat $fileName
 #cpu_size=0
-kubectl get pod spark-client-0 -n $namespace -o yaml > old_pod.yaml
-old_memory_size=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2)
-echo "Old memory size: " $old_memory_size
+kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
+old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"')
+echo 
+echo Old memory size spark_client: $old_memory_size_client
 memory_size=0
-for i in `seq 4`
-        do
+old_conf=""
+for i in `seq $alphabetLength`
+	do
 		kubectl get statefulset $namespace-spark-worker$i -n $namespace -o yaml > old_ss.yaml
-	        old_replicas=#get number of replicas of ss
-		old_cpu_size=#get cpu of ss
-		old_memory_size=#get memory of ss 	
+		value=$(grep 'replicas: .*' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		old_replicas=$((value))
+		#get number of replicas of ss
+                if [ $i -eq $alphabetLength ]
+                then
+                        old_conf=$old_conf${old_replicas}
+                else
+                        old_conf=$old_conf${old_replicas}_
+                fi
+
+		old_cpu_size=$(grep 'cpu: .*' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		#get cpu size 
+		old_memory_size=$(grep 'memory: .*Gi' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		#get memory of ss 	
                 keyName=worker$i.replicaCount
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
                 replicas=$((value))
-                echo $replicas
                 if [ $replicas -gt 0 ]
                 then
                         cpuKeyName=worker$i.resources.requests.cpu
@@ -47,54 +61,61 @@ for i in `seq 4`
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2)
                         memory_size=$valueMemory
-			if [ $nb_of_tenants -gt $previous_tenants && $old_replicas -eq 0 ]
+			if [ ! $previous_conf == "no" ]  && [ $old_replicas -eq 0 ]
+			# && [ $nb_of_tenants -gt $previous_tenant_nb 
 			then	
 				replace=false
-				if [ ! $cpu_size -eq $old_cpu_size ]
+				echo "cpu size: $old_cpu_size -> $cpu_size"
+                                echo "memory size: $old_memory_size -> $memory_size"
+				if [ $cpu_size -ne $old_cpu_size ]
 				then	
+					echo "Replacing CPU"
 					replace=true
-					sed -i "s/cpu: $old_cpu_size/cpu: $cpu_size" old_ss.yaml
+					sed -i "s/cpu: $old_cpu_size/cpu: $cpu_size/g" old_ss.yaml
 				fi
-				if [ ! $memory_size -eq $old_memory_size ]
+				if [ ${memory_size}Gi = $old_memory_size ]
                                 then
+					echo "Replacing memory"
 					replace=true
-                                        sed -i "s/memory: $old_memory_size/cpu: $memory_size" old_ss.yaml
+                                        sed -i "s/memory: $old_memory_size/cpu: $memory_size/g" old_ss.yaml
                                 fi
-				if [ replace == true ]
+				if [ $replace = true ]
 				then
+					echo "Vertical scaling of worker$i"
+					echo "cpu size: $old_cpu_size -> $cpu_size"
+					echo "memory size: $old_memory_size -> $memory_size"
 					kubectl replace -f old_ss.yaml
 				fi
-				rm old_ss.yaml
+				#rm old_ss.yaml
+			fi
+        	fi        
+	done
 
-                fi
-        done
 echo "New memory size: " $memory_size
-if [ ! ${memory_size}Gi == $old_memory_size ]
+if [  ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
-	kubectl get statefulset spark-client -n $namespace -o yaml > ss.yaml
-	sed "s/memory: 2/memory: $memory_size/g" ss.yaml > tmp.yaml
+	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml
+	sed "s/memory: 2/memory: $memory_size/g" ss_client.yaml > tmp.yaml
 	kubectl replace -f tmp.yaml -n $namespace
 	kubectl wait --for=delete  pod/spark-client-0 -n $namespace --timeout=120s
 	kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s
-	rm ss.yaml
+	rm ss_client.yaml
 	rm tmp.yaml
 fi
-rm old_pod.yaml
-new_previous_conf=""
-for i in `seq 4`
+for i in `seq $alphabetLength`
 	do
 		keyName=worker$i.replicaCount
 		value=$(grep $keyName $fileName | cut -d ":" -f2)
-		if [ i -eq 4 ]
-		then
-			new_previous_conf=$previous_conf${value}_
-		else
-			new_previous_conf=$previous_conf${value}
-		fi
 		replicas=$((value))
-		echo $replicas
-		kubectl scale statefulset $namespace-spark-worker$i --replicas=$replicas -n $namespace
+		old_replicas_str=$(echo $old_conf | cut -d "_" -f$i)
+		old_replicas=$((old_replicas_str))
+		if [ ! $replicas -eq $old_replicas ]
+		then
+			echo "Horizontal scaling worker$i: $old_replicas -> $replicas"
+			kubectl scale statefulset $namespace-spark-worker$i --replicas=$replicas -n $namespace
+		fi
 	done
 rm $fileName
-echo new_previous_conf > new_previous_conf
+rm old_pod.yaml
+echo $new_conf > new_previous_conf
