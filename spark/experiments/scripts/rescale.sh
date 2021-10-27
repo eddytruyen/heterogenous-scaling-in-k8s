@@ -35,8 +35,8 @@ memory_size=0
 old_conf=""
 for i in `seq $alphabetLength`
 	do
-		kubectl get statefulset $namespace-spark-worker$i -n $namespace -o yaml > old_ss.yaml
-		value=$(grep 'replicas: .*' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		kubectl get statefulset $namespace-spark-worker$i -n $namespace -o yaml > old_ss$i.yaml
+		value=$(grep 'replicas: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
 		old_replicas=$((value))
 		#get number of replicas of ss
                 if [ $i -eq $alphabetLength ]
@@ -46,9 +46,10 @@ for i in `seq $alphabetLength`
                         old_conf=$old_conf${old_replicas}_
                 fi
 
-		old_cpu_size=$(grep 'cpu: .*' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		value=$((grep 'cpu: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"'))
+		old_cpu_size=$((value))
 		#get cpu size 
-		old_memory_size=$(grep 'memory: .*Gi' old_ss.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
 		#get memory of ss 	
                 keyName=worker$i.replicaCount
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
@@ -61,30 +62,31 @@ for i in `seq $alphabetLength`
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2)
                         memory_size=$valueMemory
-			if [ ! $previous_conf == "no" ]  && [ $old_replicas -eq 0 ]
+			if [ ! $previous_conf == "no" ]  
+			#&& [ $old_replicas -eq 0 ]
 			# && [ $nb_of_tenants -gt $previous_tenant_nb 
 			then	
-				replace=false
 				echo "cpu size: $old_cpu_size -> $cpu_size"
-                                echo "memory size: $old_memory_size -> $memory_size"
+                                echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+				replace=false
 				if [ $cpu_size -ne $old_cpu_size ]
 				then	
 					echo "Replacing CPU"
 					replace=true
-					sed -i "s/cpu: $old_cpu_size/cpu: $cpu_size/g" old_ss.yaml
+					sed -i "s/cpu: \"$old_cpu_size\"/cpu: \"$cpu_size\"/g" old_ss$i.yaml
 				fi
-				if [ ${memory_size}Gi = $old_memory_size ]
+				if [ ${memory_size}Gi != ${old_memory_size} ]
                                 then
 					echo "Replacing memory"
 					replace=true
-                                        sed -i "s/memory: $old_memory_size/cpu: $memory_size/g" old_ss.yaml
+                                        sed -i "s/memory: ${old_memory_size}/memory: ${memory_size}Gi/g" old_ss$i.yaml
                                 fi
 				if [ $replace = true ]
 				then
 					echo "Vertical scaling of worker$i"
 					echo "cpu size: $old_cpu_size -> $cpu_size"
-					echo "memory size: $old_memory_size -> $memory_size"
-					kubectl replace -f old_ss.yaml
+					echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+					kubectl replace -f old_ss$i.yaml
 				fi
 				#rm old_ss.yaml
 			fi
