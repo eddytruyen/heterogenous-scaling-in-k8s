@@ -395,19 +395,19 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     # there is no experiment sample left, therefore end this set of samples.
                     last_experiment=True
                 #let k8-resource-optimizer process the inputted previous result
+                ws=rm.get_current_experiment_specification()
+                i=rm.get_current_experiment_nb()
+                sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                samples=int(ws[4]*sampling_ratio)
+                if samples == 0:
+                    samples=1
+                results=[]
+                previous_result=float(completion_time)
+                previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
+                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, previous_result=previous_result, previous_replicas=previous_replicas)
+                if SORT_SAMPLES:
+                    sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                 if not last_experiment:
-                    ws=rm.get_current_experiment_specification()
-                    i=rm.get_current_experiment_nb()
-                    sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-                    samples=int(ws[4]*sampling_ratio)
-                    if samples == 0:
-                        samples=1
-                    results=[]
-                    previous_result=float(completion_time)
-                    previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
-                    sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, previous_result=previous_result, previous_replicas=previous_replicas)
-                    if SORT_SAMPLES:
-                        sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                     rm.update_experiment_list(i,ws,sample_list)
                     d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                     update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
