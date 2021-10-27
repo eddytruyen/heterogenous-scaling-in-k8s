@@ -46,7 +46,7 @@ for i in `seq $alphabetLength`
                         old_conf=$old_conf${old_replicas}_
                 fi
 
-		value=$((grep 'cpu: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"'))
+		value=$(grep 'cpu: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
 		old_cpu_size=$((value))
 		#get cpu size 
 		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
