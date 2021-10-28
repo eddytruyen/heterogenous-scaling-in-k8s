@@ -1021,7 +1021,7 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                                                 if involves_worker(adaptive_scaler.workers, result_conf,i) and not other_as.workers[i].equals(w):
                                                         changed=True
                                                 if changed:
-                                                        if not int(t) in cloned_other_as.keys():
+                                                        if not t in cloned_other_as.keys():
                                                             cloned_other_as[t]=other_as.clone()
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
