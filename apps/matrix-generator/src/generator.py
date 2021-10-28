@@ -999,6 +999,8 @@ def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
 
 def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo, scaling_down_threshold):
+        if result_conf == [0,0,1,2]:
+            import pdb; pdb.set_trace()
         cloned_other_as={}
         for t in previous_results.keys():
                 if int(t) > tenant_nb:
