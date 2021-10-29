@@ -1141,6 +1141,14 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     print("not removed")
                 if new_window == 0:
                         return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+window, window, previous_results, start_tenant, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers, ScaledDownWorkerIndex, log, original_adaptive_scaler, initial_conf)
+        #When all constraints are satisfied and a worker has been scaled, update all previous_tenants with the appropriate worker
+        if ScaledDownWorkerIndex >= 0:
+                for t in previous_results.keys():
+                        if int(t) < tenant_nb:
+                                adaptive_scalers[get_adaptive_scaler_key(int(t), get_conf(adaptive_scaler.workers, previous_results[t]))].workers[ScaledDownWorkerIndex]=adaptive_scaler.workers[ScaledDownWorkerIndex].clone()
+                                for key in adaptive_scaler.workers[ScaledDownWorkerIndex].resources.keys():
+                                    previous_results[t]["worker"+str(adaptive_scaler.workers[ScaledDownWorkerIndex].worker_id)+".resources.requests." + key]=adaptive_scaler.workers[ScaledDownWorkerIndex].resources[key]
+                                                        
         return [start, new_window]
 
 
