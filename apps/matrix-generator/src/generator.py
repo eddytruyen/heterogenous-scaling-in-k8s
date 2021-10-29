@@ -966,7 +966,7 @@ def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, con
 #def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
 #    return  has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b) or  has_smaller_workers_than(adaptive_scaler_b, conf_b, adaptive_scaler_a, conf_a)
 
-def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
+def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
     if conf_a == [0,0,1,2] and conf_b == [0,0,1,2]:
         import pdb; pdb.set_trace()
     response=False
@@ -980,6 +980,11 @@ def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_
                 return True
     return False
 
+
+def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
+    if conf_a == [0,0,1,2] and conf_b == [0,0,1,2]:
+        import pdb; pdb.set_trace()
+    return generator.resource_cost(adaptive_scaler_a.workers,conf_a, cost_aware=False) < generator.resource_cost(adaptive_scaler_b.workers,conf_b, cost_aware=False)
 
 
 def is_smaller_worker_than(worker_a, worker_b):
@@ -1028,6 +1033,10 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
             if t in cloned_other_as.keys():
+                if int(t) == min([int(t_nb) for t_nb in  cloned_other_as.keys()]):
+                    for smaller_tenant_nb in previous_results_keys():
+                        if int(smaller_tenant_nb) < int(t):
+                            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],smaller_tenant_nb, get_conf(cloned_other_as[t].workers, previous_results[smaller_tenant_nb]))
                 update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
                 previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
         return False
