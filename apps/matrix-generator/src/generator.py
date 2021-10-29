@@ -984,7 +984,7 @@ def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b,
 def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
     if conf_a == [0,0,1,2] and conf_b == [0,0,1,2]:
         import pdb; pdb.set_trace()
-    return generator.resource_cost(adaptive_scaler_a.workers,conf_a, cost_aware=False) < generator.resource_cost(adaptive_scaler_b.workers,conf_b, cost_aware=False)
+    return resource_cost(adaptive_scaler_a.workers,conf_a, cost_aware=False) < resource_cost(adaptive_scaler_b.workers,conf_b, cost_aware=False)
 
 
 def is_smaller_worker_than(worker_a, worker_b):
