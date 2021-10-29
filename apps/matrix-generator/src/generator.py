@@ -126,7 +126,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
                                                         adaptive_scaler.validate_result({},opt_conf,slo)
-                                                        return process_states([[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)], original_adaptive_scaler=original_adaptive_scaler)
+                                                        return process_states([[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results,recursive_scale_down=False)], original_adaptive_scaler=original_adaptive_scaler)
                                             else:
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
                                                     #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
@@ -253,7 +253,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
         def get_adaptive_scaler_for_closest_tenant_nb(tenants):
                         as_predictedConf=None
-                        k=tenants-1
+                        k=tenants
                         while k >= 1:
                                 if str(k) in d[sla['name']].keys():
                                         as_predictedConf=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scaler, d[sla['name']], k, get_conf(adaptive_scaler.workers,d[sla['name']][str(k)]),slo)
@@ -328,10 +328,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         evaluate=False
         if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
+            if previous_conf == [0,2,0,1] and int(previous_tenants) == 2:
+                import pdb; pdb.set_trace()
             evaluate=True
             tenant_nb=int(previous_tenants)
             maxTenants=int(previous_tenants)
-            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scalers['init'], d[sla['name']], tenant_nb, previous_conf,slo)
+            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo)
             rm=get_rm_for_closest_tenant_nb(tenant_nb)
             adaptive_window=rm.get_adaptive_window()
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
@@ -986,8 +988,8 @@ def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b,
 
 
 def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
-    if conf_a == [0,1,1,1] and conf_b == [0,1,1,0]:
-        import pdb; pdb.set_trace()
+    #if conf_a == [0,1,1,1] and conf_b == [0,1,1,0]:
+    #    import pdb; pdb.set_trace()
     if not has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
         return False
     test_conf=conf_a
@@ -1018,8 +1020,8 @@ def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
 
 def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo, scaling_down_threshold):
-        if result_conf == [0,1,1,0] and tenant_nb == 2:
-            import pdb; pdb.set_trace()
+        #if result_conf == [0,1,1,0] and tenant_nb == 2:
+        #    import pdb; pdb.set_trace()
         cloned_other_as={}
         for t in previous_results.keys():
                 if int(t) > tenant_nb:
