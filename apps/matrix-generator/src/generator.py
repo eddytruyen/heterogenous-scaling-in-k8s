@@ -1142,7 +1142,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                         if int(t) < tenant_nb:
                                 adaptive_scalers[get_adaptive_scaler_key(int(t), get_conf(adaptive_scaler.workers, previous_results[t]))].workers[ScaledDownWorkerIndex].resources=dict(adaptive_scaler.workers[ScaledDownWorkerIndex].resources)
                                 for key in adaptive_scaler.workers[ScaledDownWorkerIndex].resources.keys():
-                                    previous_results[t]["worker"+str(adaptive_scaler.workers[ScaledDownWorkerIndex].worker_id)+".resources.requests." + key]=adaptive_scaler.workers[ScaledDownWorkerIndex].resources[key]
+                                    previous_results[t]["worker"+str(adaptive_scaler.workers[ScaledDownWorkerIndex].worker_id)+".resources.requests." + key]=str(adaptive_scaler.workers[ScaledDownWorkerIndex].resources[key])
                                                         
         return [start, new_window]
 
