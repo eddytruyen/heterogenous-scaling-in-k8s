@@ -322,7 +322,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False):
 
 		def is_testable(worker, conf):
                       nonlocal scale_down
@@ -454,7 +454,7 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
-			if scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
+			if scale_down and recursive_scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
 				self.redo_scale_action(slo)
 				#self.initial_confs=[]
 				if not self.only_failed_results:
