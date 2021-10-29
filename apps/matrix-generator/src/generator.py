@@ -971,7 +971,7 @@ def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, con
 #    return  has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b) or  has_smaller_workers_than(adaptive_scaler_b, conf_b, adaptive_scaler_a, conf_a)
 
 def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
-    if conf_a == [0,0,1,2] and conf_b == [0,0,1,2]:
+    if conf_a == [0,1,1,0] and conf_b == [0,0,1,2]:
         import pdb; pdb.set_trace()
     response=False
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
@@ -986,7 +986,7 @@ def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b,
 
 
 def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
-    if conf_a == [0,0,1,2] and conf_b == [0,0,1,2]:
+    if conf_a == [0,1,1,0] and conf_b == [0,1,1,1]:
         import pdb; pdb.set_trace()
     if not has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
         return False
@@ -1012,7 +1012,7 @@ def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
 
 def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo, scaling_down_threshold):
-        if result_conf == [0,0,1,2]:
+        if result_conf == [0,1,1,0] and tenant_nb == 2:
             import pdb; pdb.set_trace()
         cloned_other_as={}
         for t in previous_results.keys():
