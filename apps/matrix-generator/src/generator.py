@@ -972,7 +972,7 @@ def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_
     response=False
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
         if conf_pair[0] > 0 and conf_pair[1] > 0:
-            if not is_smaller_worker_than(adaptive_scaler_a.workers[worker_index],adaptive_scaler_b.workers[worker_index]):
+            if is_smaller_worker_than(adaptive_scaler_b.workers[worker_index],adaptive_scaler_a.workers[worker_index]):
                 return False
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
         if conf_pair[0] > 0 and conf_pair[1] > 0:
@@ -986,7 +986,7 @@ def is_smaller_worker_than(worker_a, worker_b):
     if worker_a.equals(worker_b):
         return False
     for res in worker_a.resources.keys():
-        if worker_a.resources[res] >= worker_b.resources[res]:
+        if worker_a.resources[res] > worker_b.resources[res]:
             return False
     for res in worker_a.resources.keys():
         if worker_a.resources[res] < worker_b.resources[res]:
