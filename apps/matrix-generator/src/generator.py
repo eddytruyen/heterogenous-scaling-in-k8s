@@ -569,11 +569,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #rm=get_rm_for_closest_tenant_nb(startTenants)
         #adaptive_window=rm.get_adaptive_window()
         if currentResult:
+            if adaptive_scaler.workers[2].resources['cpu'] == 5:
+                import pdb; pdb.set_trace()
             found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=lst.index(found_conf)
-            if rm.no_experiments_left() and not rm.last_experiment_in_queue():
+            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                     check_and_get_next_exps(found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
                     if lst[start] in rm.get_left_over_configs():
