@@ -990,13 +990,13 @@ def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_
         import pdb; pdb.set_trace()
     if not has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
         return False
-    test_conf=[]
+    test_conf=conf_a
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
         if conf_pair[0] > 0 and conf_pair[1] > 0:
             test_conf[worker_index]=1
-        else
+        else:
             test_conf[worker_index]=0
-    return resource_cost(adaptive_scaler_a.workers,test_conf, cost_aware=False) <= resource_cost(adaptive_scaler_b.workers,test_conf cost_aware=False)
+    return resource_cost(adaptive_scaler_a.workers,test_conf, cost_aware=False) <= resource_cost(adaptive_scaler_b.workers,test_conf,cost_aware=False)
 
 
 def is_smaller_worker_than(worker_a, worker_b):
