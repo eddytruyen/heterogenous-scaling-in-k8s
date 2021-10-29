@@ -11,7 +11,7 @@ import sys
 import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-SORT_SAMPLES=False
+SORT_SAMPLES=True
 LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 
@@ -548,6 +548,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 check_and_get_next_exps(previous_conf,start,new_window,tenant_nb, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=False)
                 d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                 update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
+            print("Saving optimal results into matrix for previous results")
+            utils.saveToYaml(d,'Results/matrix.yaml')
             tenant_nb+=1
         predictedConf=[]
         evaluate_current=False
