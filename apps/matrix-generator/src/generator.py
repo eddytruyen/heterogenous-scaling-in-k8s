@@ -1034,13 +1034,8 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                                                             cloned_other_as[t]=other_as.clone()
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
-            if t in cloned_other_as.keys():
-                if int(t) == min([int(t_nb) for t_nb in  cloned_other_as.keys()]):
-                    for smaller_tenant_nb in previous_results_keys():
-                        if int(smaller_tenant_nb) < int(t):
-                            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],smaller_tenant_nb, get_conf(cloned_other_as[t].workers, previous_results[smaller_tenant_nb]))
-                update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
-                previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
+            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
+            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
         return False
 
 #def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo):
