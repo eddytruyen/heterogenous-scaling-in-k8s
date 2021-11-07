@@ -12,7 +12,7 @@ import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -1063,6 +1063,7 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
 #        return False
 
 def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False):
+        print("Starting at index " + str(start) + " with window " + str(window))
         i=start_tenant
         new_window=window
         start_window=window
