@@ -11,7 +11,7 @@ import sys
 import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-SORT_SAMPLES=True
+SORT_SAMPLES=False
 LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 
@@ -1013,6 +1013,14 @@ def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
     if not str(tenants) in results.keys():
         return True
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
+
+def can_be_improved_by_smaller_config(adaptive_scaler,sorted_combinations,results,tenants,slo):
+    if not str(tenants) in results.keys():
+        return True
+    tmp_combinations=sort_configs(adaptive_scaler.workers, sorted_combinations)
+    index=tmp_combinations.index(get_conf(adaptive_scaler.workers,results[str(tenants)]))
+    return index > 0 and resource_cost(adaptive_scaler.workers, tmp_combinations[0]) < resource_cost(adaptive_scaler.workers, tmp_combinations[index])
+
 
 def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo, scaling_down_threshold):
         cloned_other_as={}
