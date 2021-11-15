@@ -209,11 +209,12 @@ class AdaptiveScaler:
             	    a_s.current_tipped_over_conf=self.current_tipped_over_conf[:] 
                 else:
                     a_s.current_tipped_over_conf=None
-                a_s.failed_results=[c[:] for c in self.failed_results]
+                #a_s.failed_results=[c[:] for c in self.failed_results]
                 a_s.initial_confs=[[dict(d[0]) if d[0] else {},d[1][:] if d[1] else [],[w.clone() for w in d[2]]] for d in self.initial_confs]
                 a_s._tested=dict(self._tested)
                 a_s.scale_action_re_undone=self.scale_action_re_undone
                 a_s.only_failed_results=self.only_failed_results
+            a_s.failed_results=[c[:] for c in self.failed_results]
             a_s.minimum_resources=self.minimum_resources
             a_s.node_resources_offset_for_scaling_function=self.node_resources_offset_for_scaling_function
             a_s.scaling_down_threshold=self.scaling_down_threshold
