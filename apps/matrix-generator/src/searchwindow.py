@@ -194,25 +194,27 @@ class AdaptiveScaler:
 			self.opt_in_for_restart=initial_conf["opt_in_for_restart"]
 			self.careful_scaling=initial_conf["careful_scaling"]
 
-	def clone(self):
+	def clone(self, start_fresh=False):
             a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True), self.sla_name)
-            a_s.ScalingDownPhase=self.ScalingDownPhase
-            a_s.StartScalingDown = self.StartScalingDown
-            a_s.ScalingUpPhase=self.ScalingUpPhase
-            a_s.ScaledDown=self.ScaledDown
-            a_s.ScaledUp=self.ScaledUp
-            a_s.FailedScalings = self.FailedScalings
-            a_s.ScaledWorkerIndex=self.ScaledWorkerIndex
-            a_s.tipped_over_confs=[c[:] for c in self.tipped_over_confs]
-            if self.current_tipped_over_conf:
-            	a_s.current_tipped_over_conf=self.current_tipped_over_conf[:] 
-            else:
-                a_s.current_tipped_over_conf=None
+            if not start_fresh:
+                a_s.ScalingDownPhase=self.ScalingDownPhase
+                a_s.StartScalingDown = self.StartScalingDown
+                a_s.ScalingUpPhase=self.ScalingUpPhase
+                a_s.ScaledDown=self.ScaledDown
+                a_s.ScaledUp=self.ScaledUp
+                a_s.FailedScalings = self.FailedScalings
+                a_s.ScaledWorkerIndex=self.ScaledWorkerIndex
+                a_s.tipped_over_confs=[c[:] for c in self.tipped_over_confs]
+                if self.current_tipped_over_conf:
+            	    a_s.current_tipped_over_conf=self.current_tipped_over_conf[:] 
+                else:
+                    a_s.current_tipped_over_conf=None
+                #a_s.failed_results=[c[:] for c in self.failed_results]
+                a_s.initial_confs=[[dict(d[0]) if d[0] else {},d[1][:] if d[1] else [],[w.clone() for w in d[2]]] for d in self.initial_confs]
+                a_s._tested=dict(self._tested)
+                a_s.scale_action_re_undone=self.scale_action_re_undone
+                a_s.only_failed_results=self.only_failed_results
             a_s.failed_results=[c[:] for c in self.failed_results]
-            a_s.initial_confs=[[dict(d[0]) if d[0] else {},d[1][:] if d[1] else [],[w.clone() for w in d[2]]] for d in self.initial_confs]
-            a_s._tested=dict(self._tested)
-            a_s.scale_action_re_undone=self.scale_action_re_undone
-            a_s.only_failed_results=self.only_failed_results
             a_s.minimum_resources=self.minimum_resources
             a_s.node_resources_offset_for_scaling_function=self.node_resources_offset_for_scaling_function
             a_s.scaling_down_threshold=self.scaling_down_threshold
@@ -321,7 +323,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False):
 
 		def is_testable(worker, conf):
                       nonlocal scale_down
@@ -453,7 +455,7 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			self.FailedScalings=[]
-			if scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
+			if scale_down and recursive_scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
 				self.redo_scale_action(slo)
 				#self.initial_confs=[]
 				if not self.only_failed_results:
