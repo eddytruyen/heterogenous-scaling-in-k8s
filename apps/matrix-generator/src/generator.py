@@ -1021,7 +1021,6 @@ def is_smaller_worker_than(worker_a, worker_b):
 
 
 def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
-    import pdb; pdb.set_trace()
     if not str(tenants) in results.keys():
         return True
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
@@ -1211,7 +1210,7 @@ def filter_samples_previous_tenant_conf(sorted_combinations, workers, previous_t
 			else:
 				min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
 			print(result_conf)
-			if all_flagged_conf(workers, result_conf) or (costIsRelevant and cost > maximum_transition_cost) or nb_shrd_replicas < min_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
+			if all_flagged_conf(workers, result_conf, ScaledWorkerIndex) or (costIsRelevant and cost > maximum_transition_cost) or nb_shrd_replicas < min_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
 				print("Moved")
 				sorted_combinations.remove(result_conf)
 				#if window > 1:
