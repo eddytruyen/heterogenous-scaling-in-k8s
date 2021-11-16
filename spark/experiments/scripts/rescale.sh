@@ -12,14 +12,15 @@ alphabetLength=$((4))
 function str_to_int {
   echo $(( 0x$(echo -n "$1" | sha1sum | cut -d " " -f 1) % $2 ))
 }
-
+start=0
 #curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=149&previoustenants=2&previousconf=2_0_0_0"
 if [ ! $previous_conf == "no" ]
 then
 	echo "previous_conf"
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 else
-	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName	
+	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
+	start=1	
 fi
 sed -i 's/\"//g' $fileName
 sed -i 's|,|\n|g' $fileName
@@ -118,6 +119,12 @@ for i in `seq $alphabetLength`
 		then
 			echo "Horizontal scaling worker$i: $old_replicas -> $replicas"
 			kubectl scale statefulset $namespace-spark-worker$i --replicas=$replicas -n $namespace
+			if [ $start -eq 1 ] && [ ! $replicas -eq 0 ]
+			then
+				echo Starting up...
+				kubectl wait --for=condition=Ready  pod/$namespace-spark-worker$i-$((replicas-1)) -n $namespace  --timeout=120s
+			fi
+
 		fi
 	done
 rm $fileName
