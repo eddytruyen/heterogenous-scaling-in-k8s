@@ -1232,7 +1232,7 @@ def filter_samples_previous_tenant_conf(sorted_combinations, adaptive_scaler, pr
 		else:
 			print("Not Moved")
 	if new_window == 0:
-		return filter_samples_previous_tenant_conf(sorted_combinations, workers, previous_tenant_conf, costIsRelevant, start+window, window, minimum_shared_replicas, maximum_transition_cost, ScaledWorkerIndex)
+		return filter_samples_previous_tenant_conf(sorted_combinations, adaptive_scaler, previous_tenant_conf, costIsRelevant, start+window, window, minimum_shared_replicas, maximum_transition_cost, ScaledWorkerIndex)
 	else:
 		return [start, new_window]
 
