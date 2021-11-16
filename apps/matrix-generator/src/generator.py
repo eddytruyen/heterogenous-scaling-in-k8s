@@ -634,7 +634,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print([utils.array_to_str(el) for el in lst])
             next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])
             try:
-                start_and_window=filter_samples_previous_tenant_conf(lst,[],previous_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, minimum_shared_replicas, maximum_transition_cost)
+                start_and_window=filter_samples_previous_tenant_conf(lst,adaptive_scaler,previous_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, minimum_shared_replicas, maximum_transition_cost)
                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                 print([utils.array_to_str(el) for el in lst])
                 next_conf=lst[start_and_window[0]]
