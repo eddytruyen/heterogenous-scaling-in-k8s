@@ -33,6 +33,7 @@ echo
 echo Old memory size spark_client: $old_memory_size_client
 memory_size=0
 old_conf=""
+new_conf=""
 for i in `seq $alphabetLength`
 	do
 		kubectl get statefulset $namespace-spark-worker$i -n $namespace -o yaml > old_ss$i.yaml
@@ -54,6 +55,7 @@ for i in `seq $alphabetLength`
                 keyName=worker$i.replicaCount
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
                 replicas=$((value))
+		new_conf=${new_conf}${replicas}_
                 if [ $replicas -gt 0 ]
                 then
                         cpuKeyName=worker$i.resources.requests.cpu
@@ -120,4 +122,4 @@ for i in `seq $alphabetLength`
 	done
 rm $fileName
 rm old_pod.yaml
-echo $new_conf > new_previous_conf
+echo ${new_conf::-1} > new_previous_conf
