@@ -901,6 +901,7 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False):
+		import pdb; pdb.set_trace()
 		if optimal_conf and optimal_conf_is_cost_effective:
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
@@ -931,7 +932,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				failed_range=tmp_combinations.index(failed_configs[len(failed_configs)-1])+1
 				#failed_range=start+window
 				print("Removing all confs in window going over the scaling_up_threshold because no optimal config has been found at all")
-				index=0 if startingTenant else tmp_start
+				index=0 #if startingTenant else tmp_start
 				possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * scaling_up_threshold and r['Successfull'] == 'true')
 				for i in range(tmp_start,failed_range,1):
 					print(tmp_combinations[index])
