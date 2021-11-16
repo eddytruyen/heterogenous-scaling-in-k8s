@@ -901,7 +901,6 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False):
-		import pdb; pdb.set_trace()
 		if optimal_conf and optimal_conf_is_cost_effective:
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
@@ -1198,8 +1197,9 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         return [start, new_window]
 
 
-def filter_samples_previous_tenant_conf(sorted_combinations, workers, previous_tenant_conf, costIsRelevant, start, window, minimum_shared_replicas, maximum_transition_cost, ScaledWorkerIndex=-1):
+def filter_samples_previous_tenant_conf(sorted_combinations, adaptive_scaler, previous_tenant_conf, costIsRelevant, start, window, minimum_shared_replicas, maximum_transition_cost, ScaledWorkerIndex=-1):
 	new_window=window
+	workers=adaptive_scaler.workers
 	for el in range(start, start+window):
 		result_conf=sorted_combinations[el-(window-new_window)]
 		if previous_tenant_conf:
@@ -1211,7 +1211,7 @@ def filter_samples_previous_tenant_conf(sorted_combinations, workers, previous_t
 			else:
 				min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
 			print(result_conf)
-			if all_flagged_conf(workers, result_conf, ScaledWorkerIndex) or (costIsRelevant and cost > maximum_transition_cost) or nb_shrd_replicas < min_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
+			if all_flagged_conf(adaptive_scaler, result_conf, ScaledWorkerIndex) or (costIsRelevant and cost > maximum_transition_cost) or nb_shrd_replicas < min_shared_replicas or not involves_worker(workers, result_conf, ScaledWorkerIndex):
 				print("Moved")
 				sorted_combinations.remove(result_conf)
 				#if window > 1:
