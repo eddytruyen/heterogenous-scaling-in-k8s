@@ -567,8 +567,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
             #copy result for startTenants-1 but set an artificial high  completion time
             #so that a later actual result will always outperform this completion time.
-            currentResult=d[sla['name']][str(startTenants-1)]
-            transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold) #previous_conf, previous_tenants)
+            if not can_be_improved_by_larger_config(d[sla['name']], startTenants-1, slo, scaling_up_threshold)
+                currentResult=d[sla['name']][str(startTenants-1)]
+                transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold) #previous_conf, previous_tenants)
             if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) >= 1.0 and float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'true':
                 window=adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)], 1, False)
         #rm=get_rm_for_closest_tenant_nb(startTenants)
