@@ -929,16 +929,17 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				tmp_combinations=sort_configs(workers,sorted_combinations, cost_aware=False)
 				tmp_start=tmp_combinations.index(failed_configs[0])
 				failed_range=tmp_combinations.index(failed_configs[len(failed_configs)-1])+1
+				last_failed_conf=failed_configs[len(failed_configs)-1][:]
 				#failed_range=start+window
 				print("Removing all confs in window going over the scaling_up_threshold because no optimal config has been found at all")
 				index=0 #if startingTenant else tmp_start
 				possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * scaling_up_threshold and r['Successfull'] == 'true')
-				for i in range(tmp_start,failed_range,1):
-					print(tmp_combinations[index])
-					if not tmp_combinations[index] in possible_tipped_over_confs:
-						print(utils.array_to_delimited_str(tmp_combinations[index], " ") + " is removed")
-						sorted_combinations.remove(tmp_combinations[index])
-					index+=1
+				for i in range(index,failed_range,1):
+					if i >= tmp_start or resource_cost(adaptive_scaler.workers, tmp_combinations[i]) < resource_cost(adaptive_scaler.workers, last_failed_conf):
+						print(tmp_combinations[i])
+						if not tmp_combinations[index] in possible_tipped_over_confs:
+							print(utils.array_to_delimited_str(tmp_combinations[index], " ") + " is removed")
+							sorted_combinations.remove(tmp_combinations[index])
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
