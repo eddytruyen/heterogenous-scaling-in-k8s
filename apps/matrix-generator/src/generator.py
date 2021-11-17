@@ -937,9 +937,9 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				for i in range(index,failed_range,1):
 					if i >= tmp_start or resource_cost(workers, tmp_combinations[i]) < resource_cost(workers, last_failed_conf):
 						print(tmp_combinations[i])
-						if not tmp_combinations[index] in possible_tipped_over_confs:
-							print(utils.array_to_delimited_str(tmp_combinations[index], " ") + " is removed")
-							sorted_combinations.remove(tmp_combinations[index])
+						if not tmp_combinations[i] in possible_tipped_over_confs:
+							print(utils.array_to_delimited_str(tmp_combinations[i], " ") + " is removed")
+							sorted_combinations.remove(tmp_combinations[i])
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
