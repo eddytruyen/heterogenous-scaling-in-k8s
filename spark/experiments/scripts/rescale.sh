@@ -101,7 +101,7 @@ if [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
 	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml
-	sed "s/memory: 2/memory: $memory_size/g" ss_client.yaml > tmp.yaml
+	sed "s/memory: .*Gi/memory: ${memory_size}Gi/g" ss_client.yaml > tmp.yaml
 	kubectl replace -f tmp.yaml -n $namespace
 	kubectl wait --for=delete  pod/spark-client-0 -n $namespace --timeout=120s
 	kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s
