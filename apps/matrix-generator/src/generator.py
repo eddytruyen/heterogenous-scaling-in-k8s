@@ -935,7 +935,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				index=0 #if startingTenant else tmp_start
 				possible_tipped_over_confs=return_failed_confs(workers, results, lambda r: float(r['CompletionTime']) <= slo * scaling_up_threshold and r['Successfull'] == 'true')
 				for i in range(index,failed_range,1):
-					if i >= tmp_start or resource_cost(adaptive_scaler.workers, tmp_combinations[i]) < resource_cost(adaptive_scaler.workers, last_failed_conf):
+					if i >= tmp_start or resource_cost(workers, tmp_combinations[i]) < resource_cost(workers, last_failed_conf):
 						print(tmp_combinations[i])
 						if not tmp_combinations[index] in possible_tipped_over_confs:
 							print(utils.array_to_delimited_str(tmp_combinations[index], " ") + " is removed")
