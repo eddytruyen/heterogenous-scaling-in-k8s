@@ -372,7 +372,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     if intermediate_state==NO_RESULT:
                         #remove_conf_for_higher_tenants
                         for i in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
-                                if str(i) in d[sla['name']].keys:
+                                if str(i) in d[sla['name']].keys():
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
