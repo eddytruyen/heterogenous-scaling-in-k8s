@@ -301,7 +301,56 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 return get_conf_for_start_tenant(slo,tenants,adaptive_scaler,lst,window, window_offset_for_scaling_function)
 
 
+        def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
+                    conf_array=sort_configs(adaptive_scaler.workers, rm.get_left_over_configs())
+                    if conf_array: # if still configs remain to be tested
+                        last_experiment=False
+                        #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
+                        print("Moving filtered samples in sorted combinations after the window")
+                        print([utils.array_to_str(el) for el in lst])
+                        if d[sla['name']]:
+                            previous_tenant_results=d[sla['name']]
+                        else:
+                            previous_tenant_results={}
+                        try:
+                            start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                            print([utils.array_to_str(el) for el in lst])
+                            next_conf=lst[start_and_window[0]]
+                            start=start_and_window[0]
+                            new_window=start_and_window[1]
+                            tmp_array=lst[start:start+new_window]
+                            #removing filtered out configs
+                            for conf in conf_array:
+                                if not conf in tmp_array:
+                                    print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
+                                    rm.remove_sample_for_conf(conf)
+                        except IndexError:
+                            last_experiment=True
+                        # there is no better experiment sample than the inputted previous result, therefore end this set of samples.
+                        if not rm.get_left_over_configs():
+                            last_experiment=True
+                    else:
+                        # there is no experiment sample left, therefore end this set of samples.
+                        last_experiment=True
+                    return last_experiment
 
+        def process_samples(rm,tenant_nb,ws):
+                        next_exp=rm.get_raw_experiments()
+                        results=[]
+                        nr_of_experiments=len(next_exp)
+                        print("Running " + str(nr_of_experiments) + " experiments")
+                        for i,ws in enumerate(next_exp):
+                            sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                            samples=int(ws[4]*sampling_ratio)
+                            if samples == 0:
+                                samples=1
+                            for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio):
+                                results.append(res)
+                        # if we evaluate a result for a conf that is not part of the configs selected by k8-resource-optimizer, than make sure this result is part of the results
+                        #if not (get_conf(adaptive_scaler.workers, tmp_result) in [get_conf(adaptive_scaler.workers, r) for r in results]):
+                            #results.append(tmp_result)i
+                        return results
 
 
         bin_path=initial_conf['bin']['path']
@@ -376,40 +425,21 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                                    remove_failed_confs(tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(tmp_adaptive_scaler2.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, higher_tenant_remove=True)
+                                    if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
+                                        remove_failed_confs(tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(tmp_adaptive_scaler2.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, higher_tenant_remove=True)
+                                        if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
+                                            last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
+                                            if not last_experiment:
+                                                d[sla['name']][str(i)]=tmp_rm.get_next_sample()
+                                            else:
+                                                ws=tmp_rm.get_current_experiment_specification()
+                                                results=process_samples(tmp_rm,i,ws)
+                                                result=find_optimal_result(tmp_adaptive_scaler2.workers,results,slo)
+                                                [sla['name']][str(i)]=result
                 elif intermediate_state == COST_EFFECTIVE_RESULT:
                     remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
-                conf_array=sort_configs(adaptive_scaler.workers, rm.get_left_over_configs())
-                if conf_array: # if still configs remain to be tested
-                    last_experiment=False
-                    #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
-                    print("Moving filtered samples in sorted combinations after the window")
-                    print([utils.array_to_str(el) for el in lst])
-                    if d[sla['name']]:
-                        previous_tenant_results=d[sla['name']]
-                    else:
-                        previous_tenant_results={}
-                    try:
-                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
-                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                        print([utils.array_to_str(el) for el in lst])
-                        next_conf=lst[start_and_window[0]]
-                        start=start_and_window[0]
-                        new_window=start_and_window[1]
-                        tmp_array=lst[start:start+new_window]
-                        #removing filtered out configs 
-                        for conf in conf_array:
-                            if not conf in tmp_array:
-                                print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
-                                rm.remove_sample_for_conf(conf)
-                    except IndexError:
-                        last_experiment=True
-                    # there is no better experiment sample than the inputted previous result, therefore end this set of samples.
-                    if not rm.get_left_over_configs():
-                        last_experiment=True
-                else:
-                    # there is no experiment sample left, therefore end this set of samples.
-                    last_experiment=True
+                # if still configs remain to be tested
+                last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
                 #let k8-resource-optimizer process the inputted previous result
                 ws=rm.get_current_experiment_specification()
                 i=rm.get_current_experiment_nb()
@@ -431,21 +461,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     tenant_nb+=1
                     break
                 else:
-                    # since no useful experiment samples are left, we let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo
-                    next_exp=rm.get_raw_experiments()
-                    results=[]
-                    nr_of_experiments=len(next_exp)
-                    print("Running " + str(nr_of_experiments) + " experiments")
-                    for i,ws in enumerate(next_exp):
-                        sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-                        samples=int(ws[4]*sampling_ratio)
-                        if samples == 0:
-                            samples=1
-                        for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio):
-                            results.append(res)
-                    # if we evaluate a result for a conf that is not part of the configs selected by k8-resource-optimizer, than make sure this result is part of the results
-                    #if not (get_conf(adaptive_scaler.workers, tmp_result) in [get_conf(adaptive_scaler.workers, r) for r in results]):
-                            #results.append(tmp_result)
+                    # since no useful experiment samples are left, we leti k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the sloi
+                    results=process_samples(rm,tenant_nb,ws)
             result=find_optimal_result(adaptive_scaler.workers,results,slo)
             if result:
                 print("RESULT FOUND")
