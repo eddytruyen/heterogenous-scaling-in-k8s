@@ -26,7 +26,7 @@ then
 	done
 elif [ $1 == "0100-v2" ]
 then
-	for i in `seq 13 14`
+	for i in `seq 13 15`
 	do
 		restart
                 bash -x ./test$i.sh

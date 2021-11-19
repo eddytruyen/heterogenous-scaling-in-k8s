@@ -1,3 +1,4 @@
+#SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: 
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1" | jq '.'
 sleep 3
 curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0" | jq '.'
