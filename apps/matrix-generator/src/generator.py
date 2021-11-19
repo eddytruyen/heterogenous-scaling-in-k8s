@@ -435,13 +435,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             if not last_experiment:
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             else:
-                                                print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 results=process_samples(tmp_rm,i,ws)
                                                 result=find_optimal_result(tmp_adaptive_scaler2.workers,results,slo,just_return_best=True)
                                                 if result:
                                                     d[sla['name']][str(i)]=result
                                                 else:
+                                                    import pdb; pdb.set_trace()
+                                                    print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[0],0,window,i, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window(), higher_tenants_only=True)
                                                     d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                                     update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,tmp_adaptive_scaler2,i,get_conf(adaptive_scaler.workers,d[sla['name']][str(i)]))
