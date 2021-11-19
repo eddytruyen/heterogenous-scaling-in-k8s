@@ -393,8 +393,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             print([utils.array_to_str(el) for el in lst])
             no_exps=False
-            if tenant_nb == 3 and '3' in d[sla['name']].keys and not d[sla['name']]['3']:
-                import pdb; pdb.set_trace()
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if not can_be_improved_by_larger_config(d[sla['name']], tenant_nb, slo, scaling_up_threshold):
                     no_exps=True
