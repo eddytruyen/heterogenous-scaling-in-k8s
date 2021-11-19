@@ -421,21 +421,27 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #remove_conf_for_higher_tenants
                         for i in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
                                 if str(i) in d[sla['name']].keys():
+                                    print("UPDATING RUNTIME MANAGER HIGHER NB OF TENANTS: " + str(i))
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
+                                        print("REMOVING CONFS FOR HIGHER NB OF TENANTS: " + str(i))
                                         remove_failed_confs(tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(tmp_adaptive_scaler2.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, higher_tenant_remove=True)
                                         if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
+                                            print("SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: " + str(i))
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
                                             if not last_experiment:
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             else:
+                                                print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 results=process_samples(tmp_rm,i,ws)
                                                 result=find_optimal_result(tmp_adaptive_scaler2.workers,results,slo)
                                                 d[sla['name']][str(i)]=result
+                                            print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
+                                            print(get_conf(adaptive_scaler.workers,d[sla['name']][str(i)]))
                 elif intermediate_state == COST_EFFECTIVE_RESULT:
                     remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
                 # if still configs remain to be tested
