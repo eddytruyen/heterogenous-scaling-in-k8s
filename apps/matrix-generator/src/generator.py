@@ -435,7 +435,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 results=process_samples(tmp_rm,i,ws)
                                                 result=find_optimal_result(tmp_adaptive_scaler2.workers,results,slo)
-                                                [sla['name']][str(i)]=result
+                                                d[sla['name']][str(i)]=result
                 elif intermediate_state == COST_EFFECTIVE_RESULT:
                     remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
                 # if still configs remain to be tested
