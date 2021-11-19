@@ -29,8 +29,8 @@ then
 	for i in `seq 13 15`
 	do
 		restart
+		sleep 10
                 bash -x ./test$i.sh
-		sleep 5
         done
 fi
 
