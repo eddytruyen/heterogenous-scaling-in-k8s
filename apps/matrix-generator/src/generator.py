@@ -12,7 +12,7 @@ import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -1075,17 +1075,18 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                 if int(t) > tenant_nb:
                         other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
                         other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True, log=False)
-                        if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
-                            return True
-                        elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
-                            return True
-                        elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
-                            return True
-                        elif not (other_as.ScalingDownPhase and other_as.StartScalingDown):
-                            return True
-                        elif not adaptive_scaler.equal_workers(other_as.workers):
-                                changed_scaler=False
-                                for i,w in enumerate(adaptive_scaler.workers):
+                        if not adaptive_scaler.equal_workers(other_as.workers):
+                            if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                                return True
+                            elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                                return True
+                            elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
+                                return True
+                            elif not (other_as.ScalingDownPhase and other_as.StartScalingDown):
+                                return True
+                            #elif not adaptive_scaler.equal_workers(other_as.workers):
+                            changed_scaler=False
+                            for i,w in enumerate(adaptive_scaler.workers):
                                                 changed=False
                                                 if involves_worker(adaptive_scaler.workers, result_conf,i) and not other_as.workers[i].equals(w):
                                                         changed=True
@@ -1116,8 +1117,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                 return True
             else:
                 return False
-
-
         print("Starting at index " + str(start) + " with window " + str(window))
         i=start_tenant
         new_window=window
