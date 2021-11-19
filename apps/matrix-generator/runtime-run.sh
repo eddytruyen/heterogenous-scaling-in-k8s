@@ -30,6 +30,7 @@ then
 	do
 		restart
                 bash -x ./test$i.sh
+		sleep 5
         done
 fi
 
