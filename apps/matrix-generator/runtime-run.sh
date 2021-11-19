@@ -24,7 +24,15 @@ then
 		restart
 		bash -x ./test$i.sh
 	done
+elif [ $1 == "0100-v2" ]
+then
+	for i in `seq 13 14`
+	do
+		restart
+                bash -x ./test$i.sh
+        done
 fi
+
 
 
 
