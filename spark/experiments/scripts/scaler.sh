@@ -50,7 +50,7 @@ do
   kubectl exec -it -n $namespace $client -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace silver-spark $workload $tenantGroup
   t2=`date +%s`
   period=$(($t2 - $t1))
-  ./parse-results.sh /mnt/nfs-disk-2/sparkbench/ $workload $tenantGroup results-tenants-$i/ $i 
+  ./parse-results.sh /mnt/nfs-disk-2/spark-bench/ $workload $tenantGroup results-tenants-$i/ $i 
   success=`cat success`
   if [ $success != "true" ]
   then
