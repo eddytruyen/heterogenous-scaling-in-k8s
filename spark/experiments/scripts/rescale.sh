@@ -97,7 +97,7 @@ for i in `seq $alphabetLength`
 	done
 
 echo "New memory size: " $memory_size
-if [ $memory_size -neq 0 ] && [ ${memory_size}Gi != $old_memory_size_client ]
+if [ $memory_size -ne 0 ] && [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
 	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml
