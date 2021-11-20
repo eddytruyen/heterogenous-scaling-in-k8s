@@ -168,12 +168,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
-                                                    if do_remove:
-                                                            remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, [], scaling_up_threshold, sampling_ratio)
                                                     if not adaptive_scaler.tipped_over_confs:
+                                                            remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
                                                             adaptive_scaler.reset()
                                                             rm.reset()
                                                             #window=adaptive_window.get_current_window()
+                                                    elif do_remove:
+                                                        remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, [], scaling_up_threshold, sampling_ratio)
                                                     if  opt_conf and previous_conf != opt_conf:
                                                             adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
                                                     if not only_failed_results:
