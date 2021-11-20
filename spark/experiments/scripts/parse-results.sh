@@ -5,7 +5,7 @@ tenantgroup=$3
 outputdir=$4
 nrOfTenants=$5
 echo "wait till distributed file system is synchronised"
-sleep 60
+sleep 3
 if [ ! -d $outputDir ]
 then
         mkdir $outputDir
