@@ -1,15 +1,22 @@
 #!/bin/bash
 
 nrofTenants=$1
-startingTenantId=${2:-1}
-executorMemory=${3:-0}
-namespace=${4:-silver}
-workload=${5:-sql}
+new_csv_file=${2:-0}
+startingTenantId=${3:-1}
+executorMemory=${4:-0}
+namespace=${5:-silver}
+workload=${6:-sql}
+new_csv_file=${6:-0}
+csv_output=csv_output_file.csv
 lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
 tenantGroup=2
 clientmode=`grep '\/\/deploy' $workload/header | wc -l` 
 #kubectl create -f spark-client/ -n $namespace
 #kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s
+if [ $new_csv_file -eq 1 ]
+then
+	echo "workload,namespace,nb_of_tenants,config,resource_size,completion_time" > $csv_output
+fi
 for i in `seq $startingTenantId $lastTenantId`
 do
   #nrOfPartitions=$(($i * 2))
@@ -20,7 +27,7 @@ do
          ./rescale.sh $namespace $i
      else
 	 previous_conf=`cat new_previous_conf`
-	 ./rescale.sh $namespace $i $period $((i-1)) $previous_conf
+	 ./rescale.sh $namespace $i $period $((i-1)) $previous_conf $workload $csv_output
   fi
   #if [ $clientmode -eq 0 ]
   #then`

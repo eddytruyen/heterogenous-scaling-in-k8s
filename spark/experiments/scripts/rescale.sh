@@ -4,9 +4,10 @@ nb_of_tenants=$2
 completion_time=${3:-0}
 previous_tenant_nb=${4:-0}
 previous_conf=${5:-"no"}
+workload=${6:-sql}
+csv_output=${7:-csv_output_file.csv}
 fileName=values.json
 resourcePlannerURL=http://172.17.13.119:80
-
 alphabetLength=$((4))
 
 function str_to_int {
@@ -35,6 +36,7 @@ echo Old memory size spark_client: $old_memory_size_client
 memory_size=0
 old_conf=""
 new_conf=""
+old_resource_size=""
 for i in `seq $alphabetLength`
 	do
 		kubectl get statefulset $namespace-spark-worker$i -n $namespace -o yaml > old_ss$i.yaml
@@ -52,6 +54,7 @@ for i in `seq $alphabetLength`
 		old_cpu_size=$((value))
 		#get cpu size 
 		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		old_resource_size=${old_resource_size}c${old_cpu_size}m${ old_memory_size}_
 		#get memory of ss 	
                 keyName=worker$i.replicaCount
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
@@ -95,6 +98,10 @@ for i in `seq $alphabetLength`
 			fi
         	fi        
 	done
+if [ $start -ne 1 ]
+then
+	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size::-1},${completion_time} >>  $csv_output${old_resource_size::-1}
+fi
 
 echo "New memory size: " $memory_size
 if [ $memory_size -ne 0 ] && [ ${memory_size}Gi != $old_memory_size_client ]
