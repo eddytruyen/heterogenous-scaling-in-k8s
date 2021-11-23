@@ -164,7 +164,7 @@ def generate_matrix(initial_conf):
 	exp_path=initial_conf['output']
 	util_func=initial_conf['utilFunc']
 	slas=initial_conf['slas']
-	previous_results=initial_conf['previous_results']
+	previous_results=initial_conf['previous_results'] if 'previous_results' in initial_conf.keys() else None
 	maximum_transition_cost=initial_conf['maximum_transition_cost']
 	minimum_shared_replicas=initial_conf['minimum_shared_replicas']
 	sampling_ratio=initial_conf['sampling_ratio']
