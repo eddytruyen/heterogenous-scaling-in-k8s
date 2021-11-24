@@ -818,7 +818,7 @@ def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,r
        flag_all_workers_for_tenants_up_to_nb_tenants(results, tenant_nb, adaptive_scaler, slo, include_current_tenant_nb)
        if log:
                 print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
-                adaptive_scaler.status()
+                #adaptive_scaler.status()
        return adaptive_scaler
 
 def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf, start_fresh=False):
