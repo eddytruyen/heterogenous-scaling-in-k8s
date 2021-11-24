@@ -27,7 +27,7 @@ def create_workers(elements, costs, base):
 def print_results(adaptive_scaler,results):
     print("SAMPLE_LIST")
     for r in results:
-        print(utils.array_to_delimited_str("[" + get_conf(adaptive_scaler.workers, r), ", ") + "] -> " + str(r["CompletionTime"]))
+        print("[" + utils.array_to_delimited_str(get_conf(adaptive_scaler.workers, r), ", ") + "] -> " + str(r["CompletionTime"]))
 
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
