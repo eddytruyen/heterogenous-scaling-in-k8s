@@ -30,7 +30,7 @@ sed -i 's/}//g' $fileName
 cat $fileName
 #cpu_size=0
 kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
-old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"')
+old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"' | sed 's/ *$//g')
 echo 
 echo Old memory size spark_client: $old_memory_size_client
 memory_size=0
@@ -53,7 +53,7 @@ for i in `seq $alphabetLength`
 		value=$(grep 'cpu: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
 		old_cpu_size=$((value))
 		#get cpu size 
-		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
+		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"' | sed 's/ *$//g')
 		old_resource_size=${old_resource_size}c${old_cpu_size}m${old_memory_size}_
 		#get memory of ss 	
                 keyName=worker$i.replicaCount
