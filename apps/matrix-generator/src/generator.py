@@ -27,7 +27,7 @@ def create_workers(elements, costs, base):
 def print_results(adaptive_scaler,results):
     print("SAMPLE_LIST")
     for r in results:
-        print(utils.array_to_delimited_str(get_conf(adaptive_scaler.workers, r), ", ") + " -> " + str(r["CompletionTime"]))
+        print(utils.array_to_delimited_str("[" + get_conf(adaptive_scaler.workers, r), ", ") + "] -> " + str(r["CompletionTime"]))
 
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
@@ -359,6 +359,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         # if we evaluate a result for a conf that is not part of the configs selected by k8-resource-optimizer, than make sure this result is part of the results
                         #if not (get_conf(adaptive_scaler.workers, tmp_result) in [get_conf(adaptive_scaler.workers, r) for r in results]):
                             #results.append(tmp_result)i
+                        print_results(adaptive_scaler, results)
                         return results
 
 
@@ -472,6 +473,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 previous_result=float(completion_time)
                 previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
                 sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, previous_result=previous_result, previous_replicas=previous_replicas)
+                print_results(adaptive_scaler, sample_list)
                 if SORT_SAMPLES:
                     sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                 if not last_experiment:
