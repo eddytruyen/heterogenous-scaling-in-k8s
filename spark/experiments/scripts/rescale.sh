@@ -100,7 +100,8 @@ for i in `seq $alphabetLength`
 	done
 if [ $start -ne 1 ]
 then
-	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size::-1},${completion_time} >>  $csv_output${old_resource_size::-1}
+	old_resource_size=${old_resource_size::-1}
+	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output${old_resource_size::-1}
 fi
 
 echo "New memory size: " $memory_size
