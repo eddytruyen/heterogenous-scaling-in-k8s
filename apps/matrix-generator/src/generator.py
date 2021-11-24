@@ -24,6 +24,11 @@ def create_workers(elements, costs, base):
     return workers
 
 
+def print_results(adaptive_scaler,results):
+    print("SAMPLE_LIST")
+    for r in results:
+        print(utils.array_to_delimited_str(get_conf(adaptive_scaler.workers, r), ", ") + " -> " + str(r["CompletionTime"]))
+
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
@@ -44,6 +49,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 if SORT_SAMPLES:
                                     sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                                 rm.set_experiment_list(i,ws,sample_list)#sort_results(adaptive_scaler.workers,slo,sample_list))
+                                print_results(adaptive_scaler,sample_list)
         
         def check_and_get_next_exps(adaptive_scaler, rm, lst,previous_conf, start_index, window, tenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=True, retry=False, retry_window=None, higher_tenants_only=False):
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and (rm.no_experiments_left() and not rm.last_experiment_in_queue()):
@@ -398,7 +404,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             no_exps=False
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if not can_be_improved_by_larger_config(d[sla['name']], tenant_nb, slo, scaling_up_threshold):
-                    print("A cost-effective result has been found for " + str(tenant_nb) + " tenants")
                     no_exps=True
             tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
             next_conf=get_conf(adaptive_scaler.workers, tmp_result)
