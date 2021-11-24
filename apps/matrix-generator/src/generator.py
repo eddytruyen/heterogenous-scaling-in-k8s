@@ -626,9 +626,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             else:
                 adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            if not found_conf in lst:
-                lst.append(found_conf)
-                lst=sort_configs(adaptive_scaler.workers, lst)
+            #if not found_conf in lst:
+            #    lst.append(found_conf)
+            #    lst=sort_configs(adaptive_scaler.workers, lst)
             start=lst.index(found_conf)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
@@ -675,25 +675,25 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #However this config should not be stored in the matrix because we need to remember the current found optimimum
         #therefore we store it in a different yaml file
         #Note: transition cost only applies when scaling up to a higher number of tenants.
-        if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) >= int(previous_tenants): #and not adaptive_scaler.hasScaled():
-            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo, include_current_tenant_nb= int(tenants) == int(previous_tenants))
-            print("Moving filtered samples in sorted combinations after the window")
-            rm=get_rm_for_closest_tenant_nb(int(tenants))
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            print([utils.array_to_str(el) for el in lst])
-            next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])
-            try:
-                start_and_window=filter_samples_previous_tenant_conf(lst,adaptive_scaler,previous_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, minimum_shared_replicas, maximum_transition_cost)
-                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                print([utils.array_to_str(el) for el in lst])
-                next_conf=lst[start_and_window[0]]
-            except IndexError:
-                print("No result that meets the transition costs and shared replicas constraints, returning to stored result")
-            if currentResult and next_conf != get_conf(adaptive_scaler.workers, currentResult):
-                current_conf=get_conf(adaptive_scaler.workers, currentResult)
-                adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),current_conf,slo,include_current_tenant_nb= int(tenants) == int(previous_tenants))
-                d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
-        print("Saving filtered results into matrix")
+        #if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) >= int(previous_tenants): #and not adaptive_scaler.hasScaled():
+        #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo, include_current_tenant_nb= int(tenants) == int(previous_tenants))
+        #    print("Moving filtered samples in sorted combinations after the window")
+        #    rm=get_rm_for_closest_tenant_nb(int(tenants))
+        #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        #    print([utils.array_to_str(el) for el in lst])
+        #    next_conf=get_conf(adaptive_scaler.workers,d[sla['name']][tenants])
+        #    try:
+        #        start_and_window=filter_samples_previous_tenant_conf(lst,adaptive_scaler,previous_conf, int(tenants) > int(previous_tenants), lst.index(next_conf), window, minimum_shared_replicas, maximum_transition_cost)
+        #        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+        #        print([utils.array_to_str(el) for el in lst])
+        #        next_conf=lst[start_and_window[0]]
+        #    except IndexError:
+        #        print("No result that meets the transition costs and shared replicas constraints, returning to stored result")
+        #    if currentResult and next_conf != get_conf(adaptive_scaler.workers, currentResult):
+        #        current_conf=get_conf(adaptive_scaler.workers, currentResult)
+        #        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),current_conf,slo,include_current_tenant_nb= int(tenants) == int(previous_tenants))
+        #        d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
+        #print("Saving filtered results into matrix")
         utils.saveToYaml(d,'Results/result-matrix.yaml')
 
 
