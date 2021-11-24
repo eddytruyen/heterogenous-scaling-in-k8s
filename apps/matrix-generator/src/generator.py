@@ -446,10 +446,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             else:
                                                 ws=tmp_rm.get_current_experiment_specification()
-                                                results=process_samples(tmp_rm,i,ws)
-                                                result=find_optimal_result(tmp_adaptive_scaler2.workers,results,slo,just_return_best=True)
-                                                if result:
-                                                    d[sla['name']][str(i)]=result
+                                                results_tmp1=process_samples(tmp_rm,i,ws)
+                                                result_tmp1=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo,just_return_best=True)
+                                                if result_tmp1:
+                                                    print("NO SAMPLES LEFT, BUT THERE IS A SAMPLE THAT HAS BEEN EVALUATED")
+                                                    d[sla['name']][str(i)]=result_tmp1
                                                 else:
                                                     print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     tmp_rm.reset()
