@@ -438,7 +438,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
                                         print("REMOVING CONFS FOR NB OF TENANTS: " + str(i))
-                                        remove_failed_confs(tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(tmp_adaptive_scaler2.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, higher_tenant_remove=True)
+                                        remove_failed_confs(tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(tmp_adaptive_scaler2.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True)# higher_tenant_remove=True)
                                         if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
                                             print("SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: " + str(i))
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
