@@ -6,7 +6,6 @@ startingTenantId=${3:-1}
 executorMemory=${4:-0}
 namespace=${5:-silver}
 workload=${6:-sql}
-new_csv_file=${6:-0}
 csv_output=csv_output_file.csv
 lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
 tenantGroup=2
