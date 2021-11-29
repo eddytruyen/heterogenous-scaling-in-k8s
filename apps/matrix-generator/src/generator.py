@@ -81,7 +81,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=start_index
                 get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
 
-        def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb):
+        def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf):
             
             def get_start_and_window_for_next_experiments(opt_conf=None):
 
@@ -90,14 +90,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     def process_states(conf_and_states,original_adaptive_scaler=None):
                                         nonlocal result
                                         nonlocal slo
-                                        nonlocal tenant_nb
+                                        #nonlocal tenant_nb
                                         nonlocal lst
                                         nonlocal adaptive_scaler
-                                        nonlocal nr_of_experiments
                                         nonlocal startTenants
-                                        nonlocal tenants
-                                        nonlocal previous_tenants
-                                        nonlocal previous_conf
+                                        #nonlocal previous_tenants
+                                        #nonlocal previous_conf
                                         nonlocal maxTenants
                                         nonlocal opt_conf
                                         nonlocal start
@@ -582,10 +580,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         tmp_lst.append(get_conf(adaptive_scaler.workers, result_tmp1))
                                                         tmp_rm.sorted_combinations=sort_configs(adaptive_scaler.workers, tmp_lst)                                                       
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
-                                                    start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
+                                                    result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp2))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
                                                     result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
-                                                    process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
+                                                    process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) )
                                                 else:
                                                     print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     tmp_rm.reset()
@@ -624,7 +623,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb,ws)
             result=find_optimal_result(adaptive_scaler.workers,results,slo)
-            process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb)
+            process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
         predictedConf=[]
         evaluate_current=False
