@@ -579,7 +579,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if not result_tmp1 in tmp_lst:
                                                         tmp_lst.append(get_conf(adaptive_scaler.workers, result_tmp1))
                                                         tmp_rm.sorted_combinations=sort_configs(adaptive_scaler.workers, tmp_lst)                                                       
-                                                    print("NO SAMPLES LEFT, BUT THERE IS A SAMPLE THAT HAS BEEN EVALUATED")
+                                                    print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
                                                     process_results(results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
