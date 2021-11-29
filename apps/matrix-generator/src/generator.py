@@ -620,7 +620,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb,ws)
-            process_result(results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb)
+            process_results(results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb)
             tenant_nb+=1
         predictedConf=[]
         evaluate_current=False
