@@ -362,7 +362,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         print_results(adaptive_scaler, results)
                         return results
         
-        def process_result(result, rm, adaptive_scaler, lst, tenant_nb):
+        def process_result(result, rm, adaptive_scaler, lst, start, window, tenant_nb):
             if result:
                 print("RESULT FOUND")
                 metric=float(result['CompletionTime'])
@@ -618,7 +618,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb,ws)
             result=find_optimal_result(adaptive_scaler.workers,results,slo)
-            process_result(result, rm, adaptive_scaler, lst, tenant_nb)
+            process_result(result, rm, adaptive_scaler, lst, start, window, tenant_nb)
             tenant_nb+=1
         predictedConf=[]
         evaluate_current=False
