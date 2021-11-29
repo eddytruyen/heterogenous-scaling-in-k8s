@@ -582,7 +582,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
-                                                    process_results(results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
+                                                    result=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    process_results(result,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
                                                 else:
                                                     print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     tmp_rm.reset()
@@ -620,7 +621,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb,ws)
-            process_results(results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb)
+            result=find_optimal_result(adaptive_scaler.workers,results,slo)
+            process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb)
             tenant_nb+=1
         predictedConf=[]
         evaluate_current=False
