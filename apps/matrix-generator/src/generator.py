@@ -82,7 +82,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
 
         def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf):
-            
+            nonlocal window           
             def get_start_and_window_for_next_experiments(opt_conf=None):
 
                                     only_failed_results=False if result else True
