@@ -1,9 +1,9 @@
-Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
+Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  23375      0 --:--:-- --:--:-- --:--:-- 24391
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  22440      0 --:--:-- --:--:-- --:--:-- 23375
 {
   "CompletionTime": "120",
   "SLAName": "silver",
@@ -29,7 +29,7 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    327      0  0:00:01  0:00:01 --:--:--   327
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    361      0  0:00:01  0:00:01 --:--:--   361
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -51,11 +51,11 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    439      0  0:00:01  0:00:01 --:--:--   439
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    502      0  0:00:01  0:00:01 --:--:--   502
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -81,7 +81,7 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1230      0 --:--:-- --:--:-- --:--:--  1233
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1105      0 --:--:-- --:--:-- --:--:--  1105
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -107,7 +107,527 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    481      0  0:00:01  0:00:01 --:--:--   481
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    501      0  0:00:01  0:00:01 --:--:--   501
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.22666666666666666",
+  "config": "0",
+  "score": "-0.22666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11411      0 --:--:-- --:--:-- --:--:-- 11640
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.18666666666666668",
+  "config": "3",
+  "score": "-0.24",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "2",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
+Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  23375      0 --:--:-- --:--:-- --:--:-- 23375
+{
+  "CompletionTime": "120",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    341      0  0:00:01  0:00:01 --:--:--   340
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "0",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    495      0  0:00:01  0:00:01 --:--:--   496
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.2",
+  "config": "0",
+  "score": "-0.2",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    460      0  0:00:01  0:00:01 --:--:--   460
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.22666666666666666",
+  "config": "0",
+  "score": "-0.22666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    738      0 --:--:-- --:--:-- --:--:--   738
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.25333333333333335",
+  "config": "0",
+  "score": "-0.25333333333333335",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_1_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1143      0 --:--:-- --:--:-- --:--:--  1140
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.24",
+  "config": "1",
+  "score": "-0.24",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "2",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_0_2_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1369      0 --:--:-- --:--:-- --:--:--  1369
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.24",
+  "config": "2",
+  "score": "-0.24",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_1_0_3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1393      0 --:--:-- --:--:-- --:--:--  1393
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.24",
+  "config": "0",
+  "score": "-0.24",
+  "worker1.replicaCount": "1",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=120&previoustenants=3&previousconf=1_0_0_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    488      0  0:00:01  0:00:01 --:--:--   488
+{
+  "CompletionTime": 1000149,
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  12183      0 --:--:-- --:--:-- --:--:-- 12183
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.22666666666666666",
+  "config": "0",
+  "score": "-0.22666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1294      0 --:--:-- --:--:-- --:--:--  1294
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.24",
+  "config": "1",
+  "score": "-0.24",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_0_3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    413      0  0:00:01  0:00:01 --:--:--   413
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.25",
+  "config": "0",
+  "score": "-0.25",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   595  100   595    0     0    275      0  0:00:02  0:00:02 --:--:--   275
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.2638888888888889",
+  "config": "0",
+  "score": "-0.2638888888888889",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "2",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0  12282      0 --:--:-- --:--:-- --:--:-- 12282
+{
+  "CompletionTime": 1000149,
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
+Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  20035      0 --:--:-- --:--:-- --:--:-- 20035
+{
+  "CompletionTime": "120",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    386      0  0:00:01  0:00:01 --:--:--   386
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "0",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    588      0 --:--:-- --:--:-- --:--:--   587
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.2",
+  "config": "0",
+  "score": "-0.2",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1032      0 --:--:-- --:--:-- --:--:--  1031
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.2",
+  "config": "0",
+  "score": "-0.2",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    583      0  0:00:01  0:00:01 --:--:--   583
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -154,19 +674,19 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_3'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  24391      0 --:--:-- --:--:-- --:--:-- 25500
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1315      0 --:--:-- --:--:-- --:--:--  1315
 {
-  "CompletionTime": "120",
+  "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "n/a",
-  "config": "0",
-  "score": "n/a",
+  "best_score": "-0.24",
+  "config": "1",
+  "score": "-0.24",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -176,94 +696,16 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "0",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    309      0  0:00:01  0:00:01 --:--:--   309
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.17333333333333334",
-  "config": "0",
-  "score": "-0.17333333333333334",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    464      0  0:00:01  0:00:01 --:--:--   465
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.2",
-  "config": "0",
-  "score": "-0.2",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "1",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    489      0  0:00:01  0:00:01 --:--:--   489
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.22666666666666666",
-  "config": "0",
-  "score": "-0.22666666666666666",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
   "worker4.replicaCount": "3",
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_0_3'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    663      0 --:--:-- --:--:-- --:--:--   662
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    391      0  0:00:01  0:00:01 --:--:--   391
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -285,17 +727,17 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_1_1_2'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1164      0 --:--:-- --:--:-- --:--:--  1161
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  14923      0 --:--:-- --:--:-- --:--:-- 14923
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.24",
-  "config": "1",
+  "best_score": "-0.18666666666666668",
+  "config": "3",
   "score": "-0.24",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
@@ -311,18 +753,70 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_0_2_2'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_2'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1050      0 --:--:-- --:--:-- --:--:--  1050
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    221      0  0:00:02  0:00:02 --:--:--   221
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.24",
-  "config": "2",
-  "score": "-0.24",
+  "best_score": "-0.26666666666666666",
+  "config": "0",
+  "score": "-0.26666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  12702      0 --:--:-- --:--:-- --:--:-- 12978
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.26666666666666666",
+  "config": "0",
+  "score": "-0.26666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
+Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    919      0 --:--:-- --:--:-- --:--:--   918
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.13333333333333333",
+  "config": "0",
+  "score": "-0.13333333333333333",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -332,205 +826,361 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "3",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_0_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    475      0  0:00:01  0:00:01 --:--:--   475
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.18666666666666668",
+  "config": "0",
+  "score": "-0.18666666666666668",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_0_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    528      0  0:00:01  0:00:01 --:--:--   529
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.2",
+  "config": "0",
+  "score": "-0.2",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
 + jq .
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_1_0_3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_1_1'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1435      0 --:--:-- --:--:-- --:--:--  1435
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    540      0  0:00:01  0:00:01 --:--:--   540
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.24",
+  "best_score": "-0.21333333333333335",
   "config": "0",
-  "score": "-0.24",
+  "score": "-0.21333333333333335",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_0_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1243      0 --:--:-- --:--:-- --:--:--  1241
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.22666666666666666",
+  "config": "1",
+  "score": "-0.22666666666666666",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_1_0'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    701      0 --:--:-- --:--:-- --:--:--   701
+{
+  "CompletionTime": 1000149,
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=140&previoustenants=5&previousconf=0_2_0_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  11000      0 --:--:-- --:--:-- --:--:-- 11000
+{
+  "CompletionTime": "140",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "n/a",
+  "config": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "1",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=140&previoustenants=5&previousconf=0_2_0_1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1172      0 --:--:-- --:--:-- --:--:--  1172
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.23076923076923078",
+  "config": "0",
+  "score": "-0.23076923076923078",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "3",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=160&previoustenants=5&previousconf=0_3_0_0'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1191      0 --:--:-- --:--:-- --:--:--  1189
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.23076923076923078",
+  "config": "0",
+  "score": "-0.23076923076923078",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "3",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=7&previousconf=0_3_0_0'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    513      0  0:00:01  0:00:01 --:--:--   513
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.28205128205128205",
+  "config": "0",
+  "score": "-0.28205128205128205",
   "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
+  "worker2.replicaCount": "2",
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=120&previoustenants=3&previousconf=1_0_0_2'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=120&previoustenants=7&previousconf=1_2_0_0'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    438      0  0:00:01  0:00:01 --:--:--   438
-{
-  "CompletionTime": 1000149,
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "n/a",
-  "config": "0",
-  "score": "n/a",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "3",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  10473      0 --:--:-- --:--:-- --:--:-- 10660
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1310      0 --:--:-- --:--:-- --:--:--  1313
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.22666666666666666",
-  "config": "0",
-  "score": "-0.22666666666666666",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "3",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "3",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ jq .
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_3'
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1143      0 --:--:-- --:--:-- --:--:--  1143
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.24",
+  "best_score": "-0.2692307692307692",
   "config": "1",
-  "score": "-0.24",
-  "worker1.replicaCount": "0",
+  "score": "-0.2692307692307692",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "1",
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13266      0 --:--:-- --:--:-- --:--:-- 13266
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.28205128205128205",
+  "config": "0",
+  "score": "-0.28205128205128205",
+  "worker1.replicaCount": "1",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "3",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_0_3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=140&previoustenants=5&previousconf=1_2_0_0'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    351      0  0:00:01  0:00:01 --:--:--   351
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0    681      0 --:--:-- --:--:-- --:--:--   680
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.25",
-  "config": "0",
-  "score": "-0.25",
-  "worker1.replicaCount": "0",
+  "best_score": "-0.2692307692307692",
+  "config": "1",
+  "score": "-0.2692307692307692",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "3",
+  "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
   "worker3.replicaCount": "1",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_2'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   595  100   595    0     0    266      0  0:00:02  0:00:02 --:--:--   266
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  16081      0 --:--:-- --:--:-- --:--:-- 16081
+{
+  "CompletionTime": "140",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.28205128205128205",
+  "config": "0",
+  "score": "-0.28205128205128205",
+  "worker1.replicaCount": "1",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "2",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=4'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1248      0 --:--:-- --:--:-- --:--:--  1246
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.2638888888888889",
+  "best_score": "-0.07692307692307693",
   "config": "0",
-  "score": "-0.2638888888888889",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "3",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "2",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "1",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0  12021      0 --:--:-- --:--:-- --:--:-- 12021
-{
-  "CompletionTime": 1000149,
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "n/a",
-  "config": "0",
-  "score": "n/a",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "3",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  15583      0 --:--:-- --:--:-- --:--:-- 16028
-{
-  "CompletionTime": "120",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "n/a",
-  "config": "0",
-  "score": "n/a",
+  "score": "-0.07692307692307693",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -541,179 +1191,49 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
   "worker4.replicaCount": "0",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=1_1_1_0'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    315      0  0:00:01  0:00:01 --:--:--   315
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1204      0 --:--:-- --:--:-- --:--:--  1204
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.17333333333333334",
+  "best_score": "-0.2692307692307692",
   "config": "0",
-  "score": "-0.17333333333333334",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    476      0  0:00:01  0:00:01 --:--:--   476
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.2",
-  "config": "0",
-  "score": "-0.2",
-  "worker1.replicaCount": "0",
+  "score": "-0.2692307692307692",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "1",
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
+  "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
   "worker4.replicaCount": "1",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
 + jq .
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    964      0 --:--:-- --:--:-- --:--:--   962
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   9754      0 --:--:-- --:--:-- --:--:--  9916
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.2",
-  "config": "0",
-  "score": "-0.2",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "1",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    451      0  0:00:01  0:00:01 --:--:--   451
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.22666666666666666",
-  "config": "0",
-  "score": "-0.22666666666666666",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "3",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11411      0 --:--:-- --:--:-- --:--:-- 11411
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.18666666666666668",
-  "config": "3",
-  "score": "-0.24",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "2",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_3'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1277      0 --:--:-- --:--:-- --:--:--  1277
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.24",
+  "best_score": "-0.2692307692307692",
   "config": "1",
-  "score": "-0.24",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "0",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "3",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_0_3'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    374      0  0:00:01  0:00:01 --:--:--   375
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.25333333333333335",
-  "config": "0",
-  "score": "-0.25333333333333335",
-  "worker1.replicaCount": "0",
+  "score": "-0.2692307692307692",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "1",
@@ -722,50 +1242,24 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.replicaCount": "1",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=1_1_0_1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  10777      0 --:--:-- --:--:-- --:--:-- 10777
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    463      0  0:00:01  0:00:01 --:--:--   462
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.18666666666666668",
-  "config": "3",
-  "score": "-0.24",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "0",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "2",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_2'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    208      0  0:00:02  0:00:02 --:--:--   208
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.26666666666666666",
+  "best_score": "-0.28205128205128205",
   "config": "0",
-  "score": "-0.26666666666666666",
-  "worker1.replicaCount": "0",
+  "score": "-0.28205128205128205",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "2",
@@ -774,24 +1268,24 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=190&previoustenants=5&previousconf=1_2_0_0'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   7960      0 --:--:-- --:--:-- --:--:--  7960
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   561  100   561    0     0    317      0  0:00:01  0:00:01 --:--:--   317
 {
-  "CompletionTime": "1e-09",
+  "CompletionTime": "120",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.26666666666666666",
+  "best_score": "n/a",
   "config": "0",
-  "score": "-0.26666666666666666",
-  "worker1.replicaCount": "0",
+  "score": "n/a",
+  "worker1.replicaCount": "1",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "2",
@@ -800,7 +1294,7 @@ Saved working directory and index state WIP on at-runtime-v2: aa66cd6 update
   "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "3",
   "worker4.resources.requests.memory": "2"
 }
