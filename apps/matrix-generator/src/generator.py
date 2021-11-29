@@ -360,6 +360,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         print("Moving filtered samples in sorted combinations after the window")
                         print([utils.array_to_str(el) for el in lst])
                         try:
+                            print(start)
+                            print(window)
                             start_and_window=filter_samples(adaptive_scalers,lst, adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                             print([utils.array_to_str(el) for el in lst])
