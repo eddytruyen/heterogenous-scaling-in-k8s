@@ -362,8 +362,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         print_results(adaptive_scaler, results)
                         return results
         
-        def process_results(results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb):
-            result=find_optimal_result(adaptive_scaler.workers,results,slo)
+        def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb):
             if result:
                 print("RESULT FOUND")
                 metric=float(result['CompletionTime'])
@@ -582,8 +581,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
-                                                    result=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
-                                                    process_results(result,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
+                                                    result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i)
                                                 else:
                                                     print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     tmp_rm.reset()
