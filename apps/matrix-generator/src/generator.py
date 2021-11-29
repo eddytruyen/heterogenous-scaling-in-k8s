@@ -660,7 +660,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     else:
                         d[sla['name']][str(startTenants)]=rm.get_next_sample()
         else:
-            # using curve-fitted scaling function to estimate configuration for tenants
+            print("using curve-fitted scaling function to estimate configuration for tenants " + startTenants)
             adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
             predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window,window_offset_for_scaling_function)
