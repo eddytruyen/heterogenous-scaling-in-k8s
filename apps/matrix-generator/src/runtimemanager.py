@@ -72,15 +72,19 @@ class RuntimeManager:
         for exp_nb in self.experiments.keys():
             if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 found=True
+                already_next_current_experiment=False
                 sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
                 experiment_spec=self.experiments[exp_nb][0]
                 experiment_nb=exp_nb
                 next_exp=self.experiments[exp_nb][1][sample_nb]
                 if exp_nb == self.get_current_experiment_nb():
-                    if self.get_nb_of_sample_for_conf(exp_nb,conf) < self.get_current_sample_nb():
+                    if sample_nb < self.get_current_sample_nb():
                         self.previous_current_experiment()
+                    elif sample_nb == self.get_total_nb_of_samples(exp_nb)-1:
+                        self.next_current_experiment()
+                        already_next_current_experiment=True
                 (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
-                if self.get_total_nb_of_samples(exp_nb) == 0:
+                if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
                     self.next_current_experiment()
         if found and self.no_experiments_left() and not self.last_experiment:
             if self.previous_returned_experiment:
