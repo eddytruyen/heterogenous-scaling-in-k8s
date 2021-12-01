@@ -74,7 +74,8 @@ class RuntimeManager:
             if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 found=True
                 print("Runtime manager:: Sample list before remove:")
-                print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb][1]])
+                for exp_nb_tmp in self.experiments.keys():
+                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
                 already_next_current_experiment=False
                 sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
                 experiment_spec=self.experiments[exp_nb][0]
@@ -90,12 +91,16 @@ class RuntimeManager:
                 print("Runtime manager:: Sample list after remove:")
                 if not self.no_experiments_left():
                     (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
-                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb][1]])
+                    for exp_nb_tmp in self.experiments.keys():
+                        print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
                 else:
                     print([])
-                if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
-                    print("Runtime manager:: Going to next experiment")
-                    self.next_current_experiment()
+                if (exp_nb == self.get_current_experiment_nb()):
+                    if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
+                        print("Runtime manager:: Going to next experiment")
+                        self.next_current_experiment()
+                #elif (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
+                    #remove exp_nb from self.experiments? NO
         if found and self.no_experiments_left() and not self.last_experiment:
             print("Runtime manager:: No experiments left.")
             if self.previous_returned_experiment:
