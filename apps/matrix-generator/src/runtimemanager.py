@@ -68,10 +68,13 @@ class RuntimeManager:
         return False
 
     def remove_sample_for_conf(self,conf):
+        print("Runtime manager:: Removing sample for the following conf: [" + utils.array_to_delimited_str(conf, ",") + "]")  
         found=False
         for exp_nb in self.experiments.keys():
             if exp_nb in self.experiments.keys() and self.conf_in_samples(conf,self.experiments[exp_nb][1]):
                 found=True
+                print("Runtime manager:: Sample list before remove:")
+                print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb][1]])
                 already_next_current_experiment=False
                 sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
                 experiment_spec=self.experiments[exp_nb][0]
@@ -81,16 +84,26 @@ class RuntimeManager:
                     if sample_nb < self.get_current_sample_nb():
                         self.previous_current_experiment()
                     elif sample_nb == self.get_total_nb_of_samples(exp_nb)-1:
+                        print("Runtime manager:: Going to next experiment")
                         self.next_current_experiment()
                         already_next_current_experiment=True
-                (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
+                print("Runtime manager:: Sample list after remove:")
+                if not self.no_experiments_left():
+                    (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
+                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb][1]])
+                else:
+                    print([])
                 if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
+                    print("Runtime manager:: Going to next experiment")
                     self.next_current_experiment()
         if found and self.no_experiments_left() and not self.last_experiment:
+            print("Runtime manager:: No experiments left.")
             if self.previous_returned_experiment:
                 self.last_experiment=self.previous_returned_experiment
             else:
                 self.last_experiment={"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
+            print("Runtime manager:: last_executed_experiment:")
+            print(self.last_experiment)
 
     def update_experiment_list(self, experiment_nb, experiment_specification, samples):
         experiment=self.experiments[experiment_nb]
