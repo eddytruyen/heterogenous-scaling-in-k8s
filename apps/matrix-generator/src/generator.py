@@ -303,11 +303,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             elif state == COST_EFFECTIVE_RESULT:
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
-                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                    adaptive_scaler.reset()#lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                 else:
                     remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),True,(rm.get_tipped_over_results())["results"],scaling_up_threshold, sampling_ratio)#, tenant_nb == startTenant)
-                if adaptive_scaler.ScalingUpPhase:
-                    adaptive_scaler.reset()
+                #if adaptive_scaler.ScalingUpPhase:
+                #    adaptive_scaler.reset()
                 adaptive_scaler.failed_results=[]
                 add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo or float(x['CompletionTime']) <= 1.0, result=result)
                 #d[sla['name']][str(tenant_nb)]=result
