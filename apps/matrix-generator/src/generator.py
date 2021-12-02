@@ -568,8 +568,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                     #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
-                                    if intermediate_tipped_over_results:
-                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, get_conf(adaptive_scaler.workers, intermediate_tipped_over_results[0])):
+                                    if tipped_over_intermediate_results:
+                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, get_conf(adaptive_scaler.workers, tipped_over_intermediate_results[0])):
                                             do_higher_tenant_remove=True
                                         else:
                                             do_higher_tenant_remove=False
