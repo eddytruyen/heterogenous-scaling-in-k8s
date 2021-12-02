@@ -31,7 +31,7 @@ do
   #nrOfPartitions=$(($i * 2))
   nrOfPartitions=0
   #2 cores per tenant
-  if [ $i -eq $startingTenantId ]
+  if [ $i -eq $startingTenantId ] && [ $new_csv_file -eq 1 ]
      then 
          ./rescale.sh $namespace $i
      else
