@@ -1,16 +1,16 @@
-Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
+Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  22440      0 --:--:-- --:--:-- --:--:-- 23375
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  23720      0 --:--:-- --:--:-- --:--:-- 24708
 {
-  "CompletionTime": "120",
+  "CompletionTime": 120,
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "n/a",
+  "best_score": "-0.17333333333333334",
   "config": "0",
-  "score": "n/a",
+  "score": "-0.17333333333333334",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -29,7 +29,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    361      0  0:00:01  0:00:01 --:--:--   361
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    362      0  0:00:01  0:00:01 --:--:--   362
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -51,11 +51,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    502      0  0:00:01  0:00:01 --:--:--   502
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    417      0  0:00:01  0:00:01 --:--:--   417
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -81,7 +81,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1105      0 --:--:-- --:--:-- --:--:--  1105
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    875      0 --:--:-- --:--:-- --:--:--   874
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -103,11 +103,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    501      0  0:00:01  0:00:01 --:--:--   501
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    531      0  0:00:01  0:00:01 --:--:--   531
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -133,7 +133,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11411      0 --:--:-- --:--:-- --:--:-- 11640
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0   9238      0 --:--:-- --:--:-- --:--:--  9238
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -154,19 +154,19 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
+Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  23375      0 --:--:-- --:--:-- --:--:-- 23375
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  29650      0 --:--:-- --:--:-- --:--:-- 29650
 {
-  "CompletionTime": "120",
+  "CompletionTime": 120,
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "n/a",
+  "best_score": "-0.17333333333333334",
   "config": "0",
-  "score": "n/a",
+  "score": "-0.17333333333333334",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -185,7 +185,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    341      0  0:00:01  0:00:01 --:--:--   340
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    396      0  0:00:01  0:00:01 --:--:--   396
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -207,11 +207,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    495      0  0:00:01  0:00:01 --:--:--   496
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    507      0  0:00:01  0:00:01 --:--:--   507
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -237,7 +237,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    460      0  0:00:01  0:00:01 --:--:--   460
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    524      0  0:00:01  0:00:01 --:--:--   524
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -263,65 +263,39 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    738      0 --:--:-- --:--:-- --:--:--   738
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    689      0 --:--:-- --:--:-- --:--:--   689
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.25333333333333335",
+  "best_score": "-0.22666666666666666",
   "config": "0",
-  "score": "-0.25333333333333335",
-  "worker1.replicaCount": "0",
-  "worker1.resources.requests.cpu": "6",
-  "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
-  "worker2.resources.requests.cpu": "4",
-  "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "1",
-  "worker3.resources.requests.cpu": "3",
-  "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
-  "worker4.resources.requests.cpu": "2",
-  "worker4.resources.requests.memory": "2"
-}
-+ sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_1_1_2'
-+ jq .
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1143      0 --:--:-- --:--:-- --:--:--  1140
-{
-  "CompletionTime": "1e-09",
-  "SLAName": "silver",
-  "Successfull": "true",
-  "best_score": "-0.24",
-  "config": "1",
-  "score": "-0.24",
+  "score": "-0.22666666666666666",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
   "worker2.replicaCount": "0",
   "worker2.resources.requests.cpu": "4",
   "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "2",
+  "worker3.replicaCount": "1",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "2",
+  "worker4.replicaCount": "3",
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=190&previoustenants=3&previousconf=0_0_2_2'
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_0_1_3'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1369      0 --:--:-- --:--:-- --:--:--  1369
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1227      0 --:--:-- --:--:-- --:--:--  1227
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
   "best_score": "-0.24",
-  "config": "2",
+  "config": "1",
   "score": "-0.24",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
@@ -341,7 +315,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1393      0 --:--:-- --:--:-- --:--:--  1393
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1379      0 --:--:-- --:--:-- --:--:--  1382
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -367,7 +341,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    488      0  0:00:01  0:00:01 --:--:--   488
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    503      0  0:00:01  0:00:01 --:--:--   503
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -393,7 +367,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  12183      0 --:--:-- --:--:-- --:--:-- 12183
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13568      0 --:--:-- --:--:-- --:--:-- 13568
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -419,7 +393,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1294      0 --:--:-- --:--:-- --:--:--  1294
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1382      0 --:--:-- --:--:-- --:--:--  1379
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -445,7 +419,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    413      0  0:00:01  0:00:01 --:--:--   413
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    365      0  0:00:01  0:00:01 --:--:--   365
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -471,24 +445,24 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   595  100   595    0     0    275      0  0:00:02  0:00:02 --:--:--   275
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    297      0  0:00:01  0:00:01 --:--:--   297
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "-0.2638888888888889",
+  "best_score": "-0.25",
   "config": "0",
-  "score": "-0.2638888888888889",
+  "score": "-0.25",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
-  "worker2.replicaCount": "1",
+  "worker2.replicaCount": "2",
   "worker2.resources.requests.cpu": "3",
   "worker2.resources.requests.memory": "2",
-  "worker3.replicaCount": "2",
+  "worker3.replicaCount": "0",
   "worker3.resources.requests.cpu": "3",
   "worker3.resources.requests.memory": "2",
-  "worker4.replicaCount": "1",
+  "worker4.replicaCount": "2",
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
@@ -497,7 +471,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0  12282      0 --:--:-- --:--:-- --:--:-- 12282
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   9912      0 --:--:-- --:--:-- --:--:-- 10089
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -518,19 +492,19 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
+Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  20035      0 --:--:-- --:--:-- --:--:-- 20035
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  21178      0 --:--:-- --:--:-- --:--:-- 21962
 {
-  "CompletionTime": "120",
+  "CompletionTime": 120,
   "SLAName": "silver",
   "Successfull": "true",
-  "best_score": "n/a",
+  "best_score": "-0.17333333333333334",
   "config": "0",
-  "score": "n/a",
+  "score": "-0.17333333333333334",
   "worker1.replicaCount": "0",
   "worker1.resources.requests.cpu": "6",
   "worker1.resources.requests.memory": "4",
@@ -545,11 +519,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    386      0  0:00:01  0:00:01 --:--:--   386
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    374      0  0:00:01  0:00:01 --:--:--   374
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -571,11 +545,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    588      0 --:--:-- --:--:-- --:--:--   587
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    446      0  0:00:01  0:00:01 --:--:--   446
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -601,7 +575,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1032      0 --:--:-- --:--:-- --:--:--  1031
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1244      0 --:--:-- --:--:-- --:--:--  1244
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -627,7 +601,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    583      0  0:00:01  0:00:01 --:--:--   583
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    500      0  0:00:01  0:00:01 --:--:--   500
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -653,7 +627,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  13227      0 --:--:-- --:--:-- --:--:-- 13534
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  12125      0 --:--:-- --:--:-- --:--:-- 12125
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -679,7 +653,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1315      0 --:--:-- --:--:-- --:--:--  1315
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1442      0 --:--:-- --:--:-- --:--:--  1446
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -705,7 +679,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    391      0  0:00:01  0:00:01 --:--:--   391
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    406      0  0:00:01  0:00:01 --:--:--   406
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -731,7 +705,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  14923      0 --:--:-- --:--:-- --:--:-- 14923
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11640      0 --:--:-- --:--:-- --:--:-- 11411
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -757,7 +731,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    221      0  0:00:02  0:00:02 --:--:--   221
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    213      0  0:00:02  0:00:02 --:--:--   213
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -783,7 +757,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  12702      0 --:--:-- --:--:-- --:--:-- 12978
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  11264      0 --:--:-- --:--:-- --:--:-- 11705
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -804,12 +778,12 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_test
+Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    919      0 --:--:-- --:--:-- --:--:--   918
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1056      0 --:--:-- --:--:-- --:--:--  1056
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -835,7 +809,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    475      0  0:00:01  0:00:01 --:--:--   475
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    530      0  0:00:01  0:00:01 --:--:--   530
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -861,7 +835,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    528      0  0:00:01  0:00:01 --:--:--   529
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    453      0  0:00:01  0:00:01 --:--:--   453
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -887,7 +861,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_1_1'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    540      0  0:00:01  0:00:01 --:--:--   540
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    511      0  0:00:01  0:00:01 --:--:--   511
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -913,7 +887,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1243      0 --:--:-- --:--:-- --:--:--  1241
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1474      0 --:--:-- --:--:-- --:--:--  1474
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -935,11 +909,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_1_0'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_1_0'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    701      0 --:--:-- --:--:-- --:--:--   701
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    679      0 --:--:-- --:--:-- --:--:--   679
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -965,7 +939,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  11000      0 --:--:-- --:--:-- --:--:-- 11000
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  10584      0 --:--:-- --:--:-- --:--:-- 10788
 {
   "CompletionTime": "140",
   "SLAName": "silver",
@@ -991,7 +965,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1172      0 --:--:-- --:--:-- --:--:--  1172
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1286      0 --:--:-- --:--:-- --:--:--  1283
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1017,7 +991,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1191      0 --:--:-- --:--:-- --:--:--  1189
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1600      0 --:--:-- --:--:-- --:--:--  1604
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1043,7 +1017,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    513      0  0:00:01  0:00:01 --:--:--   513
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    458      0  0:00:01  0:00:01 --:--:--   458
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1069,7 +1043,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1310      0 --:--:-- --:--:-- --:--:--  1313
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1204      0 --:--:-- --:--:-- --:--:--  1204
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1095,7 +1069,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13266      0 --:--:-- --:--:-- --:--:-- 13266
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13883      0 --:--:-- --:--:-- --:--:-- 14214
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1121,7 +1095,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0    681      0 --:--:-- --:--:-- --:--:--   680
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0    648      0 --:--:-- --:--:-- --:--:--   648
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1147,7 +1121,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  16081      0 --:--:-- --:--:-- --:--:-- 16081
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  13222      0 --:--:-- --:--:-- --:--:-- 13222
 {
   "CompletionTime": "140",
   "SLAName": "silver",
@@ -1173,7 +1147,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1248      0 --:--:-- --:--:-- --:--:--  1246
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1281      0 --:--:-- --:--:-- --:--:--  1278
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1199,7 +1173,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1204      0 --:--:-- --:--:-- --:--:--  1204
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1180      0 --:--:-- --:--:-- --:--:--  1182
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1221,11 +1195,11 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   9754      0 --:--:-- --:--:-- --:--:--  9916
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  10258      0 --:--:-- --:--:-- --:--:-- 10258
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1251,7 +1225,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    463      0  0:00:01  0:00:01 --:--:--   462
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    497      0  0:00:01  0:00:01 --:--:--   497
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1277,7 +1251,7 @@ Saved working directory and index state WIP on at-runtime-v2: d7225a0 update_tes
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   561  100   561    0     0    317      0  0:00:01  0:00:01 --:--:--   317
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   561  100   561    0     0    373      0  0:00:01  0:00:01 --:--:--   373
 {
   "CompletionTime": "120",
   "SLAName": "silver",
