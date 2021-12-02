@@ -71,7 +71,7 @@ do
   success=`cat success`
   if [ $success != "true" ]
   then
-	  period=999999999
+	  echo 999999999 > period
   fi
 
   #if [ $period -lt 120 ]; then echo "sleeping for 5400 sec"; sleep 5400; fi	 
