@@ -4,9 +4,10 @@ nrofTenants=$1
 new_csv_file=${2:-0}
 startingTenantId=${3:-1}
 increment=${4:-1}
-namespace=${5:-silver}
-workload=${6:-sql}
-executorMemory=${7:-0}
+previous_tenants=${5:-1}
+namespace=${6:-silver}
+workload=${7:-sql}
+executorMemory=${8:-0}
 csv_output=csv_output_file.csv
 if [ $increment -eq 1 ] 
 then
@@ -39,7 +40,7 @@ do
 	 previous_conf=`cat new_previous_conf`
 	 if [ $i -eq $startingTenantId ]
 	 then
-	 	./rescale.sh $namespace $i $period $i $previous_conf $workload $csv_output
+	 	./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
 	 else
 		./rescale.sh $namespace $i $period $((i-increment)) $previous_conf $workload $csv_output
 	 fi
