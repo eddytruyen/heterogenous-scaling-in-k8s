@@ -26,7 +26,7 @@ then
 	done
 elif [ $1 == "0100-v2" ]
 then
-	for i in `seq 13 16`
+	for i in `seq 13 17`
 	do
 		restart
 		sleep 10
