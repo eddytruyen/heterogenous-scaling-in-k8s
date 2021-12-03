@@ -1,23 +1,21 @@
 #!/bin/bash
 
-nrofTenants=$1
+lastTenantId=$1
 new_csv_file=${2:-0}
 startingTenantId=${3:-1}
-increment=${4:-1}
-previous_tenants=${5:-1}
-namespace=${6:-silver}
-workload=${7:-sql}
-executorMemory=${8:-0}
+namespace=${4:-silver}
+workload=${5:-sql}
+executorMemory=${6:-0}
 csv_output=csv_output_file.csv
-if [ $increment -eq 1 ] 
-then
 	lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
 	startingTenantId=${3:-1}
 
-elif [ $increment -eq -1 ]
+if [ $lastTenantId < $startingTenantId ]
 then
-	lastTenantId=${3:-1}
-	startingTenantId=$((($nrofTenants - 1) + $startingTenantId))
+	increment=-1
+
+else
+	increment=1	
 fi
 tenantGroup=2
 clientmode=`grep '\/\/deploy' $workload/header | wc -l` 
@@ -38,12 +36,7 @@ do
      else
 	 period=`cat period`
 	 previous_conf=`cat new_previous_conf`
-	 if [ $i -eq $startingTenantId ]
-	 then
-	 	./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
-	 else
-		./rescale.sh $namespace $i $period $((i-increment)) $previous_conf $workload $csv_output
-	 fi
+	 ./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
   fi
   #if [ $clientmode -eq 0 ]
   #then`
@@ -64,6 +57,7 @@ do
   #fi
   #echo "sleeping for $sleeptime seconds..."
   #sleep $sleeptime
+  echo $i > previous_tenants
   echo "generating script for $i tenants"
   ./$workload/generate_script.sh $i $executorMemory $nrOfPartitions $tenantGroup "output.conf"
   sudo cp ./$workload/output.conf /mnt/nfs-disk-2/spark-bench/
