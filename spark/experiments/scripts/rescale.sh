@@ -103,7 +103,7 @@ if [ $start -ne 1 ]
 then
 	old_resource_size=${old_resource_size::-1}
 	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output
-	if [ $exit_program -eq 1 ]
+	if [ $((exit_program)) -eq 1 ]
 	then
 		exit
 	fi
