@@ -16,14 +16,13 @@ function str_to_int {
 }
 start=0
 #curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=149&previoustenants=2&previousconf=2_0_0_0"
-if [ ! $previous_conf == "no" ]
+if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
 	echo "previous_conf"
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
-else
+elif [ $exit_program -eq 0 ]
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
-fi
 sed -i 's/\"//g' $fileName
 sed -i 's|,|\n|g' $fileName
 sed -i 's/{//g' $fileName
@@ -103,9 +102,9 @@ if [ $start -ne 1 ]
 then
 	old_resource_size=${old_resource_size::-1}
 	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output
-	if [ $((exit_program)) -eq 1 ]
+	if [ $exit_program -eq 1 ]
 	then
-		exit
+		exit 1
 	fi
 fi
 
