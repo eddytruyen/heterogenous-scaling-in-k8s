@@ -21,6 +21,7 @@ then
 	echo "previous_conf"
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
+then
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
 fi
