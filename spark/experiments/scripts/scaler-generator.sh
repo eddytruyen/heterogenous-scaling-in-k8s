@@ -36,6 +36,7 @@ do
      else
 	 period=`cat period`
 	 previous_conf=`cat new_previous_conf`
+	 previous_tenants=`cat previous_tenants`
 	 ./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
   fi
   #if [ $clientmode -eq 0 ]
