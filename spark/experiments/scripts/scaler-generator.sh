@@ -2,7 +2,7 @@
 
 startingTenantId=$1
 lastTenantId=${2:-1}
-new_csv_file=${3:-0}
+new_csv_file=${3:-2}
 namespace=${4:-silver}
 workload=${5:-sql}
 executorMemory=${6:-0}
@@ -75,7 +75,7 @@ do
 
   #if [ $period -lt 120 ]; then echo "sleeping for 5400 sec"; sleep 5400; fi	 
 done
-if [[ $new_csv_file -eq 2 ]]
+if [[ $new_csv_file -eq 0 ]]
 then
 	 period=`cat period`
          previous_conf=`cat new_previous_conf`

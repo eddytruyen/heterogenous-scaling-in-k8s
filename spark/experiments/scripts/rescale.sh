@@ -144,6 +144,5 @@ for i in `seq $alphabetLength`
 
 		fi
 	done
-rm $fileName
 rm old_pod.yaml
 echo ${new_conf::-1} > new_previous_conf
