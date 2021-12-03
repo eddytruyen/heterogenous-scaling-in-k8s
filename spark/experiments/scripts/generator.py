@@ -57,18 +57,20 @@ def abort(msg):
 	stop_load()
 	sys.exit(1)		
 
-def set_user_count(count, first_one=False):
-        p=set_tenant_nb(count, first_one)
+def set_user_count(count, intermediate_first_or_last=0):
+        p=set_tenant_nb(count, intermediate_first_or_last)
         print(p.decode())
         if (p and STORE_METRICS):
             sock.send(p)   
 	# print(r.status_code)
 
 
-def set_tenant_nb(count, first_one=False):
+def set_tenant_nb(count, intermediate_first_or_last=0):
     commands="./scaler-generator.sh " + str(count) + " " + str(count)
-    if first_one:
+    if intermediate_first_or_last == 1:
         commands=commands + " 1"
+    elif intermediate_first_or_last == 2:
+        commands=commands + " 0"
     print(commands)
     p = subprocess.check_output(commands.split())
     return p
@@ -106,7 +108,7 @@ def check_params(segment_type,initial_count,end_count):
 	else:
 		abort('Invalidad segment type. Options are: stable, rising, decreasing')
 
-def process_segment(trace, first_one=False):
+def process_segment(trace, intermediate_first_or_last=0):
 	segment_type=trace['segment']
 	initial_count=trace['initialCount']
 	end_count=trace['endCount']
@@ -115,20 +117,20 @@ def process_segment(trace, first_one=False):
 	check_params(segment_type,initial_count,end_count)
 
 	if(segment_type=='stable'):
-		set_user_count(initial_count, first_one)
+		set_user_count(initial_count, intermediate_first_or_last)
 
 	elif(segment_type=='rising'):
 		times=end_count-initial_count
 
 		for t in range(times+1):
-			set_user_count(t+initial_count, first_one)
+			set_user_count(t+initial_count, intermediate_first_or_last)
 		# set_user_count(end_count)
 
 	elif(segment_type=='decreasing'):
 		times=initial_count-end_count
 
 		for t in range(times+1):
-			set_user_count(initial_count-t, first_one)
+			set_user_count(initial_count-t, intermediate_first_or_last)
 		# set_user_count(end_count)	
 
 def generate_load():
@@ -155,10 +157,12 @@ def generate_load():
 		for k in range(trace['repeat']):
 			for j,segment in enumerate(trace['trace']):
 				if i==0 and k==0 and j==0:
-					first_one=True
-				else:
-					first_one=False
-				process_segment(segment,first_one)
+					intermediate_first_or_last=1
+				elif i==len(traces)-1 and k == len(range(trace['repeat']))-1 and j == len(trace['trace'])-1:
+ 					intermediate_first_or_last=2
+                                else:
+                                        intermediate_first_or_last=0
+				process_segment(segment,intermediate_first_or_last)
 				last=segment['endCount']
 
 
