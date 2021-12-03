@@ -8,7 +8,7 @@ workload=${5:-sql}
 executorMemory=${6:-0}
 csv_output=csv_output_file.csv
 
-if [ $lastTenantId < $startingTenantId ]
+if [ $lastTenantId -lt $startingTenantId ]
 then
 	increment=-1
 
