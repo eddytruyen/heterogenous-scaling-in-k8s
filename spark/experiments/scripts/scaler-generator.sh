@@ -75,4 +75,11 @@ do
 
   #if [ $period -lt 120 ]; then echo "sleeping for 5400 sec"; sleep 5400; fi	 
 done
+if [[ $new_csv_file -eq 2 ]]
+then
+	 period=`cat period`
+         previous_conf=`cat new_previous_conf`
+         previous_tenants=`cat previous_tenants`
+	./rescale.sh $namespace $lastTenantId $period $previous_tenants $previous_conf $workload $csv_output 1
+fi
 #kubectl delete  -f spark-client/ -n $namespace

@@ -6,6 +6,7 @@ previous_tenant_nb=${4:-0}
 previous_conf=${5:-"no"}
 workload=${6:-sql}
 csv_output=${7:-csv_output_file.csv}
+exit_program=${0:-1}
 fileName=values.json
 resourcePlannerURL=http://172.17.13.119:80
 alphabetLength=$((4))
@@ -102,6 +103,10 @@ if [ $start -ne 1 ]
 then
 	old_resource_size=${old_resource_size::-1}
 	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output
+	if [ $exit_program -eq 1 ]
+	then
+		exit
+	fi
 fi
 
 echo "New memory size: " $memory_size
