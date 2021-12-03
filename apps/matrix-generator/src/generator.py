@@ -553,7 +553,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("Removing all configs that are useless to actually test as a result of the current result")
                 tmp_adaptive_scaler=adaptive_scaler.clone()
                 intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
-                tipped_over_intermediate_results=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 intermediate_states=adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
@@ -568,8 +568,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                     #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
-                                    if tipped_over_intermediate_results:
-                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, get_conf(adaptive_scaler.workers, tipped_over_intermediate_results[0])):
+                                    if tipped_over_intermediate_confs:
+                                        import pdb; pdb.set_trace()
+                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
                                             do_higher_tenant_remove=True
                                         else:
                                             do_higher_tenant_remove=False
