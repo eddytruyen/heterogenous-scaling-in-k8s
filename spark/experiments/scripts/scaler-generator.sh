@@ -7,8 +7,6 @@ namespace=${4:-silver}
 workload=${5:-sql}
 executorMemory=${6:-0}
 csv_output=csv_output_file.csv
-	lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
-	startingTenantId=${3:-1}
 
 if [ $lastTenantId < $startingTenantId ]
 then
