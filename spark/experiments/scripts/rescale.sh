@@ -23,11 +23,15 @@ then
 elif [ $exit_program -eq 0 ]
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
-sed -i 's/\"//g' $fileName
-sed -i 's|,|\n|g' $fileName
-sed -i 's/{//g' $fileName
-sed -i 's/}//g' $fileName
-cat $fileName
+fi
+if [ $exit_program -eq 0 ]
+then
+	sed -i 's/\"//g' $fileName
+	sed -i 's|,|\n|g' $fileName
+	sed -i 's/{//g' $fileName
+	sed -i 's/}//g' $fileName
+	cat $fileName
+fi
 #cpu_size=0
 kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
 old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"' | xargs)
