@@ -160,8 +160,8 @@ def generate_load():
 					intermediate_first_or_last=1
 				elif i==len(traces)-1 and k == len(range(trace['repeat']))-1 and j == len(trace['trace'])-1:
  					intermediate_first_or_last=2
-                                else:
-                                        intermediate_first_or_last=0
+				else:
+					intermediate_first_or_last=0
 				process_segment(segment,intermediate_first_or_last)
 				last=segment['endCount']
 
