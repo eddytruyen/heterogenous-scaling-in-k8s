@@ -1,8 +1,8 @@
 #!/bin/bash
 
-lastTenantId=$1
-new_csv_file=${2:-0}
-startingTenantId=${3:-1}
+startingTenantId=$1
+lastTenantId=${2:-1}
+new_csv_file=${3:-0}
 namespace=${4:-silver}
 workload=${5:-sql}
 executorMemory=${6:-0}
