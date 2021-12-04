@@ -553,13 +553,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("Removing all configs that are useless to actually test as a result of the current result")
                 tmp_adaptive_scaler=adaptive_scaler.clone()
                 intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
+                tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 intermediate_states=adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
                     remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True)
                     if intermediate_state==NO_RESULT:
                         print("Current result is NO RESULT, therefore, we remove all configs with higher resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
-                        do_higher_tenant_remove=False
                         for i in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
                                 if str(i) in d[sla['name']].keys():
                                     print("UPDATING RUNTIME MANAGER FOR NB OF TENANTS: " + str(i))
@@ -567,8 +567,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                                    if (i == tenant_nb + 1):
-                                        #remove tipped_over_results for higher tenants
+                                    #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
+                                    if tipped_over_intermediate_confs:
+                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
+                                            do_higher_tenant_remove=True
+                                        else:
+                                            do_higher_tenant_remove=False
+                                    else:
                                         do_higher_tenant_remove=True
                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
                                         print("REMOVING CONFS FOR NB OF TENANTS: " + str(i))
@@ -939,6 +944,14 @@ def involves_worker(workers, conf, worker_index):
 		return True
 	else:
 		return False
+
+
+def all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(adaptive_scaler, conf):
+    for i,c in enumerate(conf):
+        if not adaptive_scaler.workers[i].isFlagged() and c > 0:
+            return False
+    return True
+
 
 
 def all_flagged_conf(adaptive_scaler, conf,ScaledWorkerIndex):

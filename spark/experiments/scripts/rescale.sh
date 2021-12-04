@@ -6,6 +6,7 @@ previous_tenant_nb=${4:-0}
 previous_conf=${5:-"no"}
 workload=${6:-sql}
 csv_output=${7:-csv_output_file.csv}
+exit_program=${8:-0}
 fileName=values.json
 resourcePlannerURL=http://172.17.13.119:80
 alphabetLength=$((4))
@@ -15,19 +16,23 @@ function str_to_int {
 }
 start=0
 #curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=149&previoustenants=2&previousconf=2_0_0_0"
-if [ ! $previous_conf == "no" ]
+if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
 	echo "previous_conf"
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
-else
+elif [ $exit_program -eq 0 ]
+then
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
 fi
-sed -i 's/\"//g' $fileName
-sed -i 's|,|\n|g' $fileName
-sed -i 's/{//g' $fileName
-sed -i 's/}//g' $fileName
-cat $fileName
+if [ $exit_program -eq 0 ]
+then
+	sed -i 's/\"//g' $fileName
+	sed -i 's|,|\n|g' $fileName
+	sed -i 's/{//g' $fileName
+	sed -i 's/}//g' $fileName
+	cat $fileName
+fi
 #cpu_size=0
 kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
 old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"' | xargs)
@@ -102,6 +107,10 @@ if [ $start -ne 1 ]
 then
 	old_resource_size=${old_resource_size::-1}
 	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output
+	if [ $exit_program -eq 1 ]
+	then
+		exit 1
+	fi
 fi
 
 echo "New memory size: " $memory_size
@@ -135,6 +144,5 @@ for i in `seq $alphabetLength`
 
 		fi
 	done
-rm $fileName
 rm old_pod.yaml
 echo ${new_conf::-1} > new_previous_conf

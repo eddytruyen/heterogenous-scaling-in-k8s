@@ -1,0 +1,6 @@
+load:
+  - trace:
+    - segment: stable
+      initialCount: 9
+      endCount: 9
+    repeat: 10  

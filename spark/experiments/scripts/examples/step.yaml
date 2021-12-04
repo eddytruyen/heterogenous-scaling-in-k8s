@@ -1,0 +1,11 @@
+load:
+  - trace:
+    - segment: stable
+      initialCount: 1
+      endCount: 1
+      duration: 10
+    - segment: stable
+      initialCount: 10
+      endCount: 10
+      duration: 10
+    repeat: 1

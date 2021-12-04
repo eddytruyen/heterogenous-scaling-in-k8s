@@ -1,0 +1,34 @@
+load:
+  - trace:
+    - segment: stable
+      initialCount: 1
+      endCount: 1
+    - segment: rising
+      initialCount: 1
+      endCount: 5
+    - segment: stable
+      initialCount: 5
+      endCount: 5
+    - segment: decreasing
+      initialCount: 5
+      endCount: 1
+    - segment: stable
+      initialCount: 1
+      endCount: 1
+    - segment: rising
+      initialCount: 1
+      endCount: 5
+    - segment: rising
+      initialCount: 5
+      endCount: 10
+    - segment: stable
+      initialCount: 10
+      endCount: 10
+    - segment: decreasing
+      initialCount: 10
+      endCount: 1
+    - segment: stable
+      initialCount: 1
+      endCount: 1
+    repeat: 2
+    

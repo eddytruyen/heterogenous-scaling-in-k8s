@@ -1,9 +1,9 @@
-Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
+Saved working directory and index state WIP on at-runtime-v2: 2be54ec8 test17
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  23720      0 --:--:-- --:--:-- --:--:-- 24708
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  21962      0 --:--:-- --:--:-- --:--:-- 22807
 {
   "CompletionTime": 120,
   "SLAName": "silver",
@@ -29,7 +29,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    362      0  0:00:01  0:00:01 --:--:--   362
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    365      0  0:00:01  0:00:01 --:--:--   365
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -55,7 +55,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    417      0  0:00:01  0:00:01 --:--:--   417
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    427      0  0:00:01  0:00:01 --:--:--   427
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -81,7 +81,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    875      0 --:--:-- --:--:-- --:--:--   874
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1105      0 --:--:-- --:--:-- --:--:--  1107
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -107,7 +107,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_1_1'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    531      0  0:00:01  0:00:01 --:--:--   531
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    503      0  0:00:01  0:00:01 --:--:--   503
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -133,7 +133,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0   9238      0 --:--:-- --:--:-- --:--:--  9238
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  13857      0 --:--:-- --:--:-- --:--:-- 14195
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -154,12 +154,12 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
+Saved working directory and index state WIP on at-runtime-v2: 2be54ec8 test17
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  29650      0 --:--:-- --:--:-- --:--:-- 29650
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  21178      0 --:--:-- --:--:-- --:--:-- 21178
 {
   "CompletionTime": 120,
   "SLAName": "silver",
@@ -185,7 +185,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    396      0  0:00:01  0:00:01 --:--:--   396
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    288      0  0:00:02  0:00:02 --:--:--   288
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -207,11 +207,11 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    507      0  0:00:01  0:00:01 --:--:--   507
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    485      0  0:00:01  0:00:01 --:--:--   486
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -237,7 +237,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    524      0  0:00:01  0:00:01 --:--:--   524
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    574      0  0:00:01  0:00:01 --:--:--   574
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -263,7 +263,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    689      0 --:--:-- --:--:-- --:--:--   689
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    728      0 --:--:-- --:--:-- --:--:--   727
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -289,7 +289,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1227      0 --:--:-- --:--:-- --:--:--  1227
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1248      0 --:--:-- --:--:-- --:--:--  1246
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -315,7 +315,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1379      0 --:--:-- --:--:-- --:--:--  1382
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1575      0 --:--:-- --:--:-- --:--:--  1579
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -341,7 +341,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    503      0  0:00:01  0:00:01 --:--:--   503
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    529      0  0:00:01  0:00:01 --:--:--   529
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -367,7 +367,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13568      0 --:--:-- --:--:-- --:--:-- 13568
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13568      0 --:--:-- --:--:-- --:--:-- 13883
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -393,7 +393,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1382      0 --:--:-- --:--:-- --:--:--  1379
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1251      0 --:--:-- --:--:-- --:--:--  1248
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -419,7 +419,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    365      0  0:00:01  0:00:01 --:--:--   365
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    335      0  0:00:01  0:00:01 --:--:--   335
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -445,7 +445,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    297      0  0:00:01  0:00:01 --:--:--   297
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   567  100   567    0     0    325      0  0:00:01  0:00:01 --:--:--   325
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -471,7 +471,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   9912      0 --:--:-- --:--:-- --:--:-- 10089
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0  10272      0 --:--:-- --:--:-- --:--:-- 10462
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -492,12 +492,12 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
+Saved working directory and index state WIP on at-runtime-v2: 2be54ec8 test17
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  21178      0 --:--:-- --:--:-- --:--:-- 21962
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  24708      0 --:--:-- --:--:-- --:--:-- 24708
 {
   "CompletionTime": 120,
   "SLAName": "silver",
@@ -519,11 +519,11 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=1&previousconf=0_1_0_0'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    374      0  0:00:01  0:00:01 --:--:--   374
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    366      0  0:00:01  0:00:01 --:--:--   367
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -549,7 +549,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_0_1_2'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    446      0  0:00:01  0:00:01 --:--:--   446
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    479      0  0:00:01  0:00:01 --:--:--   479
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -575,7 +575,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1244      0 --:--:-- --:--:-- --:--:--  1244
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0   1184      0 --:--:-- --:--:-- --:--:--  1184
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -601,7 +601,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    500      0  0:00:01  0:00:01 --:--:--   500
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    537      0  0:00:01  0:00:01 --:--:--   538
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -627,7 +627,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  12125      0 --:--:-- --:--:-- --:--:-- 12125
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  12652      0 --:--:-- --:--:-- --:--:-- 12933
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -653,7 +653,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1442      0 --:--:-- --:--:-- --:--:--  1446
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0   1428      0 --:--:-- --:--:-- --:--:--  1428
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -679,7 +679,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    406      0  0:00:01  0:00:01 --:--:--   406
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    438      0  0:00:01  0:00:01 --:--:--   438
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -705,7 +705,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11640      0 --:--:-- --:--:-- --:--:-- 11411
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   582  100   582    0     0  11640      0 --:--:-- --:--:-- --:--:-- 11640
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -731,7 +731,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    213      0  0:00:02  0:00:02 --:--:--   213
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0100   597  100   597    0     0    219      0  0:00:02  0:00:02 --:--:--   219
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -757,7 +757,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  11264      0 --:--:-- --:--:-- --:--:-- 11705
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  12978      0 --:--:-- --:--:-- --:--:-- 12978
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -778,12 +778,12 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
-Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
+Saved working directory and index state WIP on at-runtime-v2: 2be54ec8 test17
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5'
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1056      0 --:--:-- --:--:-- --:--:--  1056
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1020      0 --:--:-- --:--:-- --:--:--  1020
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -809,7 +809,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    530      0  0:00:01  0:00:01 --:--:--   530
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    523      0  0:00:01  0:00:01 --:--:--   523
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -835,7 +835,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    453      0  0:00:01  0:00:01 --:--:--   453
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   565  100   565    0     0    494      0  0:00:01  0:00:01 --:--:--   494
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -857,11 +857,11 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=190&previoustenants=5&previousconf=0_1_1_1'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    511      0  0:00:01  0:00:01 --:--:--   511
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    514      0  0:00:01  0:00:01 --:--:--   514
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -887,7 +887,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1474      0 --:--:-- --:--:-- --:--:--  1474
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1500      0 --:--:-- --:--:-- --:--:--  1500
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -909,11 +909,11 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ jq .
 + curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=160&previoustenants=5&previousconf=0_2_1_0'
++ jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    679      0 --:--:-- --:--:-- --:--:--   679
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   565  100   565    0     0    687      0 --:--:-- --:--:-- --:--:--   687
 {
   "CompletionTime": 1000149,
   "SLAName": "silver",
@@ -939,7 +939,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  10584      0 --:--:-- --:--:-- --:--:-- 10788
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   561  100   561    0     0  11687      0 --:--:-- --:--:-- --:--:-- 11936
 {
   "CompletionTime": "140",
   "SLAName": "silver",
@@ -965,7 +965,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1286      0 --:--:-- --:--:-- --:--:--  1283
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1264      0 --:--:-- --:--:-- --:--:--  1267
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -991,7 +991,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1600      0 --:--:-- --:--:-- --:--:--  1604
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1401      0 --:--:-- --:--:-- --:--:--  1398
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1017,7 +1017,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    458      0  0:00:01  0:00:01 --:--:--   458
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    472      0  0:00:01  0:00:01 --:--:--   472
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1039,11 +1039,11 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker4.resources.requests.memory": "2"
 }
 + sleep 3
-+ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=120&previoustenants=7&previousconf=1_2_0_0'
 + jq .
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=120&previoustenants=7&previousconf=1_2_0_0'
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1204      0 --:--:-- --:--:-- --:--:--  1204
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1224      0 --:--:-- --:--:-- --:--:--  1224
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1069,7 +1069,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13883      0 --:--:-- --:--:-- --:--:-- 14214
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  13568      0 --:--:-- --:--:-- --:--:-- 13883
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1095,7 +1095,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0    648      0 --:--:-- --:--:-- --:--:--   648
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0    748      0 --:--:-- --:--:-- --:--:--   748
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1121,7 +1121,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  13222      0 --:--:-- --:--:-- --:--:-- 13222
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  12142      0 --:--:-- --:--:-- --:--:-- 12395
 {
   "CompletionTime": "140",
   "SLAName": "silver",
@@ -1147,7 +1147,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1281      0 --:--:-- --:--:-- --:--:--  1278
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1246      0 --:--:-- --:--:-- --:--:--  1243
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1173,7 +1173,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1180      0 --:--:-- --:--:-- --:--:--  1182
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0   1310      0 --:--:-- --:--:-- --:--:--  1313
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1199,7 +1199,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  10258      0 --:--:-- --:--:-- --:--:-- 10258
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   595  100   595    0     0  10438      0 --:--:-- --:--:-- --:--:-- 10625
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1225,7 +1225,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    497      0  0:00:01  0:00:01 --:--:--   497
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    498      0  0:00:01  0:00:01 --:--:--   498
 {
   "CompletionTime": "1e-09",
   "SLAName": "silver",
@@ -1251,7 +1251,7 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
 + jq .
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   561  100   561    0     0    373      0  0:00:01  0:00:01 --:--:--   373
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   561  100   561    0     0    378      0  0:00:01  0:00:01 --:--:--   378
 {
   "CompletionTime": "120",
   "SLAName": "silver",
@@ -1270,5 +1270,239 @@ Saved working directory and index state WIP on at-runtime-v2: 3fb9db89 update
   "worker3.resources.requests.memory": "2",
   "worker4.replicaCount": "0",
   "worker4.resources.requests.cpu": "3",
+  "worker4.resources.requests.memory": "2"
+}
+Saved working directory and index state WIP on at-runtime-v2: 2be54ec8 test17
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   593  100   593    0     0  22807      0 --:--:-- --:--:-- --:--:-- 22807
+{
+  "CompletionTime": 120,
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "0",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "0",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=229&previoustenants=1&previousconf=0_1_0_0'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0100   597  100   597    0     0    342      0  0:00:01  0:00:01 --:--:--   342
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "0",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=167&previoustenants=2&previousconf=0_0_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0    719      0 --:--:-- --:--:-- --:--:--   719
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.18666666666666668",
+  "config": "0",
+  "score": "-0.18666666666666668",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=145&previoustenants=3&previousconf=0_1_0_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1323      0 --:--:-- --:--:-- --:--:--  1326
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.10666666666666667",
+  "config": "1",
+  "score": "-0.10666666666666667",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=263&previoustenants=3&previousconf=0_0_0_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1344      0 --:--:-- --:--:-- --:--:--  1344
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.10666666666666667",
+  "config": "1",
+  "score": "-0.10666666666666667",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=1&completiontime=238&previoustenants=2&previousconf=0_0_0_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0   1515      0 --:--:-- --:--:-- --:--:--  1519
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "0",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=143&previoustenants=1&previousconf=0_0_1_2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   567  100   567    0     0    793      0 --:--:-- --:--:-- --:--:--   793
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.16",
+  "config": "2",
+  "score": "-0.16",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "3",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=170&previoustenants=2&previousconf=0_0_0_3'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:11 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:12 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:13 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:14 --:--:--     0  0     0    0     0    0     0      0      0 --:--:--  0:00:14 --:--:--     0100   597  100   597    0     0     40      0  0:00:14  0:00:14 --:--:--   162
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.17333333333333334",
+  "config": "2",
+  "score": "-0.17333333333333334",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "0",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "1",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
+  "worker4.resources.requests.memory": "2"
+}
++ sleep 3
++ curl 'http://172.17.13.119:80/conf?namespace=silver&tenants=2'
++ jq .
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   597  100   597    0     0  10854      0 --:--:-- --:--:-- --:--:-- 10854
+{
+  "CompletionTime": "1e-09",
+  "SLAName": "silver",
+  "Successfull": "true",
+  "best_score": "-0.18666666666666668",
+  "config": "0",
+  "score": "-0.18666666666666668",
+  "worker1.replicaCount": "0",
+  "worker1.resources.requests.cpu": "6",
+  "worker1.resources.requests.memory": "4",
+  "worker2.replicaCount": "1",
+  "worker2.resources.requests.cpu": "4",
+  "worker2.resources.requests.memory": "2",
+  "worker3.replicaCount": "0",
+  "worker3.resources.requests.cpu": "3",
+  "worker3.resources.requests.memory": "2",
+  "worker4.replicaCount": "2",
+  "worker4.resources.requests.cpu": "2",
   "worker4.resources.requests.memory": "2"
 }
