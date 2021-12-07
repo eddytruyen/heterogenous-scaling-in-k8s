@@ -109,7 +109,7 @@ then
 	echo ${workload},${namespace},${previous_tenant_nb},${previous_conf},${old_resource_size},${completion_time} >>  $csv_output
 	if [ $exit_program -eq 1 ]
 	then
-		exit 1
+		exit 0
 	fi
 fi
 
