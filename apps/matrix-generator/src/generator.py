@@ -1646,4 +1646,6 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 	#return [random.choice(conf_array)]
 
 	results=ExperimentAnalizer(exp_path+'/op').analyzeExperiment()
+        print("hello")
 	return results
+
