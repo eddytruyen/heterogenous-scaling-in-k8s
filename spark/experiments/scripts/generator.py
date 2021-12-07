@@ -66,7 +66,8 @@ def set_user_count(count, intermediate_first_or_last=0):
 
 
 def set_tenant_nb(count, intermediate_first_or_last=0):
-    commands="./scaler-generator.sh " + str(count) + " " + str(count)
+    print("hello")
+    commands="./scaler-generator.sh " + str(count) + " " + str(count) + " " + str(SLA)
     if intermediate_first_or_last == 1:
         commands=commands + " 1"
     elif intermediate_first_or_last == 2:
