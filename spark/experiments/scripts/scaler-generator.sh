@@ -1,9 +1,9 @@
 #!/bin/bash
 
 startingTenantId=$1
-lastTenantId=${2:-1}
-new_csv_file=${3:-2}
-namespace=${4:-silver}
+lastTenantId=$2
+namespace=$3
+new_csv_file=${4:-2}
 workload=${5:-sql}
 executorMemory=${6:-0}
 csv_output=csv_output_file.csv
@@ -63,7 +63,7 @@ do
   echo "executing script for $i tenants"
   client=spark-client-0
   t1=`date +%s` 
-  kubectl exec -it -n $namespace $client -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace silver-spark $workload $tenantGroup
+  kubectl exec -it -n $namespace $client -- runuser -u spark spark_data/spark-bench/run-bench.sh $namespace $namespace-spark $workload $tenantGroup
   t2=`date +%s`
   echo $(($t2 - $t1)) > period
   ./parse-results.sh /mnt/nfs-disk-2/spark-bench/ $workload $tenantGroup results-tenants-$i/ $i 
