@@ -1166,7 +1166,7 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
 #                            return True
 #        return False
 
-def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, scale_action_undone=False):        
+def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False):        
         # if scale_action_undo, last failed worker of adapative_scaler should be filtered away for all tenantns (this can be done generally by setting checck_workers to True, ScaledDownWorjerIndex to the index fo the failed worker. Filtering away for all tenants means while i < == max_tannannts; if str(i) in previopus_results.keys(),prevuous_tenantconf 
         def check_resource_cost():
             if (original_adaptive_scaler and check_workers and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True)):
@@ -1189,7 +1189,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                 else:
                                     result_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
-                                if include_current_tenant_nb and i == tenant_nb and scale_action_undone and not check_workers:
+                                if include_current_tenant_nb and i == tenant_nb  and not check_workers and adaptive_scaler.FailedScalings:
                                     check_workers=True
                                     ScaledDownWorkerIndex=int(adaptive_scaler.FailedScalings[-1].worker_id)-1
                                 for el in range(start, start+window):
