@@ -455,7 +455,7 @@ class AdaptiveScaler:
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
 			if scale_down and recursive_scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
-                                self.FailedScalings=[]
+				self.FailedScalings=[]
 				self.redo_scale_action(slo)
 				#self.initial_confs=[]
 				if not self.only_failed_results:
