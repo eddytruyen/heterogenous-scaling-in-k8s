@@ -84,17 +84,15 @@ class RuntimeManager:
                 if exp_nb == self.get_current_experiment_nb():
                     if sample_nb < self.get_current_sample_nb():
                         self.previous_current_experiment()
-                    elif sample_nb == self.get_total_nb_of_samples(exp_nb)-1:
+                    elif sample_nb == self.get_current_sample_nb() and sample_nb == self.get_total_nb_of_samples(exp_nb)-1:
                         print("Runtime manager:: Going to next experiment")
                         self.next_current_experiment()
                         already_next_current_experiment=True
                 print("Runtime manager:: Sample list after remove:")
                 if not self.no_experiments_left():
                     (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
-                    for exp_nb_tmp in self.experiments.keys():
-                        print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
-                else:
-                    print([])
+                for exp_nb_tmp in self.experiments.keys():
+                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
                 if (exp_nb == self.get_current_experiment_nb()):
                     if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
                         print("Runtime manager:: Going to next experiment")
