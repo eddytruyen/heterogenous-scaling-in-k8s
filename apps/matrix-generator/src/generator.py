@@ -63,7 +63,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         else:
                             previous_tenant_results={}
                         print("Filtering from index " + str(start_index) +  " with window " + str(window))
-                        start_and_window=filter_samples(adaptive_scalers, lst,adaptive_scaler,start_index, window, previous_tenant_results, 1, tenants, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=(not higher_tenants_only and tenants == startTenants))
+                        if previous_tenants:
+                            include_current_tenant_nb=not higher_tenants_only and tenants == int(previous_tenants)
+                        else:
+                            include_current_tenant_nb=False
+                        start_and_window=filter_samples(adaptive_scalers, lst,adaptive_scaler,start_index, window, previous_tenant_results, 1, tenants, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=include_current_tenant_nb)
                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                         print([utils.array_to_str(el) for el in lst])
                         next_conf=lst[start_and_window[0]]
@@ -535,7 +539,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print([utils.array_to_str(el) for el in lst])
             no_exps=False
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
-                if not can_be_improved_by_larger_config(d[sla['name']], tenant_nb, slo, scaling_up_threshold):
+                if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                     no_exps=True
             tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
             next_conf=get_conf(adaptive_scaler.workers, tmp_result)
@@ -666,7 +670,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #    lst=sort_configs(adaptive_scaler.workers, lst)
             start=lst.index(found_conf)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
-                if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
+                if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
+                    if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
+                        start=0
                     check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
                     if lst[start] in rm.get_left_over_configs():
                         rm.remove_sample_for_conf(lst[start])
@@ -1063,7 +1069,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				sorted_combinations.remove(failed_conf)
 				if rm.conf_in_experiments(failed_conf):
  					rm.remove_sample_for_conf(failed_conf)
-			return next_index
+		return next_index
 
 
 
@@ -1115,17 +1121,21 @@ def is_smaller_worker_than(worker_a, worker_b):
 
 
 
+def can_be_improved_by_another_config(results, sorted_combinations, adaptive_scaler, tenants, slo, scaling_up_threshold):
+    return can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold) or can_be_improved_by_smaller_config(results,sorted_combinations,adaptive_scaler,tenants)
+
+
 def can_be_improved_by_larger_config(results,tenants,slo, scaling_up_threshold):
     if not str(tenants) in results.keys():
         return True
     return (float(results[str(tenants)]['CompletionTime']) >= slo * scaling_up_threshold or results[str(tenants)]['Successfull'] == 'false') and float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE)  
 
-def can_be_improved_by_smaller_config(adaptive_scaler,sorted_combinations,results,tenants,slo):
+def can_be_improved_by_smaller_config(results, sorted_combinations, adaptive_scaler, tenants):
     if not str(tenants) in results.keys():
         return True
     tmp_combinations=sort_configs(adaptive_scaler.workers, sorted_combinations)
     index=tmp_combinations.index(get_conf(adaptive_scaler.workers,results[str(tenants)]))
-    return index > 0 and resource_cost(adaptive_scaler.workers, tmp_combinations[0]) < resource_cost(adaptive_scaler.workers, tmp_combinations[index])
+    return  float(results[str(tenants)]['CompletionTime']) != float(TEST_CONFIG_CODE) and index > 0 and resource_cost(adaptive_scaler.workers, tmp_combinations[0]) < resource_cost(adaptive_scaler.workers, tmp_combinations[index])
 
 
 def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo, scaling_down_threshold):
