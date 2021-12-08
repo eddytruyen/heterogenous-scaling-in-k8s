@@ -1189,6 +1189,9 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                 else:
                                     result_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
+                                if include_current_tenant_nb and i == tenant_nb and scale_action_undone and not check_workers:
+                                    check_workers=True
+                                    ScaledDownWorkerIndex=int(adaptive_scaler.FailedScalings[-1].worker_id)-1
                                 for el in range(start, start+window):
                                         #if el-(window-new_window) >= len(sorted_combinations):
                                         #        return [-1,-1]
