@@ -10,6 +10,7 @@ import yaml
 import sys
 import os
 
+
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
 LOG_FILTERING=True
@@ -671,8 +672,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             start=lst.index(found_conf)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
+                #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                     if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
                         start=0
+                        window=min(window, lst.index(found_conf)-1) 
                     check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
                     if lst[start] in rm.get_left_over_configs():
                         rm.remove_sample_for_conf(lst[start])
@@ -772,7 +775,10 @@ def get_matrix_and_sla(initial_conf,namespace):
         for s in slas:
                 if s['name'] == namespace:
                         sla=s
-        d=yaml.safe_load(open('Results/matrix.yaml'))
+        if os.path.isfile('Results/matrix.yaml'):
+            d=yaml.safe_load(open('Results/matrix.yaml'))
+        else:
+            d={}
         if not sla['name'] in d:
                 d[sla['name']]={}
         return {"matrix": d, "sla":sla}
