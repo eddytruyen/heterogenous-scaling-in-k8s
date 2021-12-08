@@ -175,6 +175,7 @@ class AdaptiveScaler:
 		self.ScaledUp = False
 		self.ScalingFunction = scalingFunction
 		self.FailedScalings = []
+		self.PreviousFailedScalings = []
 		self.ScaledWorkerIndex=-1
 		self.workers = workers
 		self.tipped_over_confs = []
@@ -203,6 +204,7 @@ class AdaptiveScaler:
                 a_s.ScaledDown=self.ScaledDown
                 a_s.ScaledUp=self.ScaledUp
                 a_s.FailedScalings = self.FailedScalings
+                a_s.PreviousFailedScalings = self.PreviousFailedScalings
                 a_s.ScaledWorkerIndex=self.ScaledWorkerIndex
                 a_s.tipped_over_confs=[c[:] for c in self.tipped_over_confs]
                 if self.current_tipped_over_conf:
@@ -454,13 +456,14 @@ class AdaptiveScaler:
 				print(w.resources)
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
-			self.FailedScalings=[]
 			if scale_down and recursive_scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
+				self.FailedScalings=[]
 				self.redo_scale_action(slo)
 				#self.initial_confs=[]
 				if not self.only_failed_results:
 					return self.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down)
 			else:
+				self.PreviousFailedScalings=self.FailedScalings[:]
 				states+=[NO_COST_EFFECTIVE_ALTERNATIVE]
 		return states
 
