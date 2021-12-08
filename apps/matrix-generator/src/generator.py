@@ -12,8 +12,8 @@ import os
 
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-SORT_SAMPLES=False
-LOG_FILTERING=True
+SORT_SAMPLES=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -299,7 +299,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                 # ??else branch is deleted in at-runtime version
                 else:
-                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio)#, tenant_nb == startTenant)
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, careful_scaling=adaptive_scaler.careful_scaling)#, tenant_nb == startTenant)
                 start=lst.index(get_conf(adaptive_scaler.workers, result))
                 start_and_window=get_start_and_window_for_next_experiments()
                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
@@ -467,7 +467,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             #removing filtered out configs
                             for conf in conf_array:
                                 if not conf in tmp_array:
-                                    print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager")
+                                    print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager because of this conf violates transition constraints")
                                     rm.remove_sample_for_conf(conf)
                         except IndexError:
                             last_experiment=True
@@ -563,7 +563,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 intermediate_states=adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
-                    remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True)
+                    remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                     if intermediate_state==NO_RESULT:
                         print("Current result is NO RESULT, therefore, we remove all configs with higher resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
                         for i in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
@@ -1006,8 +1006,8 @@ def equal_conf(conf1, conf2):
         return True
 
 
-def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False):
-		if optimal_conf and optimal_conf_is_cost_effective:
+def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
+		if optimal_conf and (careful_scaling or optimal_conf_is_cost_effective):
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
 		#			tipped_over_results.remove(optimal_conf)
