@@ -670,14 +670,15 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #    lst.append(found_conf)
             #    lst=sort_configs(adaptive_scaler.workers, lst)
             start=lst.index(found_conf)
+            import pdb;
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                     if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
                         start=0
-                        window=min(window, lst.index(found_conf)-1) 
+                        window=min(window, lst.index(found_conf)) 
                     check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
-                    if lst[start] in rm.get_left_over_configs():
+                    if (found_conf == lst[start]) and found_conf in rm.get_left_over_configs():
                         rm.remove_sample_for_conf(lst[start])
                     else:
                         d[sla['name']][str(startTenants)]=rm.get_next_sample()
