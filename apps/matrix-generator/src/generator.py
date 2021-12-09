@@ -12,8 +12,8 @@ import os
 
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
-SORT_SAMPLES=True
-LOG_FILTERING=False
+SORT_SAMPLES=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -446,6 +446,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
         def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
                     conf_array=sort_configs(adaptive_scaler.workers, rm.get_left_over_configs())
+                    print("Left over configs in runtime manager: ")
+                    print(conf_array)
                     if conf_array: # if still configs remain to be tested
                         last_experiment=False
                         #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
