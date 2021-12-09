@@ -676,7 +676,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #    lst.append(found_conf)
             #    lst=sort_configs(adaptive_scaler.workers, lst)
             start=lst.index(found_conf)
-            import pdb; pdb.set_trace()
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (previous_tenants and startTenants != int(previous_tenants)):
                 if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
