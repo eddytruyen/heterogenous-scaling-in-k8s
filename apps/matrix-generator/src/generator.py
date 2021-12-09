@@ -445,27 +445,31 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
 
         def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
-                    conf_array=sort_configs(adaptive_scaler.workers, rm.get_left_over_configs())
+                    conf_array=rm.get_left_over_configs()
+                    if SORT_SAMPLES:
+                        tmp_lst=sort_configs(adaptive_scaler.workers,lst)
+                    else:
+                        tmp_lst=lst
                     print("Left over configs in runtime manager: ")
                     print(conf_array)
                     if conf_array: # if still configs remain to be tested
                         last_experiment=False
                         #Remove confs that violate constraints about transition cost and number of shared replicas from the set of experiment samples still to run
                         print("Moving filtered samples in sorted combinations after the window")
-                        print([utils.array_to_str(el) for el in lst])
+                        print([utils.array_to_str(el) for el in tmp_lst])
                         if d[sla['name']]:
                             previous_tenant_results=d[sla['name']]
                         else:
                             previous_tenant_results={}
                         try:
-                            print("Filtering from index " + str(lst.index(conf_array[0])) +  " with window " + str(window))
-                            start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                            print("Filtering from index " + str(tmp_lst.index(conf_array[0])) +  " with window " + str(window))
+                            start_and_window=filter_samples(adaptive_scalers,tmp_lst,adaptive_scaler,tmp_lst.index(conf_array[0]), window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                            print([utils.array_to_str(el) for el in lst])
-                            next_conf=lst[start_and_window[0]]
+                            print([utils.array_to_str(el) for el in tmp_lst])
+                            next_conf=tmp_lst[start_and_window[0]]
                             start=start_and_window[0]
                             new_window=start_and_window[1]
-                            tmp_array=lst[start:start+new_window]
+                            tmp_array=tmp_lst[start:start+new_window]
                             #removing filtered out configs
                             for conf in conf_array:
                                 if not conf in tmp_array:
