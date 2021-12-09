@@ -671,7 +671,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo, include_current_tenant_nb=int(previous_tenants) == startTenants)
             else:
                 adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             #if not found_conf in lst:
             #    lst.append(found_conf)
             #    lst=sort_configs(adaptive_scaler.workers, lst)
@@ -680,6 +679,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                     if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
+                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
                         start=0
                         window=min(window, lst.index(found_conf)) 
                     check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
