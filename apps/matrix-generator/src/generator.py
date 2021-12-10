@@ -184,7 +184,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
-                                                    import pdb; pdb.set_trace()
                                                     if not adaptive_scaler.tipped_over_confs:
                                                             remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
                                                             adaptive_scaler.reset()
@@ -342,7 +341,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         result={}
                         #retry_attempt+=nr_of_experiments
                     except:
-                        import pdb; pdb.set_trace()
                         rm.reset()
                         start=0
                         new_window=window
@@ -562,7 +560,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
-            import pdb; pdb.set_trace()
             #if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
             print("Removing all configs that are useless to actually test as a result of the current result")
             tmp_adaptive_scaler=adaptive_scaler.clone()
@@ -1020,8 +1017,6 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, optimal_conf_is_cost_effective, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
-		if get_conf(workers, results[0]) == [0,1,0,0]:
-			import pdb; pdb.set_trace()
 		if optimal_conf and (careful_scaling or optimal_conf_is_cost_effective):
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
