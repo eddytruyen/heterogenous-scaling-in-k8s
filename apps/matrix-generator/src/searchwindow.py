@@ -290,8 +290,8 @@ class AdaptiveScaler:
 		states = []
 		self.scale_action_re_undone=False
 
-                if not self.ScalingUpPhase or result:
-		    self.initial_confs+=[[result,conf,[w.clone() for w in self.workers]]]
+		if not self.ScalingUpPhase or result:
+			self.initial_confs+=[[result,conf,[w.clone() for w in self.workers]]]
 
 		if result and slo > float(result['CompletionTime']) * self.scaling_down_threshold:
 			states+=[NO_COST_EFFECTIVE_RESULT]
