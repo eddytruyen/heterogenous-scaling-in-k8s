@@ -185,9 +185,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
                                                     if not adaptive_scaler.tipped_over_confs:
+                                                        if only_failed_results:
                                                             remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
-                                                            adaptive_scaler.reset()
-                                                            rm.reset()
+                                                        else:
+                                                            remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False,[], scaling_up_threshold, sampling_ratio)
+                                                        adaptive_scaler.reset()
+                                                        rm.reset()
                                                             #window=adaptive_window.get_current_window()
                                                     elif do_remove:
                                                         remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, [], scaling_up_threshold, sampling_ratio)
