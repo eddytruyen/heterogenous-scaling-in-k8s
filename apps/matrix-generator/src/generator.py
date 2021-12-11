@@ -1083,7 +1083,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
                                 if failed_conf in sorted_combinations:
                                         print("Removing tipped over conf")
                                         print(failed_conf)
-                                        if sorted_combinations.index_(failed_conf) <= next_index and next_index > 0:
+                                        if sorted_combinations.index(failed_conf) <= next_index and next_index > 0:
                                                 next_index=next_index-1
                                         sorted_combinations.remove(failed_conf)
                                 else:
