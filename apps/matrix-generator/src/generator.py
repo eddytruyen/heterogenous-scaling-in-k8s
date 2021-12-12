@@ -572,7 +572,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             intermediate_state=intermediate_states.pop(0)
             #if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
             #        remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
-            if intermediate_state==NO_RESULT or not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
+            if intermediate_state==NO_RESULT and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
                 print("Current result is NO RESULT, therefore, we remove all configs with higher resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
                 for i in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
                             if str(i) in d[sla['name']].keys():
@@ -597,8 +597,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
                                             if not last_experiment:
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
-                                            else:
+                                            elif tmp_rm.last_experiment:
                                                 ws=tmp_rm.get_current_experiment_specification()
+                                                print(ws)
                                                 results_tmp1=process_samples(tmp_rm,i,ws)
                                                 result_tmp1=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)
                                                 if result_tmp1:
@@ -621,6 +622,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #elif intermediate_state == COST_EFFECTIVE_RESULT:
                 #    remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
             if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                tmp_adaptive_scaler=adaptive_scaler.clone()
+                intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
+                tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
