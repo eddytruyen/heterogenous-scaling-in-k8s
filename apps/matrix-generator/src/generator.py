@@ -26,6 +26,23 @@ def create_workers(elements, costs, base):
 
 def generate_matrix(initial_conf):
 
+	def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
+            if not original_adaptive_scaler.careful_scaling:
+                return False
+            tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
+            tmp_index_conf=tmp_combinations.index(opt_conf)
+            original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
+            new_tmp_index=tmp_index_conf+1
+            while new_tmp_index < len(tmp_combinations) and (tmp_combinations[new_tmp_index] in adaptive_scaler.failed_results or original_resource_cost == resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index])):
+                new_tmp_index+=1
+            if original_resource_cost < resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
+                if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) >= resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+
 	def get_start_and_window_for_next_experiments(opt_conf=None):
                                     nonlocal result
                                     nonlocal slo
@@ -41,6 +58,19 @@ def generate_matrix(initial_conf):
                                     nonlocal sla
 
                                     only_failed_results=False if result else True
+
+                                    def copy_state_of_adaptive_scaler():
+                                        original_adaptive_scaler=adaptive_scaler.clone()
+                                        if result:
+                                            tmp_result=result
+                                        elif str(tenant_nb) in d[sla['name']].keys():
+                                            tmp_result=d[sla['name']][str(tenant_nb)]
+                                        else:
+                                            tmp_result={}
+                                        if tmp_result:
+                                            for w in original_adaptive_scaler.workers:
+                                                w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
+                                        return original_adaptive_scaler
 
                                     def process_states(conf_and_states, original_adaptive_scaler=None):
                                         nonlocal result
@@ -83,7 +113,14 @@ def generate_matrix(initial_conf):
                                                             return process_states([[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)], original_adaptive_scaler=original_adaptive_scaler)
                                             else:
                                                     next_conf=adaptive_scaler.current_tipped_over_conf
-                                                    return [lst.index(next_conf), 1]
+                                                    if not resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, next_conf):
+                                                        return [lst.index(next_conf), 1]
+                                                    else:
+                                                        print("No config exists that meets all filtering constraints")
+                                                        for w in adaptive_scaler.workers:
+                                                            adaptive_scaler.untest(w)
+                                                        adaptive_scaler.validate_result({},next_conf,slo)
+                                                        return process_states(adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb),original_adaptive_scaler=original_adaptive_scaler)
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
                                             print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
@@ -127,24 +164,15 @@ def generate_matrix(initial_conf):
                                                     adaptive_scaler.reset()
                                                     adaptive_scaler.set_tipped_over_failed_confs()
                                                     conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
-                                                    return process_states(conf_and_states)
+                                                    return process_states(conf_and_states, original_adaptive_scaler=original_adaptive_scaler)
 
                                     if not opt_conf and result:
                                             opt_conf=get_conf(adaptive_scaler.workers, result)
                                     elif not opt_conf and not result:
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
+                                    original_adaptive_scaler=copy_state_of_adaptive_scaler()
                                     if adaptive_scaler.ScalingDownPhase:
-                                            original_adaptive_scaler=adaptive_scaler.clone()
-                                            if result:
-                                                    tmp_result=result
-                                            elif str(tenant_nb) in d[sla['name']].keys():
-                                                    tmp_result=d[sla['name']][str(tenant_nb)]
-                                            else:
-                                                    tmp_result={}
-                                            if tmp_result:
-                                                    for w in original_adaptive_scaler.workers:
-                                                            w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources)
@@ -154,7 +182,7 @@ def generate_matrix(initial_conf):
                                             conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources)
-                                            return process_states(conf_and_states) 
+                                            return process_states(conf_and_states, original_adaptive_scaler=original_adaptive_scaler) 
                                     for w in adaptive_scaler.workers:
                                             print(w.resources)
 
@@ -360,14 +388,16 @@ def involves_worker(workers, conf, worker_index):
 		return False
 
 
-def all_flagged_conf(workers, conf):
-	if not (workers and conf):
+def all_flagged_conf(adaptive_scaler, conf):
+	if adaptive_scaler.opt_in_for_restart:
 		return False
-	for w,c in zip(workers, conf):
+	if not (adaptive_scaler.workers and conf):
+		return False
+	for w,c in zip(adaptive_scaler.workers, conf):
 		if not w.isFlagged() and c > 0:
 			return False
 	result=True
-	for w,c in zip(workers, conf):
+	for w,c in zip(adaptive_scaler.workers, conf):
 		if w.isFlagged() and c == 0:
 			result=False
 	return  result
@@ -440,7 +470,7 @@ def filter_samples(sorted_combinations, adaptive_scaler, start, window, previous
                                         shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                 else:
                                         shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
-                                if (check_workers and all_flagged_conf(adaptive_scaler.workers, result_conf)) or cost > maximum_transition_cost or nb_shrd_replicas < shared_replicas or not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)) or (original_adaptive_scaler and check_workers and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True)):
+                                if (check_workers and all_flagged_conf(adaptive_scaler, result_conf)) or cost > maximum_transition_cost or nb_shrd_replicas < shared_replicas or not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)) or (original_adaptive_scaler and check_workers and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True)):
                                         print("removed")
                                         sorted_combinations.remove(result_conf)
                                         sorted_combinations.insert(new_window+el-1,result_conf)
