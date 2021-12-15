@@ -363,13 +363,13 @@ class AdaptiveScaler:
                                 return conf_cost-total_cost - 1
                         else:
                                 print("SCALE UP DIFF")
-                                if self.careful_scaling:
-                                    return total_cost + 1 - conf_cost
-                                else:
-                                    offset=0
-                                    for res in self.ScalingFunction.Max.keys():
-                                        offset+=int(self.node_resources_offset_for_scaling_function[res]*float(self.ScalingFunction.Max[res]))
-                                    return total_cost + 1 - conf_cost + offset 
+                                #if self.careful_scaling:
+                                #    return total_cost + 1 - conf_cost
+                                #else:
+                                offset=0
+                                for res in self.ScalingFunction.Max.keys():
+                                    offset+=int(self.node_resources_offset_for_scaling_function[res]*float(self.ScalingFunction.Max[res]))
+                                return total_cost + 1 - conf_cost + offset 
 
 		def is_worker_scaleable(worker):
                         nonlocal scale_down
