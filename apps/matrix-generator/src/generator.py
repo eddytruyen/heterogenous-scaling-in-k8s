@@ -1001,6 +1001,8 @@ def involves_worker(workers, conf, worker_index):
 
 
 def all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(adaptive_scaler, conf):
+    if adaptive_scaler.opt_in_for_restart:
+        return False
     for i,c in enumerate(conf):
         if not adaptive_scaler.workers[i].isFlagged() and c > 0:
             return False
@@ -1009,6 +1011,8 @@ def all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(adaptive_scaler,
 
 
 def all_flagged_conf(adaptive_scaler, conf,ScaledWorkerIndex):
+	if adaptive_scaler.opt_in_for_restart:
+		return False
 	if adaptive_scaler.ScalingDownPhase and not adaptive_scaler.StartScalingDown:
 		if not (adaptive_scaler.workers and conf):
 			return False
