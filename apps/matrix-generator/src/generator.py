@@ -88,6 +88,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
 
         def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
+            if not original_adaptive_scaler.careful_scaling:
+                return False
             tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
             tmp_index_conf=tmp_combinations.index(opt_conf)
             original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
@@ -108,6 +110,19 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             def get_start_and_window_for_next_experiments(opt_conf=None):
 
                                     only_failed_results=False if result else True
+
+                                    def copy_state_of_adaptive_scaler():
+                                        original_adaptive_scaler=adaptive_scaler.clone()
+                                        if result:
+                                            tmp_result=result
+                                        elif str(tenant_nb) in d[sla['name']].keys():
+                                            tmp_result=d[sla['name']][str(tenant_nb)]
+                                        else:
+                                            tmp_result={}
+                                        if tmp_result:
+                                            for w in original_adaptive_scaler.workers:
+                                                w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
+                                        return original_adaptive_scaler
 
                                     def process_states(conf_and_states,original_adaptive_scaler=None):
                                         nonlocal result
@@ -241,7 +256,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     adaptive_scaler.reset()
                                                     adaptive_scaler.set_tipped_over_failed_confs()
                                                     conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
-                                                    return process_states(conf_and_states)
+                                                    return process_states(conf_and_states, original_adaptive_scaler=original_adaptive_scaler)
                                                     #else:
                                                     #        adaptive_scaler.redo_scale_action()
                                                     #        #adaptive_scaler.reset(changePhase=False)
@@ -265,26 +280,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
                                     import pdb; pdb.set_trace()
-                                    original_adaptive_scaler=adaptive_scaler.clone()
-                                    if result:
-                                        tmp_result=result
-                                    elif str(tenant_nb) in d[sla['name']].keys():
-                                        tmp_result=d[sla['name']][str(tenant_nb)]
-                                    else:
-                                        tmp_result={}
-                                    if tmp_result:
-                                        for w in original_adaptive_scaler.workers:
-                                            w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
+                                    original_adaptive_scaler=copy_state_of_adaptive_scaler()
                                     if adaptive_scaler.ScalingDownPhase:
-                                            if result:
-                                                    tmp_result=result
-                                            elif str(tenant_nb) in d[sla['name']].keys():
-                                                    tmp_result=d[sla['name']][str(tenant_nb)]
-                                            else:
-                                                    tmp_result={}
-                                            if tmp_result:
-                                                    for w in original_adaptive_scaler.workers:
-                                                            w.resources=extract_resources_from_result(tmp_result,w.worker_id,w.resources.keys())
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
