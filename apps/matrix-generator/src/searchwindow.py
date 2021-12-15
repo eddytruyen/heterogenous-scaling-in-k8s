@@ -238,7 +238,7 @@ class AdaptiveScaler:
                 self._tested[worker.worker_id]=False
 
 	def status(self):
-                print("ScalingDownPhase, ScalingUpPhase, Tipped_over_confs, Current_tipped_over_conf, initial_confs, StartScalingDozn")
+                print("ScalingDownPhase, ScalingUpPhase, Tipped_over_confs, Current_tipped_over_conf, initial_confs, StartScalingDown, Worker resources")
                 print(self.ScalingDownPhase)
                 print(self.ScalingUpPhase)
                 print(self.tipped_over_confs)
