@@ -27,9 +27,8 @@ def create_workers(elements, costs, base):
 def generate_matrix(initial_conf):
 
 	def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
-            import pdb; pdb.set_trace()
-            #if not original_adaptive_scaler.careful_scaling:
-            #    return False
+            if not original_adaptive_scaler.careful_scaling:
+                return False
             tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
             tmp_index_conf=tmp_combinations.index(opt_conf)
             original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
