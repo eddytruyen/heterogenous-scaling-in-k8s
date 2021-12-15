@@ -178,7 +178,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             print("Recursive down scaling disabled")
                                                         return process_states([[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results,recursive_scale_down=recursive_scale_down)], original_adaptive_scaler=original_adaptive_scaler)
                                             else:
-                                                    import pdb; pdb.set_trace()
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
                                                     #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
                                                     if d[sla['name']]:
@@ -279,7 +278,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     elif not opt_conf and not result:
                                             if not adaptive_scaler.ScalingUpPhase:
                                                     exit("No result during scaling down phase, thus explicit optimal conf needed")
-                                    import pdb; pdb.set_trace()
                                     original_adaptive_scaler=copy_state_of_adaptive_scaler()
                                     if adaptive_scaler.ScalingDownPhase:
                                             states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
@@ -1247,8 +1245,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         i=start_tenant
         new_window=window
         start_window=window
-        if tenant_nb==1 and sorted_combinations[start] != [0,0,0,3] and sorted_combinations[start] != [0,0,0,2]:
-            import pdb; pdb.set_trace()
         if previous_results:
                 max_tenants=max(map(lambda x: int(x), previous_results.keys()))
                 while i <= max_tenants:
