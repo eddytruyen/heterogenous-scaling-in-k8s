@@ -1,0 +1,4154 @@
+CompletionTime: 120
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 0
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+generating script for 1 tenants
+executing script for 1 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.17333333333333334
+ config: 0
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 0 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 5 tenants
+executing script for 5 tenants
+^[[Await till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size: 4Gi -> 4Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.17333333333333334
+ config: 0
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Starting up...
+pod/silver-spark-worker3-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.10666666666666667
+ config: 1
+ score: -0.10666666666666667
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.10666666666666667
+ config: 2
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 152
+ SLAName: silver
+ Successfull: true
+ best_score: -1
+ config: 0
+ score: -1.0133333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 167
+ SLAName: silver
+ Successfull: true
+ best_score: -1
+ config: 0
+ score: -1.1133333333333333
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 1
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size: 4Gi -> 4Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.10666666666666667
+ config: 4
+ score: -0.16
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+Starting up...
+pod/silver-spark-worker4-2 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.16
+ config: 2
+ score: -0.16
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 0
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size: 4Gi -> 4Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 2
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 0 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size: 4Gi -> 4Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 2 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 147
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 137
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 150
+ SLAName: silver
+ Successfull: true
+ best_score: -0.22666666666666666
+ config: 0
+ score: -0.22666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 0
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size: 4Gi -> 4Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 2 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 0 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 134
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 135
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 0
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 140
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 1
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 129
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 135
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 144
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 137
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 0
+ score: -0.24
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 147
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 143
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.28
+ config: 1
+ score: -0.28
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 128
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 133
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 147
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 135
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 136
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 148
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 147
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 144
+ SLAName: silver
+ Successfull: true
+ best_score: -0.28
+ config: 1
+ score: -0.28
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 129
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 139
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 144
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 144
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+vwait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 143
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 147
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 123
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 128
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 140
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 135
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 141
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 129
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 134
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 135
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 141
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 1
+ score: -0.28
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 145
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+CompletionTime: 129
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Starting up...
+pod/silver-spark-worker2-0 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+CompletionTime: 137
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+previous_conf
+CompletionTime: 142
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 3
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 3
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+previous_conf
+CompletionTime: 141
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 3 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+previous_conf
+CompletionTime: 123
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+previous_conf
+CompletionTime: 148
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+previous_conf
+CompletionTime: 146
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+previous_conf
+CompletionTime: 149
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 3 -> 3
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+previous_conf
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.24
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size: 2Gi -> 2Gi
+cpu size: 2 -> 2
+memory size: 2Gi -> 2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 0
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
