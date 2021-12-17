@@ -1,0 +1,1220 @@
+ubuntu@kubeadm-ubuntu19:~/heterogenous-scaling-in-k8s/spark/experiments/scripts$ ./scaler.sh 10 2
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0   1040      0 --:--:-- --:--:-- --:--:--  1040
+CompletionTime: 1000149.0
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 0
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+^CInterrupt
+command terminated with exit code 130
+wait till distributed file system is synchronised
+^C
+ubuntu@kubeadm-ubuntu19:~/heterogenous-scaling-in-k8s/spark/experiments/scripts$ ./scaler.sh 10
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   561  100   561    0     0  22440      0 --:--:-- --:--:-- --:--:-- 23375
+CompletionTime: 120
+ SLAName: silver
+ Successfull: true
+ best_score: n/a
+ config: 0
+ score: n/a
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 0
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 0
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+generating script for 1 tenants
+executing script for 1 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    364      0  0:00:01  0:00:01 --:--:--   364
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.17333333333333334
+ config: 0
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 0 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 0 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+rm: cannot remove 'results-tenants-2/*': No such file or directory
+mv: target 'results-tenants-2/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    348      0  0:00:01  0:00:01 --:--:--   348
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+rm: cannot remove 'results-tenants-3/*': No such file or directory
+mv: target 'results-tenants-3/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    590      0 --:--:-- --:--:-- --:--:--   591
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+rm: cannot remove 'results-tenants-4/*': No such file or directory
+mv: target 'results-tenants-4/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    497      0  0:00:01  0:00:01 --:--:--   498
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+rm: cannot remove 'results-tenants-5/*': No such file or directory
+mv: target 'results-tenants-5/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    407      0  0:00:01  0:00:01 --:--:--   407
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+rm: cannot remove 'results-tenants-6/*': No such file or directory
+mv: target 'results-tenants-6/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    378      0  0:00:01  0:00:01 --:--:--   378
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+rm: cannot remove 'results-tenants-7/*': No such file or directory
+mv: target 'results-tenants-7/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    390      0  0:00:01  0:00:01 --:--:--   390
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+rm: cannot remove 'results-tenants-8/*': No such file or directory
+mv: target 'results-tenants-8/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    428      0  0:00:01  0:00:01 --:--:--   428
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+rm: cannot remove 'results-tenants-9/*': No such file or directory
+mv: target 'results-tenants-9/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    412      0  0:00:01  0:00:01 --:--:--   412
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+rm: cannot remove 'results-tenants-10/*': No such file or directory
+mv: target 'results-tenants-10/' is not a directory
+ubuntu@kubeadm-ubuntu19:~/heterogenous-scaling-in-k8s/spark/experiments/scripts$ ./scaler.sh 10
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   4326      0 --:--:-- --:--:-- --:--:--  4357
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.17333333333333334
+ config: 0
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+Starting up...
+pod/silver-spark-worker3-0 condition met
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+Starting up...
+pod/silver-spark-worker4-1 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   565  100   565    0     0    278      0  0:00:02  0:00:02 --:--:--   278
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+rm: cannot remove 'results-tenants-2/*': No such file or directory
+mv: target 'results-tenants-2/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   1010      0 --:--:-- --:--:-- --:--:--  1011
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 1
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+rm: cannot remove 'results-tenants-3/*': No such file or directory
+mv: target 'results-tenants-3/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    674      0 --:--:-- --:--:-- --:--:--   673
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 1
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+rm: cannot remove 'results-tenants-4/*': No such file or directory
+mv: target 'results-tenants-4/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    621      0 --:--:-- --:--:-- --:--:--   621
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 2
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 3
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker3: 2 -> 3
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+rm: cannot remove 'results-tenants-5/*': No such file or directory
+mv: target 'results-tenants-5/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   1175      0 --:--:-- --:--:-- --:--:--  1177
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 3
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 3
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+rm: cannot remove 'results-tenants-6/*': No such file or directory
+mv: target 'results-tenants-6/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   1215      0 --:--:-- --:--:-- --:--:--  1215
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 1
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 3 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+rm: cannot remove 'results-tenants-7/*': No such file or directory
+mv: target 'results-tenants-7/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    975      0 --:--:-- --:--:-- --:--:--   975
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 1
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 3
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 3
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+rm: cannot remove 'results-tenants-8/*': No such file or directory
+mv: target 'results-tenants-8/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   576  100   576    0     0    161      0  0:00:03  0:00:03 --:--:--   161
+CompletionTime: 158
+ SLAName: silver
+ Successfull: true
+ best_score: -1
+ config: 0
+ score: -1.0533333333333332
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 3 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+rm: cannot remove 'results-tenants-9/*': No such file or directory
+mv: target 'results-tenants-9/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   567  100   567    0     0    331      0  0:00:01  0:00:01 --:--:--   331
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.28
+ config: 0
+ score: -0.28
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+rm: cannot remove 'results-tenants-10/*': No such file or directory
+mv: target 'results-tenants-10/' is not a directory
+ubuntu@kubeadm-ubuntu19:~/heterogenous-scaling-in-k8s/spark/experiments/scripts$ ./scaler.sh 10
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   595  100   595    0     0   4612      0 --:--:-- --:--:-- --:--:--  4685
+CompletionTime: 148
+ SLAName: silver
+ Successfull: true
+ best_score: -0.17333333333333334
+ config: 0
+ score: -0.17333333333333334
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 2
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+New memory size:  2
+Horizontal scaling worker2: 2 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker4: 1 -> 2
+statefulset.apps/silver-spark-worker4 scaled
+Starting up...
+pod/silver-spark-worker4-1 condition met
+generating script for 1 tenants
+executing script for 1 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv results-tenants-1/
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   3532      0 --:--:-- --:--:-- --:--:--  3511
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 1
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker3: 1 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+Horizontal scaling worker4: 2 -> 1
+statefulset.apps/silver-spark-worker4 scaled
+generating script for 2 tenants
+executing script for 2 tenants
+rm: cannot remove 'results-sql-g2-t-*.csv': No such file or directory
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv results-tenants-2/
+rm: cannot remove 'results-tenants-2/*': No such file or directory
+mv: target 'results-tenants-2/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   595  100   595    0     0    687      0 --:--:-- --:--:-- --:--:--   686
+CompletionTime: 148
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 1
+ score: -0.18666666666666668
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 3 tenants
+executing script for 3 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv results-tenants-3/
+rm: cannot remove 'results-tenants-3/*': No such file or directory
+mv: target 'results-tenants-3/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   563  100   563    0     0   3728      0 --:--:-- --:--:-- --:--:--  3703
+CompletionTime: 148
+ SLAName: silver
+ Successfull: true
+ best_score: -0.2
+ config: 0
+ score: -0.2
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 4 tenants
+executing script for 4 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv results-tenants-4/
+rm: cannot remove 'results-tenants-4/*': No such file or directory
+mv: target 'results-tenants-4/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0   3901      0 --:--:-- --:--:-- --:--:--  3927
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 0
+ score: -0.25333333333333335
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size:  4Gi ->  4Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker1: 0 -> 1
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker2: 1 -> 0
+statefulset.apps/silver-spark-worker2 scaled
+generating script for 5 tenants
+executing script for 5 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv results-tenants-5/
+rm: cannot remove 'results-tenants-5/*': No such file or directory
+mv: target 'results-tenants-5/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    481      0  0:00:01  0:00:01 --:--:--   481
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.25333333333333335
+ config: 0
+ score: -0.25333333333333335
+ worker1.replicaCount: 1
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 6 -> 6
+memory size:  4Gi ->  4Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 6 tenants
+executing script for 6 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv results-tenants-6/
+rm: cannot remove 'results-tenants-6/*': No such file or directory
+mv: target 'results-tenants-6/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   597  100   597    0     0    427      0  0:00:01  0:00:01 --:--:--   427
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.18666666666666668
+ config: 3
+ score: -0.25333333333333335
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 0
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 3
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker1: 1 -> 0
+statefulset.apps/silver-spark-worker1 scaled
+Horizontal scaling worker3: 1 -> 3
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 7 tenants
+executing script for 7 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv results-tenants-7/
+rm: cannot remove 'results-tenants-7/*': No such file or directory
+mv: target 'results-tenants-7/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   595  100   595    0     0    343      0  0:00:01  0:00:01 --:--:--   343
+CompletionTime: 144
+ SLAName: silver
+ Successfull: true
+ best_score: -0.26666666666666666
+ config: 0
+ score: -0.26666666666666666
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 0 -> 1
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 3 -> 2
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 8 tenants
+executing script for 8 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv results-tenants-8/
+rm: cannot remove 'results-tenants-8/*': No such file or directory
+mv: target 'results-tenants-8/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   562  100   562    0     0   3325      0 --:--:-- --:--:-- --:--:--  3305
+CompletionTime: 153
+ SLAName: silver
+ Successfull: true
+ best_score: -1
+ config: 0
+ score: -1.02
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 1
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 2
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+generating script for 9 tenants
+executing script for 9 tenants
+executing script for 9 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-9/
+rm: cannot remove 'results-tenants-9/*': No such file or directory
+mv: target 'results-tenants-9/' is not a directory
+previous_conf
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   567  100   567    0     0    366      0  0:00:01  0:00:01 --:--:--   366
+CompletionTime: 1e-09
+ SLAName: silver
+ Successfull: true
+ best_score: -0.28
+ config: 0
+ score: -0.28
+ worker1.replicaCount: 0
+ worker1.resources.requests.cpu: 6
+ worker1.resources.requests.memory: 4
+ worker2.replicaCount: 2
+ worker2.resources.requests.cpu: 4
+ worker2.resources.requests.memory: 2
+ worker3.replicaCount: 1
+ worker3.resources.requests.cpu: 3
+ worker3.resources.requests.memory: 2
+ worker4.replicaCount: 1
+ worker4.resources.requests.cpu: 2
+ worker4.resources.requests.memory: 2
+Old memory size spark_client: 2Gi
+cpu size: 4 -> 4
+memory size:  2Gi ->  2Gi
+cpu size: 3 -> 3
+memory size:  2Gi ->  2Gi
+cpu size: 2 -> 2
+memory size:  2Gi ->  2Gi
+New memory size:  2
+Horizontal scaling worker2: 1 -> 2
+statefulset.apps/silver-spark-worker2 scaled
+Horizontal scaling worker3: 2 -> 1
+statefulset.apps/silver-spark-worker3 scaled
+generating script for 10 tenants
+executing script for 10 tenants
+wait till distributed file system is synchronised
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv/_SUCCESS  /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv/_SUCCESS
+/mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv/_SUCCESS   /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv/_SUCCESS
+cp -r /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-1.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-10.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-2.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-3.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-4.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-5.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-6.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-7.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-8.csv /mnt/nfs-disk-2/spark-bench/results-sql-g2-t-9.csv results-tenants-10/
+rm: cannot remove 'results-tenants-10/*': No such file or directory
+mv: target 'results-tenants-10/' is not a directory
+
+
