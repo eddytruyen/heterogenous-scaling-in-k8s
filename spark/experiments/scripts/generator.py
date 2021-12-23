@@ -123,14 +123,24 @@ def process_segment(trace, intermediate_first_or_last=0):
 		times=end_count-initial_count
 
 		for t in range(times+1):
-			set_user_count(t+initial_count, intermediate_first_or_last)
+                    if t == 0 and intermediate_first_or_last == 1:
+                            set_user_count(t+initial_count, intermediate_first_or_last)
+                    elif t == times and intermediate_first_or_last == 2:
+                            set_user_count(t+initial_count, intermediate_first_or_last)
+                    else:
+                            set_user_count(t+initial_count)
 		# set_user_count(end_count)
 
 	elif(segment_type=='decreasing'):
 		times=initial_count-end_count
 
 		for t in range(times+1):
-			set_user_count(initial_count-t, intermediate_first_or_last)
+                    if t == 0 and intermediate_first_or_last == 1:
+                            set_user_count(initial_count-t, intermediate_first_or_last)
+                    elif t == times and intermediate_first_or_last == 2:
+                            set_user_count(initial_count-t, intermediate_first_or_last)
+                    else:
+                            set_user_count(initial_count-t)
 		# set_user_count(end_count)	
 
 def generate_load():
