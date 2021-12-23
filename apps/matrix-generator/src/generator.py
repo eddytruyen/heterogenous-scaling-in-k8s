@@ -55,8 +55,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         def check_and_get_next_exps(adaptive_scaler, rm, lst,previous_conf, start_index, window, tenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=True, retry=False, retry_window=None, higher_tenants_only=False):
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and (rm.no_experiments_left() and not rm.last_experiment_in_queue()):
                 print("Getting next batch of experiments for " + str(tenants) + " tenants")
-                if filter:
-                    try:
+                try:
+                    if filter:
                         print("Moving filtered samples in sorted combinations after the window")
                         print([utils.array_to_str(el) for el in lst])
                         if d[sla['name']]:
@@ -74,18 +74,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         next_conf=lst[start_and_window[0]]
                         start=start_and_window[0]
                         new_window=start_and_window[1]
-                    except IndexError:
-                        if retry and retry_window:
-                            get_next_exps(adaptive_scaler, rm, lst, get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function), sampling_ratio, retry_window, tenants)
-                        else:
-                            next_conf=previous_conf
-                            start=lst.index(previous_conf)
-                            new_window=1
-                else:
-                    next_conf=lst[start_index]
-                    new_window=window
-                    start=start_index
-                get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
+                    else:
+                        next_conf=lst[start_index]
+                        new_window=window
+                        start=start_index
+                    get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
+                except IndexError:
+                    if retry and retry_window:
+                        get_next_exps(adaptive_scaler, rm, lst, get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function), sampling_ratio, retry_window, tenants)
+                    else:
+                        next_conf=previous_conf
+                        start=lst.index(previous_conf)
+                        new_window=1
 
         def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
             if not original_adaptive_scaler.careful_scaling:
@@ -747,6 +747,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             else:
                 conf_in_case_of_IndexError=lst[0]
                 retry_wdw=window-start+1
+
+            next_conf=predictedConf
             check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
             #if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) < startTenants:
             #    new_d=deep_copy_results(d)
@@ -1288,14 +1290,18 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                	                print(result_conf)
                                             else:
                                                 print(previous_tenant_conf)
-                                        qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas)
+                                        if i <= tenant_nb:
+                                            qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, check_workers, ScaledDownWorkerIndex)
+                                        else:
+                                            qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replica, false, -1)
                                         cost=qualitiesOfSample['cost']
                                         nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
                                         if isinstance(minimum_shared_replicas,int):
                                                 min_shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                         else:
                                                 min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
-                                        if (check_workers and i <= tenant_nb and all_flagged_conf(adaptive_scaler, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or ( (cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas)) or (not exceptional_no_check_for_vertical_scaling and (not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)))) or check_resource_cost() or (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
+                                        #if (check_workers and i <= tenant_nb and all_flagged_conf(adaptive_scaler, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))
+                                        if ( (cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas)) or (not exceptional_no_check_for_vertical_scaling and (not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)))) or check_resource_cost() or (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
@@ -1570,17 +1576,22 @@ def resource_cost(workers, conf, cost_aware=True):
         return cost
 
 
-def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas):
-        if not previous_conf:
-               return {'cost': 0, 'nb_shrd_repls': minimal_shared_replicas}
-        cost=0
-        shared_replicas=0
-        for c1,c2 in zip(conf,previous_conf):
-               if  c1 > c2:
-                       cost+=c1-c2
-               if c2 >= 1  and c1 >= 1:
-                       shared_replicas+=min(c1,c2)
-        return {'cost': cost, 'nb_shrd_repls': shared_replicas}
+def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas, check_worker, scaler_worker_index):
+    if not previous_conf:
+        return {'cost': 0, 'nb_shrd_repls': minimal_shared_replicas}
+    cost=0
+    shared_replicas=0
+    index=0
+    for c1,c2 in zip(conf,previous_conf):
+        if  not (check_worker and index == scaled_worker_index) and c1 > c2:
+            cost+=c1-c2
+        elif (check_worker and index == scaled_worker_index) and c1 > 0:
+            cost+=c1
+        if c2 >= 1  and c1 >= 1 and not (check_worker and index == scaled_worker_index):
+            shared_replicas+=min(c1,c2)
+        index+=1
+    print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas))
+    return {'cost': cost, 'nb_shrd_repls': shared_replicas}
 
 
 

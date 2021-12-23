@@ -40,6 +40,7 @@ class ScalingFunction:
 		self.LastScaledUpWorker = []
 		if initial_conf:
 			self.minimum_resources=initial_conf["minimum_resources"]
+			self.increments=initial_conf["increments"]
 
 	def clone(self, clone_scaling_records=False):
                 sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
@@ -49,6 +50,7 @@ class ScalingFunction:
                     sc.LastScaledDownWorker = self.LastScaledDownWorker[:]
                     sc.LastScaledUpWorker = self.LastScaledUpWorker[:]
                 sc.minimum_resources=self.minimum_resources
+                sc.increments=self.increments
                 return sc
 
 	def maximum(self,x1,x2):
@@ -120,16 +122,16 @@ class ScalingFunction:
                 worker=workers[worker_index]
                 scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
                 for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units >= self.minimum_resources[res]:
-                            worker.scale(res, worker.resources[res]-nb_of_units)
+                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments >= self.minimum_resources[res]:
+                            worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
-                            scale_down[res]=[nb_of_units] + k[res]
-                        elif scaleSecondaryResource and worker.resources[res] - 1 >= self.minimum_resources[res]:
-                            worker.scale(res, worker.resources[res]-1)
+                            scale_down[res]=[nb_of_units*self.increments[res]] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] - 1*self.increments[res] >= self.minimum_resources[res]:
+                            worker.scale(res, worker.resources[res]-1*self.increments[res])
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
-                            scale_down[res]=[1] + k[res]
+                            scale_down[res]=[1*self.increments[res]] + k[res]
                         else:
                             k=self.workersScaledDown[worker_index][1]
                             scale_down[res]=[0] + k[res]
@@ -145,16 +147,16 @@ class ScalingFunction:
 		worker=workers[worker_index]
 		scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
 		for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]+nb_of_units <= self.Max[res]:
-                            worker.scale(res, worker.resources[res]+nb_of_units)
+                        if (res in self.DominantResources) and worker.resources[res]+nb_of_units*self.increments[res] <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+nb_of_units*self.increments[res])
                             self.LastScaledUpWorker+=[worker_index]
                             k=self.workersScaledUp[worker_index][1]
-                            scale_up[res]=[nb_of_units] + k[res]
-                        elif scaleSecondaryResource and worker.resources[res] + 1 <= self.Max[res]:
-                            worker.scale(res, worker.resources[res]+1)
+                            scale_up[res]=[nb_of_units*self.increments[res]] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] + 1*self.increments[res] <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+1*self.increments[res])
                             self.LastScaledUpWorker+=[worker_index]
                             k=self.workersScaledUp[worker_index][1]
-                            scale_up[res]=[1] + k[res]
+                            scale_up[res]=[1*self.increments[res]] + k[res]
                         else:
                             k=self.workersScaledUp[worker_index][1]
                             scale_up[res]=[0] + k[res]
