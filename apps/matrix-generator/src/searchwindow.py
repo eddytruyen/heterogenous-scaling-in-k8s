@@ -122,7 +122,7 @@ class ScalingFunction:
                 worker=workers[worker_index]
                 scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
                 for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments >= self.minimum_resources[res]:
+                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments[res] >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
