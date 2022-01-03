@@ -13,7 +13,7 @@ import os
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -1290,10 +1290,10 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                	                print(result_conf)
                                             else:
                                                 print(previous_tenant_conf)
-                                        if i <= tenant_nb:
+                                        if i <= tenant_nb and not exceptional_no_check_for_vertical_scaling:
                                             qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, check_workers, ScaledDownWorkerIndex)
                                         else:
-                                            qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replica, false, -1)
+                                            qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1)
                                         cost=qualitiesOfSample['cost']
                                         nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
                                         if isinstance(minimum_shared_replicas,int):
@@ -1576,7 +1576,7 @@ def resource_cost(workers, conf, cost_aware=True):
         return cost
 
 
-def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas, check_worker, scaler_worker_index):
+def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas, check_worker, scaled_worker_index):
     if not previous_conf:
         return {'cost': 0, 'nb_shrd_repls': minimal_shared_replicas}
     cost=0
