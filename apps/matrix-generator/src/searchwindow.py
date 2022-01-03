@@ -196,6 +196,8 @@ class AdaptiveScaler:
 			self.scaling_down_threshold=initial_conf["scaling_down_threshold"]
 			self.opt_in_for_restart=initial_conf["opt_in_for_restart"]
 			self.careful_scaling=initial_conf["careful_scaling"]
+			self.exploration_rate=initial_conf["exploration_rate"]
+
 
 	def clone(self, start_fresh=False):
             a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True), self.sla_name)
@@ -224,6 +226,8 @@ class AdaptiveScaler:
             a_s.scaling_down_threshold=self.scaling_down_threshold
             a_s.opt_in_for_restart=self.opt_in_for_restart
             a_s.careful_scaling=self.careful_scaling
+            a_s.exploration_rate=self.exploration_rate
+
             return a_s
 
 
@@ -388,7 +392,8 @@ class AdaptiveScaler:
                                 return True
                 
 		def worker_is_notflagged_testable_and_scaleable(worker,conf):
-                       if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
+		       #if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
+                       if is_testable(worker,conf) and is_worker_scaleable(worker):
                                 return True
                        else:
                                 return False
