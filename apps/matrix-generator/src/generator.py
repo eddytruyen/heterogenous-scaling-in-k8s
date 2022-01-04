@@ -1291,18 +1291,31 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                	                print(result_conf)
                                             else:
                                                 print(previous_tenant_conf)
-                                        #if i <= tenant_nb:
-                                        qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, check_workers, ScaledDownWorkerIndex, log=True)
+                                        remove=False
+                                        if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost():
+                                            remove=True
+                                        else:
+                                            if i < tenant_nb:
+                                                previous_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,previous_conf,slo)
+                                                current_adaptive_scaler=adaptive_scaler
+                                            elif i > tenant_nb:
+                                                tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)
+                                                previous_adaptive_scaler=adaptive_scaler
+                                                current_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,previous_conf,slo)
+                                            if i != tenant_nb:
+                                                qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimal_shared_replicas, log=True)
+                                            else:
+                                                qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, check_workers, ScaledDownWorkerIndex, log=True)
                                         #else:
                                         #    qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1, log=log)
-                                        cost=qualitiesOfSample['cost']
-                                        nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-                                        if isinstance(minimum_shared_replicas,int):
+                                            cost=qualitiesOfSample['cost']
+                                            nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
+                                            if isinstance(minimum_shared_replicas,int):
                                                 min_shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
-                                        else:
+                                            else:
                                                 min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
                                         #if (check_workers and i <= tenant_nb and all_flagged_conf(adaptive_scaler, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))
-                                        if ( (cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas)) or not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost(): #or (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
+                                        if remove or (cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas): #or (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
@@ -1577,6 +1590,39 @@ def resource_cost(workers, conf, cost_aware=True):
         return cost
 
 
+
+def tenant_nb_X_result_conf_conflict_with_other_tenant_nb(adaptive_scalers, previous_results, adaptive_scaler, tenant_nb, result_conf, other_tenant_nb, slo, scaling_down_threshold):
+        cloned_other_as={}
+        t=str(other_tenant_nb)
+        if t in previous_results.keys():
+            other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
+            other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,other_tenant_nb,other_conf,slo, clone_scaling_function=True, log=False)
+            if other_tenant_nb > tenant_nb:
+                        if not adaptive_scaler.equal_workers(other_as.workers):
+                            if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                                return True
+                            elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                                return True
+                            elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
+                                return True
+                            elif not (other_as.ScalingDownPhase and other_as.StartScalingDown):
+                                return True
+                            #elif not adaptive_scaler.equal_workers(other_as.workers):
+                            changed_scaler=False
+                            for i,w in enumerate(adaptive_scaler.workers):
+                                                changed=False
+                                                if involves_worker(adaptive_scaler.workers, result_conf,i) and not other_as.workers[i].equals(w):
+                                                        changed=True
+                                                if changed:
+                                                        if not t in cloned_other_as.keys():
+                                                            cloned_other_as[t]=other_as.clone(start_fresh=True)
+                                                        cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
+        for t in cloned_other_as.keys():
+            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
+            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
+        return False
+
+
 def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas, check_worker, scaled_worker_index, log=False):
     if not previous_conf:
         return {'cost': 0, 'nb_shrd_repls': minimal_shared_replicas}
@@ -1591,6 +1637,23 @@ def _pairwise_transition_cost(previous_conf,conf, minimal_shared_replicas, check
         if c2 >= 1  and c1 >= 1 and not (check_worker and index == scaled_worker_index):
             shared_replicas+=min(c1,c2)
         index+=1
+    if log:
+        print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas))
+    return {'cost': cost, 'nb_shrd_repls': shared_replicas}
+
+def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_conf, adaptive_scaler, conf, minimal_shared_replicas, log=False):
+    if not previous_conf or not provious_adaptive_scaler:
+        return {'cost': 0, 'nb_shrd_repls': minimal_shared_replicas}
+    cost=0
+    shared_replicas=0
+    for worker_index, conf_pair in enumerate(zip(conf,previous_conf)):
+        if adaptive_scaler.workers[worker_index].equals(previous_adaptive_scaler.workers[worker_index]):
+            if conf_pair[0] > conf_pair[1]:
+                cost+=conf_pair[0]-conf_pair[1]
+            if conf_pair[1] >= 1  and conf_pair[0] >= 1:
+                shared_replicas+=min(conf_pair[0],conf_pair[1])
+        else:
+            cost+=conf_pair[0]
     if log:
         print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas))
     return {'cost': cost, 'nb_shrd_repls': shared_replicas}
