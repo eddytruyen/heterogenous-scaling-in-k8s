@@ -220,6 +220,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
+                                                    import pdb; pdb.set_trace()
                                                     if not adaptive_scaler.tipped_over_confs:
                                                         if only_failed_results:
                                                             remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
@@ -562,6 +563,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         base=alphabet['base']
         slo=float(sla['slos']['completionTime'])
         adaptive_scaler=adaptive_scalers['init']
+        check_consistency_adaptive_scalers_and_results(d, sla, adaptive_scalers, adaptive_scaler, slo, initial_conf)
         startTenants = int(tenants)
         tenant_nb=startTenants
         maxTenants = -1
@@ -818,6 +820,25 @@ def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenan
 					d[sla['name']][t]=create_result(other_as, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
 	return d
 
+
+def check_consistency_adaptive_scalers_and_results(d, sla, adaptive_scalers, adaptive_scaler, slo, init_conf):
+        print("Checking consistency of adaptive_scalers with stored results in matrix")
+        for t in d[sla['name']].keys():
+                        tmp_result=d[sla['name']][t]
+                        other_conf=get_conf(adaptive_scaler.workers, tmp_result)
+                        as_key=get_adaptive_scaler_key(t, other_conf)
+                        if not as_key in adaptive_scalers.keys():
+                            tmp_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(t),other_conf,slo, clone_scaling_function=True)
+                            resources_keys=adaptive_scaler.workers[0].resources.keys()
+                            for i, w in enumerate(tmp_adaptive_scaler.workers):
+                                for res in resources_keys:
+                                    tmp_res=int(tmp_result["worker"+str(i+1)+".resources.requests." + res])
+                                    if tmp_res != w.resources[res]:
+                                        prefix=str(init_conf['prefix'][res]) if init_conf['prefix'][res] != None else ""
+                                        suffix=str(init_conf['suffix'][res]) if init_conf['suffix'][res] != None else ""
+                                        print("!!!Resource " + res +  " for worker " + str(w.worker_id) + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
+                                        raise RuntimeError("!!!Resource " + res +  " for worker " + str(w.worker_id) + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
+                        
 
 def get_matrix_and_sla(initial_conf,namespace):
         slas=initial_conf['slas']

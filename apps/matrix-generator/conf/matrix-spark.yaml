@@ -58,6 +58,8 @@ suffix:
   cpu:
   memory: Gi
 prefix:
+  cpu:
+  memory:
 scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: True
