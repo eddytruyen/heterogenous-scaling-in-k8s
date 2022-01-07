@@ -197,6 +197,7 @@ class AdaptiveScaler:
 			self.opt_in_for_restart=initial_conf["opt_in_for_restart"]
 			self.careful_scaling=initial_conf["careful_scaling"]
 			self.exploration_rate=initial_conf["exploration_rate"]
+			self.increments=initial_conf["increments"]
 
 
 	def clone(self, start_fresh=False):
@@ -227,6 +228,7 @@ class AdaptiveScaler:
             a_s.opt_in_for_restart=self.opt_in_for_restart
             a_s.careful_scaling=self.careful_scaling
             a_s.exploration_rate=self.exploration_rate
+            a_s.increments=self.increments
 
             return a_s
 

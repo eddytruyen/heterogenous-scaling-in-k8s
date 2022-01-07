@@ -220,7 +220,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
-                                                    import pdb; pdb.set_trace()
                                                     if not adaptive_scaler.tipped_over_confs:
                                                         if only_failed_results:
                                                             remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), False, adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
@@ -1170,17 +1169,18 @@ def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, con
 #def has_different_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
 #    return  has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b) or  has_smaller_workers_than(adaptive_scaler_b, conf_b, adaptive_scaler_a, conf_a)
 
-def has_smaller_workers_than_old_v(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
-    response=False
+def has_pairwise_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b): 
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
-        if conf_pair[0] > 0 and conf_pair[1] > 0:
+        #if conf_pair[0] > 0 and conf_pair[1] > 0:
             if is_smaller_worker_than(adaptive_scaler_b.workers[worker_index],adaptive_scaler_a.workers[worker_index]):
                 return False
     for worker_index,conf_pair in enumerate(zip(conf_a,conf_b)):
-        if conf_pair[0] > 0 and conf_pair[1] > 0:
-            if is_smaller_worker_than(adaptive_scaler_a.workers[worker_index],adaptive_scaler_b.workers[worker_index]):
+        #if conf_pair[0] > 0 and conf_pair[1] > 0:
+            if is_smaller_increment_worker_than(adaptive_scaler_a.workers[worker_index],adaptive_scaler_b.workers[worker_index], adaptive_scaler_a.increments,1):
                 return True
     return False
+
+
 
 
 def has_smaller_workers_than(adaptive_scaler_a, conf_a, adaptive_scaler_b, conf_b):
@@ -1206,6 +1206,16 @@ def is_smaller_worker_than(worker_a, worker_b):
             return True
     return False
 
+def is_smaller_increment_worker_than(worker_a, worker_b, increments, nb_of_increments):
+    if worker_a.equals(worker_b):
+        return False
+    for res in worker_a.resources.keys():
+        if worker_a.resources[res] > worker_b.resources[res]:
+            return False
+    for res in worker_a.resources.keys():
+        if worker_a.resources[res] + nb_of_increments*increments[res] == worker_b.resources[res]:
+            return True
+    return False
 
 
 def can_be_improved_by_another_config(results, sorted_combinations, adaptive_scaler, tenants, slo, scaling_up_threshold):
@@ -1234,9 +1244,9 @@ def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previo
                         if not adaptive_scaler.equal_workers(other_as.workers):
                             if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
                                 return True
-                            elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
+                            elif float(previous_results[t]['CompletionTime']) <= slo and has_pairwise_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
                                 return True
-                            elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
+                            elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_pairwise_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
                                 return True
                             elif not (other_as.ScalingDownPhase and other_as.StartScalingDown):
                                 return True
@@ -1323,13 +1333,15 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                         if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost():
                                             remove=True
                                         else:
+                                            other_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
+                                            other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,other_conf,slo,log=False)
                                             if i < tenant_nb:
-                                                previous_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,previous_tenant_conf,slo)
+                                                previous_adaptive_scaler=other_as
                                                 current_adaptive_scaler=adaptive_scaler
                                             elif i > tenant_nb:
                                                 tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)
                                                 previous_adaptive_scaler=adaptive_scaler
-                                                current_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,previous_tenant_conf,slo)
+                                                current_adaptive_scaler=other_as
                                             if i != tenant_nb:
                                                 qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, log=True)
                                             else:
