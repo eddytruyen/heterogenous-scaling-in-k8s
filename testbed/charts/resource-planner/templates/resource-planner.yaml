@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-planner
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resource-planner
+  template:
+    metadata:
+      labels:
+        app: resource-planner
+    spec:
+      serviceAccountName: resource-planner
+      nodeSelector: 
+        workerNode: "yes"
+      containers:
+      - name: resource-planner
+        image: avl4kul/resource-planner:latest
+        imagePullPolicy: Always
+ 
+       

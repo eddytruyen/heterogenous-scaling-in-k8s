@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer3
+spec:
+  selector:
+    matchLabels:
+      app: consumer
+  replicas: {{.Values.worker3Replicas}}
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: arguez/python-consumer:basic
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: {{.Values.worker3CPU}}
+          limits:
+            cpu: {{.Values.worker3CPU}}
+        env:
+        - name: DNS_NAMESPACE
+          value: {{.Values.namespace}}
+        - name: STRESS_SIZE
+          value: "{{.Values.stressSize}}"
+        - name: POOL_SIZE
+          value: "{{.Values.poolSize3}}"          
+      priorityClassName: {{.Values.priorityClass}}
+      nodeSelector:
+        workerNode: "yes"
