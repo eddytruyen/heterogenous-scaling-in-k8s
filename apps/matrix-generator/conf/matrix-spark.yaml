@@ -23,13 +23,13 @@ slas:
             memory: 4
         - size:
             cpu: 4
-            memory: 4
+            memory: 2
         - size: 
             cpu: 3
-            memory: 4 
+            memory: 2 
         - size:
             cpu: 2
-            memory: 4
+            memory: 2
       costs:
         -  cpu: 1
            memory: 1
@@ -64,4 +64,4 @@ scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: True
 careful_scaling: False
-exploration_rate: 0.1
+exploration_rate: 0.5
