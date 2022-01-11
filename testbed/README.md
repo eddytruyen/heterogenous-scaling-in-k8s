@@ -69,5 +69,10 @@ kubectl port-forward spark-client-0 -n silver --address 0.0.0.0 <choose port>:18
 
 Go to browser and open at `http://IP of random node:<chosen port>`
 
+### Stopping history-server
+```
+root@spark-client-0:/opt/bitnami/spark# ./sbin/stop-history-server.sh
+```
+
 ### More information
 https://spark.apache.org/docs/2.4.6/monitoring.html
