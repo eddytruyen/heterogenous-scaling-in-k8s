@@ -30,7 +30,7 @@ charts
 
 ```
 
-### Spark monitoring
+## Spark monitoring
 
 ### Assume 1 Job is being run
 
@@ -47,7 +47,7 @@ spark-submit-config = [{
     }
 ```
 
-## During run:
+### During run:
 Run at a random node of Kubernetes cluster
 ```
 kubectl port-forward spark-client-0 -n silver --address 0.0.0.0 4040:4040
@@ -55,7 +55,7 @@ kubectl port-forward spark-client-0 -n silver --address 0.0.0.0 4040:4040
 
 Go to browser and open at `http://IP of random node:4040`
 
-## After run
+### After run
 ```
 # kubectl exec -it spark-client-0 -n silver -- bash
 root@spark-client-0:/opt/bitnami/spark# mkdir /tmp/spark-events
@@ -69,3 +69,5 @@ kubectl port-forward spark-client-0 -n silver --address 0.0.0.0 <choose port>:18
 
 Go to browser and open at `http://IP of random node:<chosen port>`
 
+### More information
+https://spark.apache.org/docs/2.4.6/monitoring.html
