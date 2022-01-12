@@ -769,6 +769,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
         if not next_tenant_nb_processed:
+            rm=get_rm_for_closest_tenant_nb(startTenants)
+            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+            start=0
+            adaptive_window=rm.get_adaptive_window()
             process_request_for_next_tenant_nb()
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
@@ -1340,19 +1344,20 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                         if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost():
                                             remove=True
                                         else:
-                                            other_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
-                                            other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,other_conf,slo,log=False)
+                                            tenant_nb_X_result_conf_conflict_with_other_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)
                                             if i != tenant_nb:
-                                                tenant_nb_X_result_conf_conflict_with_other_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)
+                                                other_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
+                                                other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,other_conf,slo,log=False)
                                                 if i < tenant_nb:
                                                     previous_adaptive_scaler=other_as
                                                     current_adaptive_scaler=adaptive_scaler
                                                 elif i > tenant_nb:
                                                     previous_adaptive_scaler=adaptive_scaler
                                                     current_adaptive_scaler=other_as
-                                                qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, log=True)
                                             else:
-                                                qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, check_workers, ScaledDownWorkerIndex, log=True)
+                                                current_adaptive_scaler=adaptive_scaler
+                                                previous_adaptive_scaler=update_adaptive_scaler_with_results(adaptive_scaler.clone(), previous_results, tenant_nb, get_conf(adaptive_scaler.workers, previous_results[str(tenant_nb)]))
+                                            qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, log=True)
                                         #else:
                                         #    qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1, log=log)
                                             cost=qualitiesOfSample['cost']
