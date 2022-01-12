@@ -6,14 +6,14 @@ class RuntimeManager:
     def __init__(self, tenant_nb, adaptive_scalers, adaptive_window):
         self.tenant_nb=tenant_nb
         self.raw_experiments=[]
-        self.experiments={}
+        self.experiments={} #{1..n, [experiment_specification,samples: [conf]]}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
         self.sorted_combinations=[]
         self.adaptive_scalers=adaptive_scalers
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
-        self.last_experiment={}
+        self.last_experiment={}#{"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
         self.previous_returned_experiment={}
         self.initial_window=adaptive_window.get_current_window()
         self.adaptive_window=adaptive_window
@@ -130,6 +130,19 @@ class RuntimeManager:
             return exp["experiment_nb"]
         else:
             return self.current_experiment["experiment_nb"]
+
+    def get_nb_of_experiment_for_conf(self,conf):
+        for exp_nb in self.experiments.keys():
+            if self.conf_in_samples(conf,self.experiments[exp_nb][1]):
+                return exp_nb
+        return -1
+
+    def get_experiment_specification_for_experiment_nb(self, experiment_nb):
+        if experiment_nb in self.experiments.keys():
+            return self.experiments[experiment_nb][0]
+        else:
+            return None
+
 
     def get_nb_of_sample_for_conf(self,experiment_nb,conf):
         if self.conf_in_experiments(conf):

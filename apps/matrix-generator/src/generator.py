@@ -569,7 +569,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                 start=lst.index(found_conf)
-                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (1 in [random.choice(range(1,int(100/(100*adaptive_scaler.exploration_rate))))]): #i#(previous_tenants and startTenants != int(previous_tenants)):
+                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (1 in [random.choice(range(1,int(100/(100*adaptive_scaler.exploration_rate))+1))]): #i#(previous_tenants and startTenants != int(previous_tenants)):
                     if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                         if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
@@ -691,10 +691,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                     #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
                                     if tipped_over_intermediate_confs:
-                                        if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
-                                            do_higher_tenant_remove=True
-                                        else:
-                                            do_higher_tenant_remove=False
+                                        #if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
+                                        #    do_higher_tenant_remove=True
+                                        #else:
+                                        do_higher_tenant_remove=False
                                     else:
                                         do_higher_tenant_remove=True
                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
@@ -738,12 +738,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
                     remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                 elif intermediate_state == COST_EFFECTIVE_RESULT:
-                    remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
+                    remove_failed_confs(lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                 # if still configs remain to be tested
                 last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
                 print("let k8-resource-optimizer process the inputted previous result")
-                ws=rm.get_current_experiment_specification()
-                i=rm.get_current_experiment_nb()
+                if rm.experiments:
+                    i=rm.get_nb_of_experiment_for_conf(previous_conf)
+                    ws=rm.get_experiment_specification_for_experiment_nb(i)
+                elif rm.last_experiment:
+                    ws=rm.last_experiment["experiment_spec"]
+                    i=rm.last_experiment["experiment_nb"]
+                else:
+                    raise RuntimeError("No experiments left in runtime manager")
                 sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                 samples=int(ws[4]*sampling_ratio)
                 if samples == 0:
@@ -1135,7 +1141,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 	#						sorted_combinations.remove(tmp_combinations[i])
 # if not intermediate_remove
 		next_index=0
-		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
+		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (careful_scaling or (higher_tenant_remove or tipped_over_results)))):
 			if failed_conf in sorted_combinations:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=tmp_combinations.index(failed_conf)
