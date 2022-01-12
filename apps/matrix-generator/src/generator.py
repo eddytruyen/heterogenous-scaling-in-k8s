@@ -14,7 +14,7 @@ import random
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 
 def create_workers(elements, costs, base):
@@ -107,7 +107,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
 
         def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf):
-            
+
             def get_start_and_window_for_next_experiments(opt_conf=None):
 
                                     only_failed_results=False if result else True
@@ -410,6 +410,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                             rm.reset()
+                            if adaptive_scaler.ScalingUpPhase:
+                                adaptive_scaler.reset()
                         except IndexError:
                                 rm.reset()
                                 start=0
@@ -543,7 +545,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             nonlocal lst
             nonlocal start
             nonlocal d
-            nonlocal next_conf
             nonlocal rm
             nonlocal adaptive_window
 
