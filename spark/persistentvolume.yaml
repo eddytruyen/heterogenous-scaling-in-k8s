@@ -20,3 +20,7 @@ spec:
           operator: In
           values:
           - "yes"
+        - key: sparkClient
+          operator: In
+          valueus:
+          - "yes"
