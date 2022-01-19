@@ -25,7 +25,7 @@ metadata:
 data:
   storageClassMap: |
     local-storage:
-      hostDir: /mnt/nfs-disk
+      hostDir: /mnt/nfs-disk2
       mountDir: /mnt/nfs-disk
       volumeMode: Filesystem
       fsType: ext4
@@ -146,4 +146,4 @@ spec:
             path: /dev
         - name: local-storage
           hostPath:
-            path: /mnt/nfs-disk
+            path: /mnt/nfs-disk2
