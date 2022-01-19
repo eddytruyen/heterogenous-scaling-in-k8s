@@ -16,6 +16,7 @@ NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
 LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
+USE_PERFORMANCE_MODEL=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -585,7 +586,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             rm.remove_sample_for_conf(lst[start])
                         else:
                             d[sla['name']][str(startTenants)]=rm.get_next_sample()
-            else:
+            elif USE_PERFORMANCE_MODEL:
                 print("using curve-fitted scaling function to estimate configuration for tenants " + str(startTenants))
                 adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
@@ -606,6 +607,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
                 next_conf=predictedConf
                 check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
+                d[sla['name']][str(startTenants)]=rm.get_next_sample()
+            else:
+                tmp_rm=get_rm_for_closest_tenant_nb(startTenants)
+                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                next_conf=lst[0]
+                start=0
+                tmp_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,next_conf,slo)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=window)
                 d[sla['name']][str(startTenants)]=rm.get_next_sample()
 
 
