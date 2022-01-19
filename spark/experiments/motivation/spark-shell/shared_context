@@ -1,0 +1,27 @@
+val df = spark.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data1.csv")
+df.createOrReplaceTempView("people")
+val sqlDF = spark.sql("select _c0, _c6 from people where _c0 < -0.9")
+val sqlDF = spark.sql("select _c0, _c6 from people where _c0 < -0.9")
+val spark2 = spark.newSession()
+val df2 = spark2.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data2.csv")
+df2.createOrReplaceTempView("people")
+val sqlDF2 = spark2.sql("select _c0, _c7, _c6 from people where _c0 < -0.9 and _c7 < -0.9")
+val spark3 = spark.newSession()
+val df3 = spark3.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data3.csv")
+df3.createOrReplaceTempView("people")
+val sqlDF3 = spark3.sql("select _c0, _c7, _c8, _c6 from people where _c0 < -0.9 and _c7 < -0.9 and _c8 < -0.9")
+val spark4 = spark.newSession()
+val df4 = spark4.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data4.csv")
+df4.createOrReplaceTempView("people")
+val sqlDF4 = spark4.sql("select _c0, _c7, _c8, _c9, _c6 from people where _c0 < -0.9 and _c7 < -0.9 and _c8 < -0.9 and _c9 < -0.9")
+val spark5 = spark.newSession()
+val df5= spark5.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data5.csv")
+df5.createOrReplaceTempView("people")
+val sqlDF5 = spark5.sql("select _c0, _c7, _c8, _c9, _c10, _c6 from people where _c0 < -0.9 and _c7 < -0.9 and _c8 < -0.9 and _c9 < -0.9 and _c10 < -0.9")
+val list = List(sqlDF,sqlDF2,sqlDF3,sqlDF4,sqlDF5)
+list.par.foreach(t => {
+      t.collect()
+      }
+      )
+
+

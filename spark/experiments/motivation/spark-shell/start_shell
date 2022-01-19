@@ -1,0 +1,1 @@
+bin/spark-shell --master spark://silver-spark-master-svc.silver.svc.cluster.local:7077 --executor-memory "3712M" --total-executor-cores 10 --executor-cores 5 --conf spark.executor.memoryOverhead=409M
