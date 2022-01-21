@@ -1146,7 +1146,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 		#					rm.remove_sample_for_conf(possible_removal)
 			if intermediate_remove:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
-				failed_range=tmp_combinations.index(optimal_conf)+1
+				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
 					possible_removal=tmp_combinations[i]
 					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False):
