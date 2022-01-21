@@ -42,7 +42,7 @@ slas:
 utilFunc: sparkbenchalphabet
 output: Results/exp3
 sampling_ratio: 0.75
-minimum_shared_replicas: 2
+minimum_shared_replicas: 0
 maximum_transition_cost: 2
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
@@ -63,5 +63,5 @@ prefix:
 scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: False
-careful_scaling: False
+careful_scaling: True
 exploration_rate: 0.5
