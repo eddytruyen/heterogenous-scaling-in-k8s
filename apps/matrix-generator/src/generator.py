@@ -224,8 +224,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if not adaptive_scaler.tipped_over_confs:
                                                         if only_failed_results:
                                                             start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), d[sla['name']][str(tenant_nb)], adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
-                                                        else:
-                                                            start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), d[sla['name']][str(tenant_nb)],[],scaling_up_threshold, sampling_ratio)
+                                                        #else:
+                                                         #   start=remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(), d[sla['name']][str(tenant_nb)],[],scaling_up_threshold, sampling_ratio)
                                                         adaptive_scaler.reset()
                                                         rm.reset()
                                                             #window=adaptive_window.get_current_window()
@@ -437,7 +437,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:
             if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                check_and_get_next_exps(adaptive_scaler,rm,lst,lst[start],start,new_window,tenant_nb, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=False)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,new_window,tenant_nb, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=False)
                 d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                 update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
             print("Saving optimal results into matrix for previous results")
@@ -491,7 +491,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
 
         def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
-                    import pdb; pdb.set_trace()
                     nonlocal start
                     nonlocal next_conf
                     conf_array=rm.get_left_over_configs()
@@ -1181,7 +1180,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 # if not intermediate_remove
 		if previous_result and float(previous_result['CompletionTime']) < slo and float(previous_result['CompletionTime']) > 1:
 			workers_result=[w.clone() for w in workers]
-			resources_types=workers[0].resources.keys()
+			resource_types=workers[0].resources.keys()
 			for w in workers_result:
 				w.resources=extract_resources_from_result(previous_result, w.worker_id, resource_types)
 		else:
