@@ -257,6 +257,21 @@ class RuntimeManager:
             self.tipped_over_results=[]
         return {"workers": workers, "results": results}
 
+    def remove_tipped_over_result(self, conf):
+        print("Removing " + str(conf) + " from tipped_over_results in rm")
+        found=False
+        index=0
+        while not found and index < len(self.tipped_over_results):
+            tor=self.tipped_over_results[index]
+            if conf == tor["results"]:
+                found=True
+            else:
+                index+=1
+        if found:
+            print("Found and removed")
+            del self.tipped_over_results[index]
+
+
     def get_adaptive_window(self):
         return self.adaptive_window
 

@@ -617,6 +617,9 @@ class AdaptiveScaler:
                                 return [[{},self.current_tipped_over_conf,self.workers],copy_of_states]
                         elif state == NO_COST_EFFECTIVE_ALTERNATIVE:
                                 self.tipped_over_confs.pop(0)
+                                if self.tipped_over_confs:
+                                    self.PreviousFailedScalings=self.FailedScalings[:]
+                                    self.FailedScalings=[]
                 if not state:
                         states=[NO_COST_EFFECTIVE_ALTERNATIVE]
                         copy_of_states=states[:]

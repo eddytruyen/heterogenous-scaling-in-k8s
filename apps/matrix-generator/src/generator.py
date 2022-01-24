@@ -324,7 +324,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),d[sla['name']][str(tenant_nb)],[], scaling_up_threshold, sampling_ratio, careful_scaling=adaptive_scaler.careful_scaling)#, tenant_nb == startTenant)
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 if not next_conf in lst:
-                    println("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
+                    print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
                     rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
                     #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
                     lst.append(next_conf)
@@ -343,8 +343,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("COST-EFFECTIVE-RESULT")
                 if adaptive_scaler.ScalingUpPhase:
                     adaptive_scaler.reset()#lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),d[sla['name']][str(tenant_nb)],[],scaling_up_threshold, sampling_ratio, careful_scaling=adaptive_scaler.careful_scaling)
                 else:
-                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),d[sla['name']][str(tenant_nb)],(rm.get_tipped_over_results())["results"],scaling_up_threshold, sampling_ratio)#, tenant_nb == startTenant)
+                    remove_failed_confs(lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),d[sla['name']][str(tenant_nb)],(rm.get_tipped_over_results())["results"],scaling_up_threshold, sampling_ratio, careful_scaling=adaptive_scaler.careful_scaling)#, tenant_nb == startTenant)
                 #if adaptive_scaler.ScalingUpPhase:
                 #    adaptive_scaler.reset()
                 adaptive_scaler.failed_results=[]
@@ -356,7 +357,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #flag_workers(adaptive_scaler.workers,next_conf)
                 new_window=window
                 if not next_conf in lst:
-                    println("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
+                    print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
                     rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
                     #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
                     lst.append(next_conf)
@@ -585,7 +586,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,found_conf,slo)
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                 start=lst.index(found_conf)
-                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (1 in [random.choice(range(1,int(100/(100*adaptive_scaler.exploration_rate))+1))]): #i#(previous_tenants and startTenants != int(previous_tenants)):
+                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (1 in [random.choice(range(1,int(100/(100*(adaptive_scaler.exploration_rate+0.00000000001)))+1))]): #i#(previous_tenants and startTenants != int(previous_tenants)):
                     if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                         if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
@@ -1129,7 +1130,7 @@ def equal_conf(conf1, conf2):
 
 def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
 		next_index=start
-		if optimal_conf:
+		if optimal_conf and careful_scaling:
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
 		#			tipped_over_results.remove(optimal_conf)
@@ -1144,15 +1145,15 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 		#				sorted_combinations.remove(possible_removal)
 		#				if rm.conf_in_experiments(possible_removal):
 		#					rm.remove_sample_for_conf(possible_removal)
-			if intermediate_remove:
+		#	if intermediate_remove:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
 					possible_removal=tmp_combinations[i]
-					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False):
+					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False) + 10:
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
-							print("Removing config because it has a higher resource cost than the current optimal result and therefore is not cost_effective for confs with a higher_resource_cost")
+							print("Removing config because it has a higher resource cost than the current optimal result and therefore this config and all higher configs are not cost effective for the currrent or lower number of tenants")
 							if sorted_combinations.index(possible_removal) < next_index:
 								next_index-=1
 							elif sorted_combinations.index(possible_removal) == next_index and next_index > 0:
@@ -1185,23 +1186,25 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				w.resources=extract_resources_from_result(previous_result, w.worker_id, resource_types)
 		else:
 			workers_result=[]
-		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (careful_scaling or (higher_tenant_remove or tipped_over_results)))):
-			next_index=0
+		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
 			if failed_conf in sorted_combinations:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=tmp_combinations.index(failed_conf)
 				for i in range(0, failed_range):
 					possible_removal=tmp_combinations[i]
-					if workers_result and resource_cost(workers, possible_removal, False) >= resource_cost(workers_result, get_conf(workers, previous_result), False):
-						println("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) +  " -> " + str(rm.minimum_shared_replicas+1))
+					if not higher_tenant_remove and workers_result and resource_cost(workers, possible_removal, False) >= resource_cost(workers_result, get_conf(workers, previous_result), False):
+						print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) +  " -> " + str(rm.minimum_shared_replicas+1))
 						rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
-					elif (higher_tenant_remove or (tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"])) and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False): #when the following condition appears there is a problem with monotonicity and the experiment should be stopped (not optimal_conf or resource_cost(workers, possible_removal, False) >= resource_cost(workers, optimal_conf, False)): 
+					elif (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False):  
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
 							sorted_combinations.remove(possible_removal)
 							if rm.conf_in_experiments(possible_removal):
 								rm.remove_sample_for_conf(possible_removal)
+							if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
+								rm.remove_tipped_over_result(possible_removal)
+				#if (not failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]) or (careful_scaling or higher_tenant_remove or tipped_over_results):
 				print("Removing failed conf")
 				print(failed_conf)
 				i=1
@@ -1213,6 +1216,8 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				sorted_combinations.remove(failed_conf)
 				if rm.conf_in_experiments(failed_conf):
  					rm.remove_sample_for_conf(failed_conf)
+				if failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]:
+					rm.remove_tipped_over_result(failed_conf)
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
@@ -1221,6 +1226,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
                                         if sorted_combinations.index(failed_conf) <= next_index and next_index > 0:
                                                 next_index=next_index-1
                                         sorted_combinations.remove(failed_conf)
+					#rm.remove_tipped_over_result(failed_conf)
                                 else:
                                         print("Tipped over conf already removed:")
                                         print(failed_conf)
@@ -1359,7 +1365,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                     return False
             else:
                 return False
-            
         if log:
             print("Starting at index " + str(start) + " with window " + str(window))
         i=start_tenant
@@ -1493,7 +1498,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     print("removed")
                                 sorted_combinations.remove(result_conf)
                                 sorted_combinations.insert(start+new_window+el-1,result_conf)
-                                new_window-=-1
+                                new_window-=1
                         else:
                                 if log:
                                     print("not removed")
