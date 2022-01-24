@@ -244,11 +244,17 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                                 previous_tenant_results=d[sla['name']]
                                                             else:
                                                                 previous_tenant_results={}
-                                                            print("Filtering from index " + str(start) +  " with window " + str(window))
-                                                            start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
-                                                            print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                                                            print([utils.array_to_str(el) for el in lst])
-                                                            return start_and_window
+                                                            try:
+                                                                print("Filtering from index " + str(start) +  " with window " + str(window))
+                                                                start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, minimum_shared_replicas, maximum_transition_cost, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                                                                print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                                                print([utils.array_to_str(el) for el in lst])
+                                                                return start_and_window
+                                                            except IndexError:
+                                                                print("No config exists that meets all filtering constraints")
+                                                                print("Returning first config")
+                                                                return [0, window] 
+
                                             else:
                                                     #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
                                                     #if changePhase:
@@ -1150,7 +1156,7 @@ def remove_failed_confs(sorted_combinations, workers, rm, results, slo, optimal_
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
 					possible_removal=tmp_combinations[i]
-					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False) + 10:
+					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False) + window*2:
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a higher resource cost than the current optimal result and therefore this config and all higher configs are not cost effective for the currrent or lower number of tenants")
@@ -1385,13 +1391,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                 #    check_workers=True
                                 #    exceptional_no_check_for_vertical_scaling=True
                                 #    ScaledDownWorkerIndex=int(adaptive_scaler.PreviousFailedScalings[-1].worker_id)-1
-                                if start+window > len(sorted_combinations):
-                                    tmp_end=len(sorted_combinations)
-                                    window=tmp_end-start
-                                    new_window=tmp_end-start
-                                else:
-                                    tmp_end=start+window
-                                for el in range(start, tmp_end):
+                                for el in range(start, start+window):
                                         #if el-(window-new_window) >= len(sorted_combinations):
                                         #        return [-1,-1]
                                         try:
@@ -1475,13 +1475,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                 if log:
                                     print("Going to " + str(i) + " tenants")
         else:
-                if start+window > len(sorted_combinations):
-                    tmp_end=len(sorted_combinations)
-                    window=tmp_end-start
-                    new_window=tmp_end-start
-                else:
-                    tmp_end=start+window
-                for el in range(start, tmp_end):
+                for el in range(start, start+window):
                         try: 
                             result_conf=sorted_combinations[el-(window-new_window)]
                         except IndexError as e:
