@@ -26,7 +26,7 @@ slas:
           min: {{worker.replicas.min}}
           max: {{worker.replicas.max}}
           granularity: 1
-        prefix: 
+        prefix:  
         suffix:
     {% for key,value in worker.resources.items() %}
       - name: worker{{worker.id}}.resources.requests.{{key}}
@@ -34,9 +34,17 @@ slas:
         searchspace:
           min: {{value}}
           max: {{value}}
-          granularity: 1
-        prefix:
-        suffix: {% if key == "memory" %}Gi{% endif %} 
+          granularity: {{increments[key]}}
+      {% if prefix[key] == None %}
+        prefix: 
+      {% else %}
+        prefix: {{prefix[key]}}
+      {% endif %}
+      {% if suffix[key] == None %}
+        suffix: 
+      {% else %}
+        suffix: {{suffix[key]}}
+      {% endif %}
        {% endfor %}{% endfor %}
 {% endfor %}
 namespaceStrategy: NSPSLA

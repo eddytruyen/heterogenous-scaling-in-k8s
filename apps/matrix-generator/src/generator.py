@@ -48,7 +48,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 if samples == 0:
                                         samples=1
                                 results=[]
-                                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenants)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3],sampling_ratio)
+                                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenants)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3],sampling_ratio, initial_conf)
                                 if SORT_SAMPLES:
                                     sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                                 rm.set_experiment_list(i,ws,sample_list)#sort_results(adaptive_scaler.workers,slo,sample_list))
@@ -552,7 +552,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             samples=int(ws[4]*sampling_ratio)
                             if samples == 0:
                                 samples=1
-                            for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio):
+                            for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, initial_conf):
                                 results.append(res)
                         # if we evaluate a result for a conf that is not part of the configs selected by k8-resource-optimizer, than make sure this result is part of the results
                         #if not (get_conf(adaptive_scaler.workers, tmp_result) in [get_conf(adaptive_scaler.workers, r) for r in results]):
@@ -792,7 +792,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 results=[]
                 previous_result=float(completion_time)
                 previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
-                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, previous_result=previous_result, previous_replicas=previous_replicas)
+                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, initial_conf, previous_result=previous_result, previous_replicas=previous_replicas)
                 print_results(adaptive_scaler, sample_list)
                 if SORT_SAMPLES:
                     sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
@@ -1870,7 +1870,7 @@ def _split_exp_intervals(sorted_combinations, min_conf, window, base):
 
 
 
-def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, conf, minimum_repl, maximum_repl, sampling_ratio, previous_result=None, previous_replicas=None):
+def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path, conf, minimum_repl, maximum_repl, sampling_ratio, initial_conf, previous_result=None, previous_replicas=None):
 	# conf_ex=ConfigParser(
 	# 	optimizer='exhaustive',
 	# 	chart_dir=chart_dir,
@@ -1898,7 +1898,10 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
 			minimum_replicas='"'+minimum_repl+'"',
 			configs='"'+conf+'"',
 			previous_result='"'+str(previous_result)+'"',
-			previous_replicas='"'+previous_replicas+'"')
+			previous_replicas='"'+previous_replicas+'"',
+                        suffix=initial_conf['suffix'],
+                        prefix=initial_conf['prefix'],
+                        increments=initial_conf['increments'])
 	else:
 		conf_op=ConfigParser(
                         optimizer='bestconfig',
@@ -1911,7 +1914,10 @@ def _generate_experiment(chart_dir, util_func, slas, samples, bin_path, exp_path
                         slas=slas,
                         maximum_replicas='"'+maximum_repl+'"',
                         minimum_replicas='"'+minimum_repl+'"',
-                        configs='"'+conf+'"')
+                        configs='"'+conf+'"',
+                        suffix=initial_conf['suffix'],
+                        prefix=initial_conf['prefix'],
+                        increments=initial_conf['increments'])
 
 	# exp_ex=SLAConfigExperiment(conf_ex,bin_path,exp_path+'/exh')
 	exp_op=SLAConfigExperiment(conf_op,bin_path,exp_path+'/op/')
