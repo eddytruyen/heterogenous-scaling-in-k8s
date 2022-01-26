@@ -19,6 +19,7 @@ class RuntimeManager:
         self.adaptive_window=adaptive_window
         self.minimum_shared_replicas=minimum_shared_replicas
         self.maximum_transition_cost=maximum_transition_cost
+        self.list_of_results=[]
 
     def copy_to_tenant_nb(self, tenant_nb):
         rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost)
@@ -274,6 +275,16 @@ class RuntimeManager:
 
     def get_adaptive_window(self):
         return self.adaptive_window
+
+    def add_result(self,result):
+        workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
+        resource_types=self.adaptive_scalers["init"].workers[0].resources.keys()
+        for w in workers_result:
+             w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
+        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "result": result, "workers": workers_result})
+
+    def get_results(self):
+        return self.list_of_results
 
 
 def instance(runtime_manager, tenant_nb, window):
