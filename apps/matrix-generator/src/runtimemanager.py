@@ -286,6 +286,23 @@ class RuntimeManager:
     def get_results(self):
         return self.list_of_results
 
+    def result_is_stored(self, workers, result):
+
+        def equal_workers(workersA,workersB):
+                if len(workersA) != len(workersB):
+                        return False
+                for a,b in zip(workersA,workersB):
+                        if not a.equals(b):
+                              return False
+                return True
+        
+        found=False
+        for r in self.list_of_results:
+            if  float(result["CompletionTime"]) == float(r["result"]["CompletionTime"]) and generator.get_conf(workers,result) == r["conf"] and equal_workers(workers, r["workers"]):
+                    found=True
+                    break
+        return found
+
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
