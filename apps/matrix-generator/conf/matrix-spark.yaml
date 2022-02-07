@@ -64,5 +64,5 @@ scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: False
 careful_scaling: True
-exploration_rate: 0.5
+exploration_rate: 0.0
 monotonicity_threshold: 10
