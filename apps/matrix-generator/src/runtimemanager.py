@@ -3,23 +3,26 @@ from . import utils
 from .searchwindow import AdaptiveWindow
 
 class RuntimeManager:
-    def __init__(self, tenant_nb, adaptive_scalers, adaptive_window):
+    def __init__(self, tenant_nb, adaptive_scalers, adaptive_window, minimum_shared_replicas, maximum_transition_cost):
         self.tenant_nb=tenant_nb
         self.raw_experiments=[]
-        self.experiments={}
+        self.experiments={} #{1..n, [experiment_specification,samples: [conf]]}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
         self.sorted_combinations=[]
         self.adaptive_scalers=adaptive_scalers
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
-        self.last_experiment={}
+        self.last_experiment={}#{"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
         self.previous_returned_experiment={}
         self.initial_window=adaptive_window.get_current_window()
         self.adaptive_window=adaptive_window
+        self.minimum_shared_replicas=minimum_shared_replicas
+        self.maximum_transition_cost=maximum_transition_cost
+        self.list_of_results=[]
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.initial_window))
+        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost)
         rm.sorted_combinations=self.sorted_combinations[:]
         return rm
 
@@ -130,6 +133,19 @@ class RuntimeManager:
             return exp["experiment_nb"]
         else:
             return self.current_experiment["experiment_nb"]
+
+    def get_nb_of_experiment_for_conf(self,conf):
+        for exp_nb in self.experiments.keys():
+            if self.conf_in_samples(conf,self.experiments[exp_nb][1]):
+                return exp_nb
+        return -1
+
+    def get_experiment_specification_for_experiment_nb(self, experiment_nb):
+        if experiment_nb in self.experiments.keys():
+            return self.experiments[experiment_nb][0]
+        else:
+            return None
+
 
     def get_nb_of_sample_for_conf(self,experiment_nb,conf):
         if self.conf_in_experiments(conf):
@@ -242,13 +258,55 @@ class RuntimeManager:
             self.tipped_over_results=[]
         return {"workers": workers, "results": results}
 
+    def remove_tipped_over_result(self, conf):
+        print("Removing " + str(conf) + " from tipped_over_results in rm")
+        found=False
+        index=0
+        while not found and index < len(self.tipped_over_results):
+            tor=self.tipped_over_results[index]
+            if conf == tor["results"]:
+                found=True
+            else:
+                index+=1
+        if found:
+            print("Found and removed")
+            del self.tipped_over_results[index]
+
+
     def get_adaptive_window(self):
         return self.adaptive_window
+
+    def add_result(self,result):
+        workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
+        resource_types=self.adaptive_scalers["init"].workers[0].resources.keys()
+        for w in workers_result:
+             w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
+        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "result": result, "workers": workers_result})
+
+    def get_results(self):
+        return self.list_of_results
+
+    def result_is_stored(self, workers, result):
+
+        def equal_workers(workersA,workersB):
+                if len(workersA) != len(workersB):
+                        return False
+                for a,b in zip(workersA,workersB):
+                        if not a.equals(b):
+                              return False
+                return True
+        
+        found=False
+        for r in self.list_of_results:
+            if  float(result["CompletionTime"]) == float(r["result"]["CompletionTime"]) and generator.get_conf(workers,result) == r["conf"] and equal_workers(workers, r["workers"]):
+                    found=True
+                    break
+        return found
 
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
-        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager["adaptive_scalers"], AdaptiveWindow(window))
+        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager["adaptive_scalers"], AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"])
     return runtime_manager[tenant_nb]
 
 

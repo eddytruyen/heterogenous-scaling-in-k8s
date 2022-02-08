@@ -1,0 +1,34 @@
+bin:
+  path: /bin/k8-resource-optimizer
+charts:
+  name: mychart
+  chartdir: /chart/exp2app
+slas:
+  - name : gold
+    slos: 
+      jobsize: 10
+      throughput: 0.5
+    maxTenants: 10
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 3
+      elements:
+        - size: 2200
+        - size: 750
+        - size: 250
+  - name : silver
+    slos: 
+      jobsize: 10
+      throughput: 0.1
+    maxTenants: 3
+    demoCPU: 800
+    alphabet:
+      searchWindow: 3
+      base: 3
+      elements:
+        - size: 740
+        - size: 240
+        - size: 80
+utilFunc: alphabetBased
+output: Results/exp3

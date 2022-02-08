@@ -1,0 +1,3 @@
+locust -f ~/heterogenous-scaling-in-k8s/Locust/locustfile-exp1.py 
+python3 ~/heterogenous-scaling-in-k8s/apps/workload-generator/generator.py start -f ~/heterogenous-scaling-in-k8s/apps/workload-generator/thesis/seasonal.yaml --host=http://172.19.133.29:8089
+python3 ~/my-k8s-playground/apps/locust-influx-metrics/collector.py -l http://172.19.133.29:8089 -i 172.19.133.29 -p 30421 -s 5 -d gold-app-data

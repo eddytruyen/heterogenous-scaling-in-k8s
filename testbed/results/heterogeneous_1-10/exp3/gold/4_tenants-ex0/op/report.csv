@@ -1,0 +1,7 @@
+config #	demoCPU	worker1CPU	worker1Replicas	worker2CPU	worker2Replicas	worker3CPU	worker3Replicas	score	Tenant-0 Throughtput	Tenant-0 avg Latency	Tenant-0 #Failures	Tenant-1 Throughtput	Tenant-1 avg Latency	Tenant-1 #Failures	Tenant-2 Throughtput	Tenant-2 avg Latency	Tenant-2 #Failures	Tenant-3 Throughtput	Tenant-3 avg Latency	Tenant-3 #Failures	
+0	800	2200	0	750	1	250	0	0.921875	0.67	1482	0	0.64	1556	0	0.67	1480	0	0.66	1488	0	
+1	800	2200	0	750	1	250	2	0.8697916666666666	0.94	1063	0	0.92	1073	0	0.94	1048	0	0.86	1144	0	
+2	800	2200	0	750	1	250	1	0.8958333333333334	0.78	1292	0	0.81	1204	0	0.72	1370	0	0.79	1241	0	
+
+
+

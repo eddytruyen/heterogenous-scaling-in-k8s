@@ -1,0 +1,91 @@
+Ideal throughput (10) = Total cpu usage * Job completion tim
+
+cpu exp= job_compl(11) Ideal_throughpt(10) / gewenste-job-completion
+
+IT_Pod250m = CPU_usage * Job_Comp_Time
+IT_11_Tenants = 11 * IT_Pod250m
+
+WC = ActualCPU_11Tenants(predicted) * Gewenst_job_compl / IT_11
+
+Ideal throughput (10) = Total cpu usage * Job completion time
+Expected cpu usage (11 tenants) = Ideal throughput (11) tenants / Gewenste job completion time
+Ideal Throughput (250) = cpu usage * job completion time
+Ideal throughput(11 tenants)= 11*IdealThroughput(250m)
+Workload complexity = Actual cpu usage predicted (11tenants) / expectec cpu usage (11 tenants)
+expected cpu usage (11 tenants) = Ideal throughput (11 tenants) / Gewenste job completion time
+
+Workload complexity (11) = Actual cpu usage (11) * Gewenste Job completion time /Ideal throughput (11 tenants)
+
+Workload complexity (11) = Actual cpu usage (11) * Gewenste Job completion time /Ideal throughput (11 tenants)
+RU = Ideal throughput (11) * Workload complexity (11) / gewenste job complextion time
+RU=Actual cpu predicited (11 tenants)*Gewenste Job completion time
+IdealThroughput(250)
+Ideal Throughput(750)
+Ideal thoughput(11,x,y)=x*(IT250) + y*(IT750). Vind dan x,y waarvoor x+y=11 en ID throughput(11) = min ({x*IT250*y*750 | x + y = 11})
+
+RU = Cpu usage predicted(11) * gewenste job completion / predicted job completio time (11)
+
+RU = (Actual cpu predicited (11 tenants) * Actual predicted Job completion time) / Gewenste Job completion Time (11)
+
+b*c^n
+cpu, b=250, c=1, n=0..2 (modulo 3)
+cpu, b=250, c=3, n=0..2 (modulo 3)
+
+250, 250*3, 250*9
+250, 750, 2250
+002 > 010
+cpu 002 < cpu 010
+mem 1 g, 1g, 19
+mem 002 > mem 010
+cost-functie(combinatie c)=total cpu(c)*0.4 + total cpu(c)*0.6 / 3*(max cpu + max mem)
+cost-functie(combinatie c)=(total cpu(c)*0.4 + total mem(c)*0.6) / 3*(max cpu + max mem)
+
+func AlphabetBasedUtilityFunc(sla models.SLA, result *models.ConfigResult) (score float64, err error) {
+        //values, err0 := utils.ReadYamlValuesFileAsMap(TmpDir + sla.Name + "-" + sla.ChartName + "/values.yaml")
+        // if err0 != nil {
+        //      log.Panicf("Error getting helm values for sla %v", sla.Name
+)
+
+max_pos := 3*(cpuSettingValue1+cpuSettingValue2+cpuSettingValue3+cpuSettingValue4+memorySettingValue1+memorySettingValue2+memorySettingValue3+memorySettingValue4)
+        score = (set1+set2+set3+set4)/float64(max_pos)
+        
+max_pos := 2*(cpuSettingValue1+cpuSettingValue2+memorySettingValue1+memorySettingValue2)
+score = (set1+set2+set3)/float64(max_pos)
+        
+set1 := (float64(replicaSettingValue1) * (float64(cpuSettingValue1)*0.4+float64(memorySettingValue1)*0.6))
+
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: consumer3
+  namespace: gold
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: consumer3
+  minReplicas: 1
+  maxReplicas: 14
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 15
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 15
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+      - type: Pods
+        value: 4
+        periodSeconds: 30
+      selectPolicy: Max
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 40
+        

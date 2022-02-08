@@ -40,6 +40,7 @@ class ScalingFunction:
 		self.LastScaledUpWorker = []
 		if initial_conf:
 			self.minimum_resources=initial_conf["minimum_resources"]
+			self.increments=initial_conf["increments"]
 
 	def clone(self, clone_scaling_records=False):
                 sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
@@ -49,6 +50,7 @@ class ScalingFunction:
                     sc.LastScaledDownWorker = self.LastScaledDownWorker[:]
                     sc.LastScaledUpWorker = self.LastScaledUpWorker[:]
                 sc.minimum_resources=self.minimum_resources
+                sc.increments=self.increments
                 return sc
 
 	def maximum(self,x1,x2):
@@ -120,16 +122,16 @@ class ScalingFunction:
                 worker=workers[worker_index]
                 scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
                 for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units >= self.minimum_resources[res]:
-                            worker.scale(res, worker.resources[res]-nb_of_units)
+                        if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments[res] >= self.minimum_resources[res]:
+                            worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
-                            scale_down[res]=[nb_of_units] + k[res]
-                        elif scaleSecondaryResource and worker.resources[res] - 1 >= self.minimum_resources[res]:
-                            worker.scale(res, worker.resources[res]-1)
+                            scale_down[res]=[nb_of_units*self.increments[res]] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] - 1*self.increments[res] >= self.minimum_resources[res]:
+                            worker.scale(res, worker.resources[res]-1*self.increments[res])
                             self.LastScaledDownWorker+=[worker_index]
                             k=self.workersScaledDown[worker_index][1]
-                            scale_down[res]=[1] + k[res]
+                            scale_down[res]=[1*self.increments[res]] + k[res]
                         else:
                             k=self.workersScaledDown[worker_index][1]
                             scale_down[res]=[0] + k[res]
@@ -145,16 +147,16 @@ class ScalingFunction:
 		worker=workers[worker_index]
 		scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
 		for res in self.resources.keys():
-                        if (res in self.DominantResources) and worker.resources[res]+nb_of_units <= self.Max[res]:
-                            worker.scale(res, worker.resources[res]+nb_of_units)
+                        if (res in self.DominantResources) and worker.resources[res]+nb_of_units*self.increments[res] <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+nb_of_units*self.increments[res])
                             self.LastScaledUpWorker+=[worker_index]
                             k=self.workersScaledUp[worker_index][1]
-                            scale_up[res]=[nb_of_units] + k[res]
-                        elif scaleSecondaryResource and worker.resources[res] + 1 <= self.Max[res]:
-                            worker.scale(res, worker.resources[res]+1)
+                            scale_up[res]=[nb_of_units*self.increments[res]] + k[res]
+                        elif scaleSecondaryResource and worker.resources[res] + 1*self.increments[res] <= self.Max[res]:
+                            worker.scale(res, worker.resources[res]+1*self.increments[res])
                             self.LastScaledUpWorker+=[worker_index]
                             k=self.workersScaledUp[worker_index][1]
-                            scale_up[res]=[1] + k[res]
+                            scale_up[res]=[1*self.increments[res]] + k[res]
                         else:
                             k=self.workersScaledUp[worker_index][1]
                             scale_up[res]=[0] + k[res]
@@ -194,6 +196,9 @@ class AdaptiveScaler:
 			self.scaling_down_threshold=initial_conf["scaling_down_threshold"]
 			self.opt_in_for_restart=initial_conf["opt_in_for_restart"]
 			self.careful_scaling=initial_conf["careful_scaling"]
+			self.exploration_rate=initial_conf["exploration_rate"]
+			self.increments=initial_conf["increments"]
+
 
 	def clone(self, start_fresh=False):
             a_s=AdaptiveScaler([w.clone() for w in self.workers], self.ScalingFunction.clone(clone_scaling_records=True), self.sla_name)
@@ -222,6 +227,9 @@ class AdaptiveScaler:
             a_s.scaling_down_threshold=self.scaling_down_threshold
             a_s.opt_in_for_restart=self.opt_in_for_restart
             a_s.careful_scaling=self.careful_scaling
+            a_s.exploration_rate=self.exploration_rate
+            a_s.increments=self.increments
+
             return a_s
 
 
@@ -386,7 +394,8 @@ class AdaptiveScaler:
                                 return True
                 
 		def worker_is_notflagged_testable_and_scaleable(worker,conf):
-                       if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
+		       #if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
+                       if is_testable(worker,conf) and is_worker_scaleable(worker):
                                 return True
                        else:
                                 return False
@@ -608,6 +617,9 @@ class AdaptiveScaler:
                                 return [[{},self.current_tipped_over_conf,self.workers],copy_of_states]
                         elif state == NO_COST_EFFECTIVE_ALTERNATIVE:
                                 self.tipped_over_confs.pop(0)
+                                if self.tipped_over_confs:
+                                    self.PreviousFailedScalings=self.FailedScalings[:]
+                                    self.FailedScalings=[]
                 if not state:
                         states=[NO_COST_EFFECTIVE_ALTERNATIVE]
                         copy_of_states=states[:]

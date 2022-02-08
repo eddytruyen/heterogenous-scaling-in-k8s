@@ -98,6 +98,7 @@ for i in `seq $alphabetLength`
 					echo "cpu size: $old_cpu_size -> $cpu_size"
 					echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
 					kubectl replace -f old_ss$i.yaml
+					kubectl delete pods -n $namespace -l set=worker$i
 				fi
 				#rm old_ss.yaml
 			fi

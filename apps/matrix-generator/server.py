@@ -30,6 +30,7 @@ def create_app():
     alphabet=sla['alphabet']
     scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES, initial_config)
     workers=_create_workers(alphabet['elements'], alphabet['costs'], alphabet['base'])
+
     # HARDCODED => make more generic by putting workers into an array
     workers[0].setReplicas(min_replicas=0,max_replicas=0)
     workers[1].setReplicas(min_replicas=0,max_replicas=0)
@@ -38,6 +39,8 @@ def create_app():
     #workers[0].setReplicas(min_replicas=1,max_replicas=workers[-1].max_replicas)
     adaptive_scalers={}
     runtime_manager={}
+    runtime_manager["maximum_transition_cost"]=initial_config['maximum_transition_cost']
+    runtime_manager["minimum_shared_replicas"]=initial_config['minimum_shared_replicas']
     adaptive_scalers["init"]=AdaptiveScaler(workers, scalingFunction, sla['name'], initial_config)
     runtime_manager["adaptive_scalers"]=adaptive_scalers
     app.config["adaptive_scalers"] = adaptive_scalers
