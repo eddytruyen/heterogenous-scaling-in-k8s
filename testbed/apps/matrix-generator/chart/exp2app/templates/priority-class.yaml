@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{.Values.priorityClass}}
+value: {{.Values.priorityValue}}
+globalDefault: false
+description: "This priority class should be used for gold service pods only."

@@ -1,0 +1,207 @@
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<_worker() done, defined at scheduler.py:38> exception=TimeoutError()>
+Traceback (most recent call last):
+  File "scheduler.py", line 55, in _worker
+    resp = await ack
+  File "scheduler.py", line 29, in _fetch
+    async with self.session.get(url,**kwargs) as response:
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 1005, in __aenter__
+    self._resp = await self._coro
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/client.py", line 575, in _request
+    break
+  File "/usr/local/lib/python3.7/site-packages/aiohttp/helpers.py", line 585, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...
+INFO:root:There was an error when executing the loop. Retrying in 2 seconds...

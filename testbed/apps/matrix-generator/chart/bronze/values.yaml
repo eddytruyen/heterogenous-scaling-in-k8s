@@ -1,0 +1,14 @@
+namespace: bronze
+stressSize: 100
+poolSize1: 120
+poolSize2: 50
+poolSize3: 10
+worker1Replicas: 0
+worker2Replicas: 0
+worker3Replicas: 0
+worker1CPU: 2250m
+worker2CPU: 750m
+worker3CPU: 250m
+demoCPU: 800m
+priorityClass: bronze
+priorityValue: 10

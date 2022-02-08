@@ -1,0 +1,67 @@
+load:
+  - trace:
+    - segment: stable
+      initialCount: 0
+      endCount: 0
+      duration: 20 
+    - segment: stable
+      initialCount: 1
+      endCount: 1
+      duration: 40
+    - segment: stable
+      initialCount: 2
+      endCount: 2
+      duration: 40
+    - segment: stable
+      initialCount: 3
+      endCount: 3
+      duration: 40
+    - segment: stable
+      initialCount: 4
+      endCount: 4
+      duration: 40
+    - segment: stable
+      initialCount: 5
+      endCount: 5
+      duration: 40
+    - segment: stable
+      initialCount: 6
+      endCount: 6
+      duration: 40
+    - segment: stable
+      initialCount: 7
+      endCount: 7
+      duration: 40
+    - segment: stable
+      initialCount: 8
+      endCount: 8
+      duration: 40
+    - segment: stable
+      initialCount: 9
+      endCount: 9
+      duration: 40
+    - segment: stable
+      initialCount: 10
+      endCount: 10
+      duration: 40
+    - segment: stable
+      initialCount: 11
+      endCount: 11
+      duration: 40
+    - segment: stable
+      initialCount: 12
+      endCount: 12
+      duration: 40
+    - segment: stable
+      initialCount: 13
+      endCount: 13
+      duration: 40
+    - segment: stable
+      initialCount: 14
+      endCount: 14
+      duration: 40
+    - segment: stable
+      initialCount: 15
+      endCount: 15
+      duration: 40
+    repeat: 1
