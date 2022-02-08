@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-web-app-deployment
+  labels:
+    app: flask-web-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-web-app
+  template:
+    metadata:
+      labels:
+        app: flask-web-app
+    spec:
+      containers:
+      - name: flask-web-app-container
+        image: avl4kul/flask-web-app:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 500m
+          limits:
+            cpu: 500m
+        ports:
+          - containerPort: 5000
+        env:
+          - name: CURRENT_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: CURRENT_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: CURRENT_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
