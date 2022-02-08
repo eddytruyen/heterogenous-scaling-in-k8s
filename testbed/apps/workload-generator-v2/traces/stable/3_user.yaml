@@ -1,0 +1,7 @@
+load:
+  - trace:
+    - segment: stable
+      initialCount: 3
+      endCount: 3
+      duration: 3600
+    repeat: 1  
