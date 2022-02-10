@@ -147,3 +147,6 @@ spec:
         - name: local-storage
           hostPath:
             path: /mnt/nfs-disk2
+        - name: local-storage-jobserver
+          hostPath:
+            path: /mnt/nfs-disk2/jobserver/config
