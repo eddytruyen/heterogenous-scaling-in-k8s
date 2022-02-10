@@ -25,6 +25,7 @@ class ScalingFunction:
 		self.CoefB = coef_b
 		self.CoefC = coef_c
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
+                #self.resources: linear increase of resources size per 1 additional tenant when profiling off-line this scaling function
 		self.resources=resources
 		self.weights=weights
 		self.DominantResources=dominant_resources

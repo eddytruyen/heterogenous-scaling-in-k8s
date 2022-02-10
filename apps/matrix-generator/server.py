@@ -41,6 +41,8 @@ def create_app():
     runtime_manager={}
     runtime_manager["maximum_transition_cost"]=initial_config['maximum_transition_cost']
     runtime_manager["minimum_shared_replicas"]=initial_config['minimum_shared_replicas']
+    runtime_manager["minimum_shared_cpus"]=initial_config['minimum_shared_cpus']
+    runtime_manager["minimum_shared_memory"]=initial_config['minimum_shared_memory']
     adaptive_scalers["init"]=AdaptiveScaler(workers, scalingFunction, sla['name'], initial_config)
     runtime_manager["adaptive_scalers"]=adaptive_scalers
     app.config["adaptive_scalers"] = adaptive_scalers
