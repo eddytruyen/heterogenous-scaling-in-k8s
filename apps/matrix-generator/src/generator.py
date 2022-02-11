@@ -1383,8 +1383,6 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
                 as2 = get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,1,conf56,slo)
                 for w in as2.workers:
                     print(w.resources)
-        if tenant_nb == 5:
-            import pdb; pdb.set_trace()
         cloned_other_as={}
         changed_scaler=False
         for t in previous_results.keys():
@@ -1480,13 +1478,11 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                     minimum_shared_replicas=runtime_manager[tenant_nb].minimum_shared_replicas
                                     maximum_transition_cost=runtime_manager[tenant_nb].maximum_transition_cost
-                                    minimum_shared_cpus=runtime_manager[tenant_nb].minimum_shared_cpus
-                                    minimum_shared_memory=runtime_manager[tenant_nb].minimum_shared_memory
+                                    minimum_shared_resources=runtime_manager[tenant_nb].minimum_shared_resources
                                 else:
                                     minimum_shared_replicas=runtime_manager[i].minimum_shared_replicas
                                     maximum_transition_cost=runtime_manager[i].maximum_transition_cost
-                                    minimum_shared_cpus=runtime_manager[i].minimum_shared_cpus
-                                    minimum_shared_memory=runtime_manager[i].minimum_shared_memory
+                                    minimum_shared_resources=runtime_manager[i].minimum_shared_resources
                                     result_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                 # if scale_action_undo, last failed worker of adapative_scaler should be filtered away for all tenantns (this can be done generally by setting checck_workers to True, ScaledDownWorjerIndex to the index fo the failed worker. Filtering away for all tenants means while i < == max_tannannts; if str(i) in previopus_results.keys(),prevuous_tenantconf
                                 #if include_current_tenant_nb and i == tenant_nb  and not check_workers and adaptive_scaler.PreviousFailedScalings:
@@ -1533,29 +1529,36 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             else:
                                                 current_adaptive_scaler=adaptive_scaler
                                                 previous_adaptive_scaler=update_adaptive_scaler_with_results(adaptive_scaler.clone(), previous_results, tenant_nb, get_conf(adaptive_scaler.workers, previous_results[str(tenant_nb)]))
-                                            qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, minimum_shared_cpus, minimum_shared_memory, log=True)
+                                            qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, minimum_shared_resources, log=True)
                                         #else:
                                         #    qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1, log=log)
                                             cost=qualitiesOfSample['cost']
                                             nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
-                                            shrd_cpus=qualitiesOfSample['shrd_cpus']
-                                            shrd_memory=qualitiesOfSample['shrd_memory']
+                                            shrd_resources=qualitiesOfSample['shrd_resources']
                                             if isinstance(minimum_shared_replicas,int):
                                                 min_shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                             else:
                                                 min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
-                                            if isinstance(minimum_shared_cpus,int):
-                                                min_shared_cpus = min([minimum_shared_cpus,reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources['cpu'],previous_adaptive_scaler.workers)))])
-                                            else:
-                                                #1> minimum_resources['cpu']
-                                                min_shared_cpus = max([1,int(minimum_shared_cpus*reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources['cpu'],previous_adaptive_scaler.workers))))])
-                                            if isinstance(minimum_shared_memory,int):
-                                                min_shared_memory = min([minimum_shared_memory,reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources['memory'],previous_adaptive_scaler.workers)))])
-                                            else:
-                                                #2 -> minimum_resources['memory']
-                                                min_shared_memory = max([2,int(minimum_shared_memory*reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources['memory'],previous_adaptive_scaler.workers))))])
+                                            min_shared_resources={}
+                                            for key in minimum_shared_resources:
+                                                minimum_shared_resource_size=minimum_shared_resources[key]
+                                                minimum_resources=adaptive_scaler.minimum_resources
+                                                if isinstance(minimum_shared_resource_size,int):
+                                                    min_shared_resources[key] = min([minimum_shared_resource_size,reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources[key],previous_adaptive_scaler.workers)))])
+                                                else:
+                                                    #1> minimum_resources['cpu']
+                                                    min_shared_resources[key] = max([minimum_resources[key],int(minimum_shared_resource_size*reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources[key],previous_adaptive_scaler.workers))))])
                                         #if (check_workers and i <= tenant_nb and all_flagged_conf(adaptive_scaler, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))
-                                        if remove or cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas: #or (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
+
+                                        def check_shared_resources():
+                                            reject=False
+                                            for key in min_shared_resources.keys():
+                                                if shrd_resources[key] < min_shared_resources[key]:
+                                                    reject=True
+                                                    break
+                                            return reject
+                                        if remove or cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas or check_shared_resources():
+                                        #for (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
@@ -1861,13 +1864,14 @@ def tenant_nb_X_result_conf_conflict_with_other_tenant_nb(adaptive_scalers, prev
         return False
 
 
-def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_cpus, minimum_shared_memory, check_worker, scaled_worker_index, log=False):
+def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_resources, check_worker, scaled_worker_index, log=False):
     if not previous_conf:
-        return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_cpus': minimum_shared_cpus, 'shrd_memory': minimum_shared_memory}
+        return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
     shared_replicas=0
-    shared_cpus=0
-    shared_memory=0
+    shared_resources={}
+    for key in minimum_shared_resources.keys():
+        shared_resources[key]=0
     index=0
     for worker_index, conf_pair in enumerate(zip(conf,previous_conf)):
         c1=conf_pair[0]
@@ -1878,35 +1882,35 @@ def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,
             cost+=c1
         if c2 >= 1  and c1 >= 1 and not (check_worker and index == scaled_worker_index):
             shared_replicas+=min(c1,c2)
-            shared_cpus+=min(workers_conf[worker_index].resources['cpu'], workers_previous_conf[worker_index].resources['cpu'])
-            shared_memory+=min(workers_conf[worker_index].resources['memory'], workers_previous_conf[worker_index].resources['memory'])
+            for key in minimum_shared_resources.keys():
+                shared_resources[key]+=min(workers_conf[worker_index].resources[key], workers_previous_conf[worker_index].resources[key])
 
         index+=1
     if log:
-        print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_cpus: ' + str(shared_cpus) + ', shrd_memory: ' + str(shared_memory))
-    return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_cpus': shared_cpus, 'shrd_memory': shared_memory}
+        print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_resources: ' + str(shared_resources))
+    return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_resources': shared_resources}
 
-def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_conf, adaptive_scaler, conf, minimum_shared_replicas, minimum_shared_cpus, minimum_shared_memory, log=False):
+def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_conf, adaptive_scaler, conf, minimum_shared_replicas, minimum_shared_resources, log=False):
     if not previous_conf or not previous_adaptive_scaler:
-        return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_cpus': minimum_shared_cpus, 'shrd_memory': minimum_shared_memory}
+        return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
     shared_replicas=0
-    shared_cpus=0
-    shared_memory=0
+    shared_resources={}
+    for key in minimum_shared_resources.keys():
+        shared_resources[key]=0
     for worker_index, conf_pair in enumerate(zip(conf,previous_conf)):
         if adaptive_scaler.workers[worker_index].equals(previous_adaptive_scaler.workers[worker_index]):
             if conf_pair[0] > conf_pair[1]:
                 cost+=conf_pair[0]-conf_pair[1]
             if conf_pair[1] >= 1  and conf_pair[0] >= 1:
                 shared_replicas+=min(conf_pair[0],conf_pair[1])
-                shared_cpus+=shared_replicas*adaptive_scaler.workers[worker_index].resources['cpu']
-                shared_memory+=shared_replicas*adaptive_scaler.workers[worker_index].resources['memory']
+                for key in minimum_shared_resources.keys():
+                    shared_resources[key]+=shared_replicas*adaptive_scaler.workers[worker_index].resources[key]
         else:
             cost+=conf_pair[0]
     if log:
-        print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_cpus: ' + str(shared_cpus) + ', shrd_memory: ' + str(shared_memory))
-    return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_cpus': shared_cpus, 'shrd_memory': shared_memory}
-
+        print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_resources: ' + str(shared_resources))
+    return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_resources': shared_resources}
 
 
 def _find_next_exp(sorted_combinations, workers, next_conf, base, window):
