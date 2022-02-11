@@ -43,8 +43,9 @@ utilFunc: sparkbenchalphabet
 output: Results/exp3
 sampling_ratio: 0.75
 minimum_shared_replicas: 0
-minimum_shared_cpus: 0
-minimum_shared_memory: 0
+minimum_shared_resources:
+  cpu: 0
+  memory: 0
 maximum_transition_cost: 2
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
