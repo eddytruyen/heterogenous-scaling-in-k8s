@@ -3,14 +3,15 @@ from . import utils
 from .searchwindow import AdaptiveWindow
 
 class RuntimeManager:
-    def __init__(self, tenant_nb, adaptive_scalers, adaptive_window, minimum_shared_replicas, maximum_transition_cost, minimum_shared_resources):
+    def __init__(self,tenant_nb, runtime_manager, adaptive_window, minimum_shared_replicas, maximum_transition_cost, minimum_shared_resources):
         self.tenant_nb=tenant_nb
         self.raw_experiments=[]
         self.experiments={} #{1..n, [experiment_specification,samples: [conf]]}
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
         self.sorted_combinations=[]
-        self.adaptive_scalers=adaptive_scalers
+        self.runtime_manager=runtime_manager
+        self.adaptive_scalers=runtime_manager["adaptive_scalers"]
         self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}#{"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
@@ -21,10 +22,16 @@ class RuntimeManager:
         self.maximum_transition_cost=maximum_transition_cost
         self.minimum_shared_resources=minimum_shared_resources
         self.list_of_results=[]
+        self.current_min_shrd_replicas=-1
+        self.current_min_shrd_resources={}
+        for key in minimum_shared_resources.keys():
+            self.current_min_shrd_resources[key]=-1
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(tenant_nb, self.adaptive_scalers, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, self.minimum_shared_resources)
+        rm=RuntimeManager(tenant_nb, self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, self.minimum_shared_resources)
         rm.sorted_combinations=self.sorted_combinations[:]
+        rm.current_min_shrd_replicas=self.current_min_shrd_replicas
+        rm.current_min_shrd_resources=dict(self.current_min_shrd_resources)
         return rm
 
     def reset(self):
@@ -277,12 +284,19 @@ class RuntimeManager:
     def get_adaptive_window(self):
         return self.adaptive_window
 
-    def add_result(self,result):
+    def add_result(self,result,tenant_nb,nb_shrd_replicas=None, shrd_resources=None):
+        self.runtime_manager['last_tenant_nb'] = tenant_nb
+        if not nb_shrd_replicas==None and not shrd_resources==None:
+            if self.current_min_shrd_replicas == -1 or  nb_shrd_replicas < self.current_min_shrd_replicas:
+                self.current_min_shrd_replicas=nb_shrd_replicas
+            for key in shrd_resources.keys():
+                if self.current_min_shrd_resources[key] == -1 or shrd_resources[key] < self.current_min_shrd_resources[key]:
+                    self.current_min_shrd_resources[key]=shrd_resources[key]
         workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
         resource_types=self.adaptive_scalers["init"].workers[0].resources.keys()
         for w in workers_result:
              w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
-        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "result": result, "workers": workers_result})
+        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "result": result, "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources})
 
     def get_results(self):
         return self.list_of_results
@@ -307,7 +321,7 @@ class RuntimeManager:
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
-        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager["adaptive_scalers"], AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"])
+        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager, AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"])
     return runtime_manager[tenant_nb]
 
 

@@ -43,6 +43,8 @@ utilFunc: sparkbenchalphabet
 output: Results/exp3
 sampling_ratio: 0.75
 minimum_shared_replicas: 0
+dominant_resources:
+  - "cpu"
 minimum_shared_resources:
   cpu: 0
   memory: 0

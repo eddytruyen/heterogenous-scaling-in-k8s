@@ -644,24 +644,58 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 d[sla['name']][str(startTenants)]=rm.get_next_sample()
 
         def check_mononoticity(workers, r, rm):
+                    mono_constraint_violated=False
+                    if "last_tenant_nb" in runtime_manager.keys(): 
+                        last_tenant_nb=runtime_manager["last_tenant_nb"]
+                        previous_rm=runtime_manager[last_tenant_nb]
+                        tmp_result=previous_rm.list_of_results[-1]
+                        qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
+                        shrd_replicas=qualities_of_sample['nb_shrd_repls']
+                        shrd_resources=qualities_of_sample['shrd_resources']
+                        if shrd_replicas < rm.minimum_shared_replicas:
+                            raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
+                        for key in rm.minimum_shared_resources.keys():
+                            if shrd_resources[key] < rm.minimum_shared_resources[key]:
+                                raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
                         mono_constraint_violated=False
                         history=runtime_manager[tenant_nb].get_results()
-                        #We start from tenants due prevent non-linear scaling effects
+                        #We start from tenants+2 due prevent non-linear scaling effects
                         for k in range(tenant_nb+2, max([int(t) for t in d[sla['name']].keys()])+1):
                             history+=runtime_manager[k].get_results()
                         for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['result']['CompletionTime']) + "s has smaller resource amount") 
                                         if  float(r['CompletionTime']) > (float(h['result']['CompletionTime']) + initial_conf['monotonicity_threshold']):
-                                                print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) +  " -> " + str(rm.minimum_shared_replicas+1))
-                                                rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
+                                                print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
+                                                resources_incremented=False
+                                                import pdb; pdb.set_trace()
+                                                for key in shrd_resources.keys():
+                                                    if key in initial_conf["dominant_resources"]:
+                                                        if shrd_resources[key] < rm.current_min_shrd_resources[key]:
+                                                            print("!!!!!! ADJUSTING shared_resources for resource type " + key +  ": "  + str(rm.minimum_shared_resources[key]) +  " -> " + str(shrd_resources[key]+initial_conf['increments'][key])) 
+                                                            rm.minimum_shared_resources[key]=shrd_resources[key]+initial_conf['increments'][key]
+                                                            resources_incremented=True
+                                                if not resources_incremented:
+                                                    print("!!!!ADJUSTUNG shared_replicas: "  + str(rm.minimum_shared_replicas) +  " -> " + str(shrd_replicas+1))
+                                                    rm.minimum_shared_replicas=shrd_replicas+1
                                                 mono_constraint_violated=True
-                                                for t in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
+                                                for t in range(tenant_nb, max([int(t) for t in d[sla['name']].keys()])+1):
                                                     if runtime_manager[t].minimum_shared_replicas < rm.minimum_shared_replicas:
                                                         runtime_manager[t].minimum_shared_replicas=rm.minimum_shared_replicas
+                                                    for key in rm.minimum_shared_resources.keys():
+                                                        if runtime_manager[t].minimum_shared_resources[key] < rm.minimum_shared_resources[key]:
+                                                            runtime_manager[t].minimum_shared_resources[key]=rm.minimum_shared_resources[key]
                                                 break
-                        if not mono_constraint_violated:
-                            rm.add_result(r)
+                    if not mono_constraint_violated:
+                            print("ADDING CORRECT RESULT TO HISTORY:")
+                            print(r)
+                            if "last_tenant_nb" in runtime_manager.keys():
+                                print("shared_replicas: " + str(shrd_replicas))
+                                for key in shrd_resources.keys():
+                                    print("shared_resources for resource type " + key + ": " + str(shrd_resources[key]))
+                                rm.add_result(r,tenant_nb,shrd_replicas,shrd_resources)
+                            else:
+                                rm.add_result(r,tenant_nb)
 
 
         def debug():
@@ -1529,7 +1563,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             else:
                                                 current_adaptive_scaler=adaptive_scaler
                                                 previous_adaptive_scaler=update_adaptive_scaler_with_results(adaptive_scaler.clone(), previous_results, tenant_nb, get_conf(adaptive_scaler.workers, previous_results[str(tenant_nb)]))
-                                            qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, minimum_shared_resources, log=True)
+                                            qualitiesOfSample=_pairwise_transition_cost(previous_adaptive_scaler.workers, previous_tenant_conf, current_adaptive_scaler.workers, result_conf, minimum_shared_replicas, minimum_shared_resources, log=True)
                                         #else:
                                         #    qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1, log=log)
                                             cost=qualitiesOfSample['cost']
@@ -1864,7 +1898,7 @@ def tenant_nb_X_result_conf_conflict_with_other_tenant_nb(adaptive_scalers, prev
         return False
 
 
-def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_resources, check_worker, scaled_worker_index, log=False):
+def _old_pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_resources, check_worker, scaled_worker_index, log=False):
     if not previous_conf:
         return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
@@ -1890,8 +1924,8 @@ def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,
         print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_resources: ' + str(shared_resources))
     return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_resources': shared_resources}
 
-def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_conf, adaptive_scaler, conf, minimum_shared_replicas, minimum_shared_resources, log=False):
-    if not previous_conf or not previous_adaptive_scaler:
+def _pairwise_transition_cost(previous_workers, previous_conf, workers, conf, minimum_shared_replicas, minimum_shared_resources, log=False):
+    if not previous_conf or not previous_workers:
         return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
     shared_replicas=0
@@ -1899,13 +1933,13 @@ def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, pre
     for key in minimum_shared_resources.keys():
         shared_resources[key]=0
     for worker_index, conf_pair in enumerate(zip(conf,previous_conf)):
-        if adaptive_scaler.workers[worker_index].equals(previous_adaptive_scaler.workers[worker_index]):
+        if workers[worker_index].equals(previous_workers[worker_index]):
             if conf_pair[0] > conf_pair[1]:
                 cost+=conf_pair[0]-conf_pair[1]
             if conf_pair[1] >= 1  and conf_pair[0] >= 1:
                 shared_replicas+=min(conf_pair[0],conf_pair[1])
                 for key in minimum_shared_resources.keys():
-                    shared_resources[key]+=shared_replicas*adaptive_scaler.workers[worker_index].resources[key]
+                    shared_resources[key]+=shared_replicas*workers[worker_index].resources[key]
         else:
             cost+=conf_pair[0]
     if log:
