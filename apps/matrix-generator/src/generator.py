@@ -652,11 +652,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
                         shrd_replicas=qualities_of_sample['nb_shrd_repls']
                         shrd_resources=qualities_of_sample['shrd_resources']
-                        if shrd_replicas < rm.minimum_shared_replicas:
-                            raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
-                        for key in rm.minimum_shared_resources.keys():
-                            if shrd_resources[key] < rm.minimum_shared_resources[key]:
-                                raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
+                        #if shrd_replicas < rm.minimum_shared_replicas:
+                        #    raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
+                        #for key in rm.minimum_shared_resources.keys():
+                        #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
+                        #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
                         mono_constraint_violated=False
                         history=runtime_manager[tenant_nb].get_results()
                         #We start from tenants+2 due prevent non-linear scaling effects
@@ -668,7 +668,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         if  float(r['CompletionTime']) > (float(h['result']['CompletionTime']) + initial_conf['monotonicity_threshold']):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
                                                 resources_incremented=False
-                                                import pdb; pdb.set_trace()
                                                 for key in shrd_resources.keys():
                                                     if key in initial_conf["dominant_resources"]:
                                                         if shrd_resources[key] < rm.current_min_shrd_resources[key]:
@@ -696,6 +695,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 rm.add_result(r,tenant_nb,shrd_replicas,shrd_resources)
                             else:
                                 rm.add_result(r,tenant_nb)
+                    return mono_constraint_violated
 
 
         def debug():
@@ -744,6 +744,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             next_tenant_nb_processed=True
         else:
             next_tenant_nb_processed=False
+        mono_constraint_violated=False
         if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
             evaluate=True
@@ -761,7 +762,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                 no_exps=True
             tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-            check_mononoticity(adaptive_scaler.workers, tmp_result, rm)
+            mono_constraint_violated=check_mononoticity(adaptive_scaler.workers, tmp_result, rm)
             next_conf=get_conf(adaptive_scaler.workers, tmp_result)
             results=[tmp_result]
 
@@ -882,7 +883,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             result=find_optimal_result(adaptive_scaler.workers,results,slo)
             process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
-        if not next_tenant_nb_processed:
+        if not next_tenant_nb_processed or mono_constraint_violated:
             rm=get_rm_for_closest_tenant_nb(startTenants)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=0
