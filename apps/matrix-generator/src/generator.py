@@ -855,6 +855,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     raise RuntimeError("No experiments left in runtime manager")
                 #removing failed_conf
                 if not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
+                    import pdb; pdb.set_trace()
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                 # if still configs remain to be tested
                 last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
@@ -1223,6 +1224,7 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
+		import pdb; pdb.set_trace()
 		if not runtime_manager[tenant_nb].result_is_stored(workers, previous_result):
 			return start
 		next_index=start
@@ -1250,9 +1252,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a higher resource cost than the current optimal result and therefore this config and all higher configs are not cost effective for the currrent or lower number of tenants")
-							if sorted_combinations.index(possible_removal) < next_index:
-								next_index-=1
-							elif sorted_combinations.index(possible_removal) == next_index and next_index > 0:
+							if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
 								next_index-=1
 							sorted_combinations.remove(possible_removal)
 							if rm.conf_in_experiments(possible_removal):
@@ -1292,6 +1292,8 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
+							if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
+								next_index-=1
 							sorted_combinations.remove(possible_removal)
 							if rm.conf_in_experiments(possible_removal):
 								rm.remove_sample_for_conf(possible_removal)
@@ -1301,7 +1303,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				print("Removing failed conf")
 				print(failed_conf)
 				i=1
-				new_index=sorted_combinations.index(failed_conf)-i
+				new_index=sorted_combinations.index(failed_conf)-1
 				while new_index >= 0 and resource_cost(workers,failed_conf, False) == resource_cost(workers, sorted_combinations[new_index], False):
 					next_index=new_index
 					i+=1
