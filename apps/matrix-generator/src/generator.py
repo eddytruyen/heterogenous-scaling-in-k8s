@@ -855,7 +855,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     raise RuntimeError("No experiments left in runtime manager")
                 #removing failed_conf
                 if not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
-                    import pdb; pdb.set_trace()
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                 # if still configs remain to be tested
                 last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
@@ -1224,7 +1223,6 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
-		import pdb; pdb.set_trace()
 		if not runtime_manager[tenant_nb].result_is_stored(workers, previous_result):
 			return start
 		next_index=start
