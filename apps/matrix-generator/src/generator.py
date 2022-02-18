@@ -17,7 +17,7 @@ NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
 LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
-USE_PERFORMANCE_MODEL=True
+USE_PERFORMANCE_MODEL=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -84,7 +84,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
                 except IndexError:
                     if retry and retry_window:
-                        get_next_exps(adaptive_scaler, rm, lst, get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function), sampling_ratio, retry_window, tenants)
+                        next_conf=get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function)
+                        if not next_conf in lst:
+                            lst+=[next_conf]
+                            lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                            start=lst.index(next_conf)
+                            tmp_window=min(retry_window, len(lst)-start)
+                        get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, tmp__window, tenants)
                     else:
                         lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
                         start=0
@@ -502,8 +508,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         k-=1
                         if closest_conf:
                                 return closest_conf
-                        else:
+                        elif USE_PERFORMANCE_MODEL:
                                 return get_conf_for_start_tenant(slo,tenants,adaptive_scaler,lst,window, window_offset_for_scaling_function)
+                        else:
+                                return lst[random.choice(range(0,len(lst)))] 
+
 
 
         def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
@@ -643,7 +652,25 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=window)
                 d[sla['name']][str(startTenants)]=rm.get_next_sample()
 
-        def check_mononoticity(workers, r, rm):
+        def get_history(skip_tenants=0):
+            history=[]
+            #We start from tenants+2 due prevent non-linear scaling effects
+            for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
+                history+=runtime_manager[k].get_results()
+            return history
+
+        def check_outlier(r, history):
+            outlier=False
+            if len(history) >= 2:
+                completiontimes=[h['CompletionTime'] for h in history]
+                average=sum(completiontimes)/len(completiontimes)
+                if float(r['CompletionTime']) > average*float(initial_conf['outlier_threshold']):
+                    print("!!!!!!!!!!!Outlier disturbing result!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    outlier=True
+            return outlier
+
+        
+        def check_mononoticity(workers, r, rm, history):
                     mono_constraint_violated=False
                     if "last_tenant_nb" in runtime_manager.keys(): 
                         last_tenant_nb=runtime_manager["last_tenant_nb"]
@@ -658,15 +685,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
                         mono_constraint_violated=False
-                        history=runtime_manager[tenant_nb].get_results()
-                        #We start from tenants+2 due prevent non-linear scaling effects
-                        for k in range(tenant_nb+2, max([int(t) for t in d[sla['name']].keys()])+1):
-                            history+=runtime_manager[k].get_results()
                         for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
-                                        print("Conf " + str(h["conf"]) + " with completion time " + str(h['result']['CompletionTime']) + "s has smaller resource amount") 
-                                        if  float(r['CompletionTime']) > (float(h['result']['CompletionTime']) + initial_conf['monotonicity_threshold']):
+                                        print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller resource amount") 
+                                        if  float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
+                                                import pdb; pdb.set_trace()
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
                                                     if key in initial_conf["dominant_resources"]:
@@ -684,7 +708,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     for key in rm.minimum_shared_resources.keys():
                                                         if runtime_manager[t].minimum_shared_resources[key] < rm.minimum_shared_resources[key]:
                                                             runtime_manager[t].minimum_shared_resources[key]=rm.minimum_shared_resources[key]
-                                                break
+
                     if not mono_constraint_violated:
                             print("ADDING CORRECT RESULT TO HISTORY:")
                             print(r)
@@ -745,6 +769,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         else:
             next_tenant_nb_processed=False
         mono_constraint_violated=False
+        outlier=False
         if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
             evaluate=True
@@ -762,15 +787,23 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                 no_exps=True
             tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-            mono_constraint_violated=check_mononoticity(adaptive_scaler.workers, tmp_result, rm)
-            next_conf=get_conf(adaptive_scaler.workers, tmp_result)
-            results=[tmp_result]
+            history=get_history()
+            outlier=check_outlier(tmp_result, history)
+            if not outlier:
+                mono_constraint_violated=check_mononoticity(adaptive_scaler.workers, tmp_result, rm, history)
+                
+            if not outlier:     
+                next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+                results=[tmp_result]
+            else:
+                tenant_nb=maxTenants+1
 
-        start=0
-        if next_conf:
-            start=lst.index(next_conf)
-        print("Starting at: " + str(start))
-        nr_of_experiments=1
+        if not outlier:
+            start=0
+            if next_conf:
+                start=lst.index(next_conf)
+            print("Starting at: " + str(start))
+            nr_of_experiments=1
         while tenant_nb <= maxTenants and evaluate:
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])

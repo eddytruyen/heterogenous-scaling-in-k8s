@@ -296,7 +296,7 @@ class RuntimeManager:
         resource_types=self.adaptive_scalers["init"].workers[0].resources.keys()
         for w in workers_result:
              w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
-        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "result": result, "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources})
+        self.list_of_results.append({"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources})
 
     def get_results(self):
         return self.list_of_results
@@ -313,7 +313,7 @@ class RuntimeManager:
         
         found=False
         for r in self.list_of_results:
-            if  float(result["CompletionTime"]) == float(r["result"]["CompletionTime"]) and generator.get_conf(workers,result) == r["conf"] and equal_workers(workers, r["workers"]):
+            if  float(result["CompletionTime"]) == r["CompletionTime"] and generator.get_conf(workers,result) == r["conf"] and equal_workers(workers, r["workers"]):
                     found=True
                     break
         return found
