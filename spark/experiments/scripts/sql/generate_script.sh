@@ -24,7 +24,7 @@ then
   sed -i "s/executor-memory = \".*\"/executor-memory = \"${executorMemory}G\"/g" tmp
   sed -i "s/spark.executor.memoryOverhead = \".*\"/spark.executor.memoryOverhead = \"$executorMemoryOverhead\"/g" tmp
 fi
-sed -i "s/x/$tenantGroup/g" tmp
+sed -i "s/gx/g$tenantGroup/g" tmp
 for i in `seq $iterations`
 do
 #  if [ $i -lt $nrOfTenants ]

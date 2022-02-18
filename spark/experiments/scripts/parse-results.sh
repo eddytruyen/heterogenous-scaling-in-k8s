@@ -6,9 +6,9 @@ outputdir=$4
 nrOfTenants=$5
 echo "wait till distributed file system is synchronised"
 sleep 3
-if [ ! -d $outputDir ]
+if [ ! -d $outputdir ]
 then
-        mkdir $outputDir
+        mkdir $outputdir
 fi
 ls ${benchpath}results-$workload-g$tenantgroup-t-*.csv/_SUCCESS
 count=`ls ${benchpath}results-$workload-g$tenantgroup-t-*.csv/_SUCCESS | wc -l`
