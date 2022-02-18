@@ -674,6 +674,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     mono_constraint_violated=False
                     if "last_tenant_nb" in runtime_manager.keys(): 
                         last_tenant_nb=runtime_manager["last_tenant_nb"]
+                        #if last_tenant_nb > tenant_nb:
+                        #    return False
                         previous_rm=runtime_manager[last_tenant_nb]
                         tmp_result=previous_rm.list_of_results[-1]
                         qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
@@ -688,7 +690,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller resource amount") 
-                                        if  float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
+                                        if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
                                                 import pdb; pdb.set_trace()
                                                 resources_incremented=False
@@ -708,7 +710,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     for key in rm.minimum_shared_resources.keys():
                                                         if runtime_manager[t].minimum_shared_resources[key] < rm.minimum_shared_resources[key]:
                                                             runtime_manager[t].minimum_shared_resources[key]=rm.minimum_shared_resources[key]
-
+                                                break
                     if not mono_constraint_violated:
                             print("ADDING CORRECT RESULT TO HISTORY:")
                             print(r)
