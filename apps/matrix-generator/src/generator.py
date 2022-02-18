@@ -654,9 +654,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
         def get_history(skip_tenants=0):
             history=[]
+            if skip_tenants < 0:
+                history=runtime_manager[tenant_nb].get_results()
+            else:
             #We start from tenants+2 due prevent non-linear scaling effects
-            for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
-                history+=runtime_manager[k].get_results()
+                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
+                    history+=runtime_manager[k].get_results()
             return history
 
         def check_outlier(r, history):
@@ -692,7 +695,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller resource amount") 
                                         if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
-                                                import pdb; pdb.set_trace()
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
                                                     if key in initial_conf["dominant_resources"]:
@@ -788,10 +790,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 #if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                 no_exps=True
-            tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-            history=get_history()
+            tmp_result=create_result(adaptive_scaler.workers, completion_time, previous_conf, sla['name'])
+            history=get_history(-1)
             outlier=check_outlier(tmp_result, history)
             if not outlier:
+                history=get_history()
                 mono_constraint_violated=check_mononoticity(adaptive_scaler.workers, tmp_result, rm, history)
                 
             if not outlier:     
@@ -991,7 +994,7 @@ def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenan
                                                 if changed:
                                                         other_as.workers[i]=adaptive_scaler.workers[i].clone()
 				if changed_scaler:
-					d[sla['name']][t]=create_result(other_as, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
+					d[sla['name']][t]=create_result(other_as.workers, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
 	return d
 
 
@@ -1078,10 +1081,10 @@ def add_incremental_result(adaptive_scalers,destination_tenant_nb, d, sla, sourc
 		x=d[sla['name']][str(destination_tenant_nb)]
 		if resource_cost(destination_adaptive_scaler.workers, get_conf(destination_adaptive_scaler.workers, x)) >= resource_cost(source_adaptive_scaler.workers, next_conf) or isExistingResultNotCostEffective(x,slo):
 			print("Adding stronger incremental result")
-			d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+			d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler.workers, float(slo) + 999999.0 , next_conf, sla['name'])
 	else:
 		print("Adding stronger incremental result")
-		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler.workers, float(slo) + 999999.0 , next_conf, sla['name'])
 	return source_adaptive_scaler
 
 
@@ -1157,9 +1160,9 @@ def flag_all_workers_for_tenants_up_to_nb_tenants(results, nb_tenants,adaptive_s
             flag_workers(adaptive_scaler.workers, conf)
 
 
-def create_result(adaptive_scaler, completion_time, conf, sla_name, successfull='true'):
+def create_result(workers, completion_time, conf, sla_name, successfull='true'):
 	result={'config': '0'}
-	for i,w in enumerate(adaptive_scaler.workers):
+	for i,w in enumerate(workers):
 		result["worker"+str(i+1)+".replicaCount"]=str(conf[i])
 		result["worker"+str(i+1)+".resources.requests.cpu"]=str(w.resources['cpu'])
 		result["worker"+str(i+1)+".resources.requests.memory"]=str(w.resources['memory'])
@@ -1464,7 +1467,8 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
                             if other_as.ScalingDownPhase and other_as.StartScalingDown:
                                 if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE or not (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100):
                                     if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE:
-                                        previous_results[t]=runtime_manager[int(t)].list_of_results[-1]['result']
+                                        previous_result_from_history=runtime_manager[int(t)].list_of_results[-1]
+                                        previous_results[t]=create_result(previous_result_from_history["workers"], previous_result_from_history["CompletionTime"], previous_result_from_history["conf"], previous_results[t]['SLAName'])
                                         update_adaptive_scaler_with_results(other_as, previous_results, int(t), get_conf(other_as.workers, previous_results[t])) 
                                     if float(previous_results[t]['CompletionTime']) > slo and has_smaller_incremental_workers_than(other_as, adaptive_scaler, other_conf):
                                         stop=False
@@ -1483,7 +1487,7 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
             update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
-            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
+            previous_results[t]=create_result(cloned_other_as[t].workers, float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
         debug()
         return changed_scaler
 
@@ -1930,7 +1934,7 @@ def tenant_nb_X_result_conf_conflict_with_other_tenant_nb(adaptive_scalers, prev
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
             update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
-            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
+            previous_results[t]=create_result(cloned_other_as[t].workers, float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
         return False
 
 
