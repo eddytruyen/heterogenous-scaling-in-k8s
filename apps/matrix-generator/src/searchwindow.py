@@ -333,7 +333,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False, use_performance_model=False):
 
 		def is_testable(worker, conf):
                       nonlocal scale_down
@@ -365,6 +365,8 @@ class AdaptiveScaler:
                                return False
 
 		def difference(conf_cost, total_cost):
+                        if total_cost < 0:
+                                return 1
                         nonlocal scale_down
                         if scale_down:
                                 print("SCALE DOWN DIFF")
@@ -432,13 +434,16 @@ class AdaptiveScaler:
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
-		totalcost = self.ScalingFunction.target(slo,tenant_nb)
+		if use_performance_model:
+			totalcost = self.ScalingFunction.target(slo,tenant_nb)
+			absolute_totalcost=0
+			for res in totalcost.keys():
+				absolute_totalcost+=totalcost[res]
+		else:
+			absolute_totalcost=-1
 		new_workers=[w.clone() for w in self.workers]
 		for w in self.workers:
 			print(w.resources)
-		absolute_totalcost=0
-		for res in totalcost.keys():
-			absolute_totalcost+=totalcost[res]
 		diff=difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
 		print("difference between resource_cost optimal conf and predicted total cost -1")
 		print(diff)
@@ -603,13 +608,13 @@ class AdaptiveScaler:
                         print(self.tipped_over_confs)
 		return self.tipped_over_confs
 
-	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
+	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb, use_performance_model=False):
                 conf_index = 0
                 result_conf_and_workers=[]
                 states=[]
                 state=None
                 while len(self.tipped_over_confs) > 0:
-                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True)
+                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True, use_performance_model=use_performance_model)
                         copy_of_states=states[:]
                         state=states.pop(0)
                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:

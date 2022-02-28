@@ -3,7 +3,8 @@ from . import utils
 from .searchwindow import AdaptiveWindow
 
 class RuntimeManager:
-    def __init__(self,tenant_nb, runtime_manager, adaptive_window, minimum_shared_replicas, maximum_transition_cost, minimum_shared_resources):
+    def __init__(self,adaptive_scaler,tenant_nb, runtime_manager, adaptive_window, minimum_shared_replicas, maximum_transition_cost, minimum_shared_resources):
+        self.adaptive_scaler=adaptive_scaler
         self.tenant_nb=tenant_nb
         self.raw_experiments=[]
         self.experiments={} #{1..n, [experiment_specification,samples: [conf]]}
@@ -28,7 +29,7 @@ class RuntimeManager:
             self.current_min_shrd_resources[key]=-1
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(tenant_nb, self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, self.minimum_shared_resources)
+        rm=RuntimeManager(self.adaptive_scaler.clone(start_fresh=True),tenant_nb,self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, self.minimum_shared_resources)
         rm.sorted_combinations=self.sorted_combinations[:]
         rm.current_min_shrd_replicas=self.current_min_shrd_replicas
         rm.current_min_shrd_resources=dict(self.current_min_shrd_resources)
@@ -321,7 +322,7 @@ class RuntimeManager:
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
-        runtime_manager[tenant_nb] = RuntimeManager(tenant_nb, runtime_manager, AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"])
+        runtime_manager[tenant_nb] = RuntimeManager(runtime_manager["adaptive_scalers"]["init"].clone(start_fresh=True),tenant_nb, runtime_manager, AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"])
     return runtime_manager[tenant_nb]
 
 
