@@ -65,7 +65,7 @@ for i in `seq $alphabetLength`
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
                 replicas=$((value))
 		new_conf=${new_conf}${replicas}_
-                if [ $replicas -gt 0 ]
+                if [ $replicas -ge 0 ]
                 then
                         cpuKeyName=worker$i.resources.requests.cpu
                         valueCpu=$(grep $cpuKeyName $fileName | cut -d ":" -f2)
