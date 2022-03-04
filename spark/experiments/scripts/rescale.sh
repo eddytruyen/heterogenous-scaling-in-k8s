@@ -18,7 +18,7 @@ start=0
 #curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=149&previoustenants=2&previousconf=2_0_0_0"
 if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
-	echo "previous_conf"
+	echo previous_conf: $previous_conf 
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
 then
