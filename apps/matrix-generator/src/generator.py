@@ -889,6 +889,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(tmp_rm, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                                    tmp_start=tmp_lst.index(get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)]))
+                                    print("For " + str(i) + " tenants, the current sample equals " + utils.array_to_delimited_str(get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)]),"_") + " and is positioned at index " + str(tmp_start))
                                     #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
                                     if tipped_over_intermediate_confs and not adaptive_scaler.careful_scaling:
                                         #if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
@@ -901,10 +903,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     if i > tenant_nb and intermediate_state==NO_RESULT:
                                             print("Current result is NO RESULT, therefore, we remove all configs with lower resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
                                             print("REMOVING CONFS FOR NB OF TENANTS: " + str(i))
-                                            remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, [], 0, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True,higher_tenant_remove=do_higher_tenant_remove)
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, [], tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True,higher_tenant_remove=do_higher_tenant_remove, other_workers=adaptive_scaler.workers)
                                     elif i < tenant_nb and (intermediate_state==COST_EFFECTIVE_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT):
                                             print("RESULT FOUND,  we remove all configs with higher resource_cost than current result for lower number of tenants: 1 .. " + str(tenant_nb-1))
-                                            remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, other_workers=adaptive_scaler.workers)
+                                    print("New index positioned at " + str(tmp_start))
                                     if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
                                             print("SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: " + str(i))
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
@@ -927,10 +930,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 else:
                                                     print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                     tmp_rm.reset()
-                                                    check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[0],0,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                    check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[start],start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
                                                     d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
-                                            print(get_conf(adaptive_scaler.workers,d[sla['name']][str(i)]))
+                                            current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
+                                            if not current_conf in tmp_lst:
+                                                print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
+                                                tmp_rm.reset()
+                                                check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[tmp_start],tmp_start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                d[sla['name']][str(i)]=tmp_rm.get_next_sample()
+                                                current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
+                                            print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
+                                            print(current_conf)
                 #elif intermediate_state == COST_EFFECTIVE_RESULT:
                 #    remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
             if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
@@ -950,7 +961,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     raise RuntimeError("No experiments left in runtime manager")
                 #removing failed_conf
                 if not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
+                    print("For " + str(tenant_nb) + " tenants, the current sample equals " + utils.array_to_delimited_str(next_conf,"_") + " and is positioned at index " + str(start))
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
+                    print("New index positioned at " + str(start))
                 # if still configs remain to be tested
                 last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
                 if not mono_constraint_violated:
@@ -1344,10 +1357,12 @@ def equal_conf(conf1, conf2):
 
 
 
-def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
+def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False, other_workers=[]):
 		if rm == runtime_manager[tenant_nb] and not runtime_manager[tenant_nb].result_is_stored(workers, previous_result):
 			return start
 		next_index=start
+		if not other_workers:
+			other_workers=workers
 		if optimal_conf and careful_scaling:
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
@@ -1368,7 +1383,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
 					possible_removal=tmp_combinations[i]
-					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False) + 10:
+					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(other_workers, optimal_conf, cost_aware=False) + 10:
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a higher resource cost than the current optimal result and therefore this config and all higher configs are not cost effective for the currrent or lower number of tenants")
@@ -1408,7 +1423,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				failed_range=tmp_combinations.index(failed_conf)
 				for i in range(0, failed_range):
 					possible_removal=tmp_combinations[i]
-					if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False):  
+					if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(other_workers, failed_conf, False):  
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
@@ -1420,19 +1435,20 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 							if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
 								rm.remove_tipped_over_result(possible_removal)
 				#if (not failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]) or (careful_scaling or higher_tenant_remove or tipped_over_results):
-				print("Removing failed conf")
-				print(failed_conf)
-				i=1
-				new_index=sorted_combinations.index(failed_conf)-1
-				while new_index >= 0 and resource_cost(workers,failed_conf, False) == resource_cost(workers, sorted_combinations[new_index], False):
-					next_index=new_index
-					i+=1
-					new_index=sorted_combinations.index(failed_conf)-i
-				sorted_combinations.remove(failed_conf)
-				if rm.conf_in_experiments(failed_conf):
- 					rm.remove_sample_for_conf(failed_conf)
-				if failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]:
-					rm.remove_tipped_over_result(failed_conf)
+				if resource_cost(workers, failed_conf, False) <= resource_cost(other_workers, failed_conf, False):
+					print("Removing failed conf")
+					print(failed_conf)
+					i=1
+					new_index=sorted_combinations.index(failed_conf)-1
+					while new_index >= 0 and resource_cost(workers,failed_conf, False) == resource_cost(workers, sorted_combinations[new_index], False):
+						next_index=new_index
+						i+=1
+						new_index=sorted_combinations.index(failed_conf)-i
+					sorted_combinations.remove(failed_conf)
+					if rm.conf_in_experiments(failed_conf):
+ 						rm.remove_sample_for_conf(failed_conf)
+					if failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]:
+						rm.remove_tipped_over_result(failed_conf)
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
