@@ -105,7 +105,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         if previous_conf in lst:
                             start=lst.index(previous_conf)
                             next_conf=previous_conf
-                            tmp_window=window
+                            tmp_window=1
                         else:
                             lst+=[previous_conf]
                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
@@ -279,8 +279,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             return start_and_window
                                                     except IndexError:
                                                             print("No config exists that meets all filtering constraints")
-                                                            print("Returning first config")
-                                                            return [0, window] 
+                                                            print("Previous_conf:")
+                                                            print(previous_conf)
+                                                            if previous_conf in lst:
+                                                                if only_failed_results:
+                                                                    tmp_window=min(window,len(lst)-lst.index(previous_conf)+1)
+                                                                else:
+                                                                    tmp_window=1
+                                                                return [lst.index(previous_conf),tmp_window]
+                                                            else:
+                                                                lst+=[previous_conf]
+                                                                lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                                                                return [lst.index(previous_conf)+1, min(window, len(lst)-lst.index(previous_conf))]
 
                                             else:
                                                     #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
@@ -382,13 +392,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 #flag_workers(adaptive_scaler.workers,next_conf)
                 new_window=window
-                if not next_conf in lst:
-                    print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
-                    rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
-                    #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
-                    lst.append(next_conf)
-                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                    #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
                 start=lst.index(next_conf)
                 rm.reset()
                 #if not (evaluate_previous or evaluate_current):
@@ -396,29 +399,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             elif state == NO_RESULT:
                 print("NO RESULT")
                 if states and states.pop(0) == UNDO_SCALE_ACTION:
-                    try:
-                        print("Previous scale action undone")
-                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                        if adaptive_scaler.ScalingDownPhase:
-                            start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.initial_confs[0][1])
-                        else:
-                            start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.current_tipped_over_conf)
-                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                        start=start_and_window[0]
-                        new_window=start_and_window[1]
-                        next_conf=lst[start]
-                        #if previous_conf != next_conf:
-                        #    adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,tenant_nb,next_conf)
-                        #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
-                        result={}
-                        #retry_attempt+=nr_of_experiments
-                        filter=False
-                    except:
-                        print("No config meets filtering constraints")
-                        rm.reset()
-                        start=0
-                        new_window=window
-                        filter=True
+                    print("Previous scale action undone")
+                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                    if adaptive_scaler.ScalingDownPhase:
+                        start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.initial_confs[0][1])
+                    else:
+                        start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.current_tipped_over_conf)
+                    print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                    start=start_and_window[0]
+                    new_window=start_and_window[1]
+                    next_conf=lst[start]
+                    result={}
+                    filter=False
                 else:
                     if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
                         remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
@@ -1596,6 +1588,7 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
 #        return False
 
 def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, update_done=False):        
+        
         def check_resource_cost():
             if original_adaptive_scaler and check_workers:
                 if adaptive_scaler.ScalingDownPhase and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True):
@@ -1617,6 +1610,21 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         start_window=window
         if previous_results:
                 if check_workers and ScaledDownWorkerIndex != -1 and not update_done:
+                    if tenant_nb == 7 or tenant_nb == 8 or tenant_nb == 9:
+                        import pdb; pdb.set_trace()
+                    #if 'copy' in runtime_manager.keys():
+                    #    del runtime_manager['copy']
+                    #if 'results' in runtime_manager.keys():
+                    #    del runtime_manager['results']
+                    #runtime_manager['copy']={}
+                    #for key in runtime_manager.keys():
+                    #    if isinstance(runtime_manager[key],RuntimeManager) and key != tenant_nb:
+                    #        runtime_manager['copy'][key]=runtime_manager[key].adaptive_scaler.clone()
+                    #    elif key != 'copy':
+                    #        runtime_manager['copy'][key]=runtime_manager[key]
+                    #runtime_manager['results']={}
+                    #for t in previous_results.keys():
+                    #    runtime_manager['results'][t]=dict(previous_results[t])
                     if 'copy' in adaptive_scalers.keys():
                         del adaptive_scalers['copy']
                     if 'results' in adaptive_scalers.keys():
@@ -1668,6 +1676,15 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             else:
                                                 previous_tenant_conf=sorted_combinations[el-(window-new_window)]
                                         except IndexError as e:
+                                            #if 'results' in runtime_manager.keys():
+                                            #    previous_results=runtime_manager['results']
+                                            #    del runtime_manager['results']
+                                            #if 'copy' in runtime_manager.keys():
+                                            #    tmp_adaptive_scalers=dict(runtime_manager['copy'])
+                                            #    for t in runtime_manager.keys():
+                                            #        if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb:
+                                            #            runtime_manager[t].adaptive_scaler=tmp_adaptive_scalers[t].clone()
+                                            #    del runtime_manager['copy']
                                             if 'results' in adaptive_scalers.keys():
                                                 for t in previous_results.keys():
                                                     previous_results[t]=adaptive_scalers['results'][t]
@@ -1696,7 +1713,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                 print(previous_tenant_conf)
                                         remove=False
                                         #if (not exceptional_no_check_for_vertical_scaling and (not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))))
-                                        if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost():
+                                        if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or (check_workers and  runtime_manager[tenant_nb].conf_X_workers_has_been_sampled_already(sorted_combinations[el-(window-new_window)], adaptive_scaler.workers)) or check_resource_cost():
                                             remove=True
                                         else:
                                             if i != tenant_nb:

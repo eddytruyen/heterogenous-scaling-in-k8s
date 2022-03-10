@@ -302,19 +302,27 @@ class RuntimeManager:
     def get_results(self):
         return self.list_of_results
 
-    def result_is_stored(self, workers, result):
-
-        def equal_workers(workersA,workersB):
+    def equal_workers(self,workersA,workersB):
                 if len(workersA) != len(workersB):
                         return False
                 for a,b in zip(workersA,workersB):
                         if not a.equals(b):
                               return False
                 return True
-        
+
+    def result_is_stored(self, workers, result):
         found=False
         for r in self.list_of_results:
-            if  float(result["CompletionTime"]) == r["CompletionTime"] and generator.get_conf(workers,result) == r["conf"] and equal_workers(workers, r["workers"]):
+            if  float(result["CompletionTime"]) == r["CompletionTime"] and generator.get_conf(workers,result) == r["conf"] and self.equal_workers(workers, r["workers"]):
+                    found=True
+                    break
+        return found
+
+
+    def conf_X_workers_has_been_sampled_already(self, conf, workers):
+        found=False
+        for r in self.list_of_results:
+            if  conf == r["conf"] and self.equal_workers(workers, r["workers"]):
                     found=True
                     break
         return found
