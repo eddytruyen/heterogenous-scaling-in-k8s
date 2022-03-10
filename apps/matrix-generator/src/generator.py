@@ -1588,7 +1588,6 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
 #        return False
 
 def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, update_done=False):        
-        
         def check_resource_cost():
             if original_adaptive_scaler and check_workers:
                 if adaptive_scaler.ScalingDownPhase and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True):
@@ -1610,8 +1609,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         start_window=window
         if previous_results:
                 if check_workers and ScaledDownWorkerIndex != -1 and not update_done:
-                    if tenant_nb == 7 or tenant_nb == 8 or tenant_nb == 9:
-                        import pdb; pdb.set_trace()
                     #if 'copy' in runtime_manager.keys():
                     #    del runtime_manager['copy']
                     #if 'results' in runtime_manager.keys():
@@ -1685,15 +1682,16 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             #        if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb:
                                             #            runtime_manager[t].adaptive_scaler=tmp_adaptive_scalers[t].clone()
                                             #    del runtime_manager['copy']
-                                            if 'results' in adaptive_scalers.keys():
+                                            if check_workers and 'results' in adaptive_scalers.keys():
                                                 for t in previous_results.keys():
                                                     previous_results[t]=adaptive_scalers['results'][t]
                                                 del adaptive_scalers['results']
-                                            if 'copy' in adaptive_scalers.keys():
-                                                adaptive_scalers=dict(adaptive_scalers['copy'])
+                                            if check_workers and 'copy' in adaptive_scalers.keys():
+                                                adaptive_scalers=adaptive_scalers['copy']
                                                 for t in runtime_manager.keys():
                                                     if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb: 
                                                         runtime_manager[t].adaptive_scaler=adaptive_scalers[t]
+                                                        del adaptive_scalers[t]
                                                         #if t == tenant_nb:
                                                         #    for i,w in enumerate(runtime_manager[t].adaptive_scaler.workers):
                                                         #        adaptive_scaler.workers[i]=w
