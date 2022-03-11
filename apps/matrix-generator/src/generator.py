@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -413,7 +413,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     filter=False
                 else:
                     if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
-                        remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
+                        if results: 
+                            remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
                         tors=rm.get_tipped_over_results(nullify=False)
                         adaptive_scaler.failed_results=tors["results"]
                         adaptive_scaler.reset()
@@ -426,7 +427,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
                     else:
                         lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))    
-                        start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],adaptive_scaler.failed_results,scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
+                        if results:
+                            start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],adaptive_scaler.failed_results,scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
                         if d[sla['name']]:
                             previous_tenant_results=d[sla['name']]
                         else:
@@ -715,6 +717,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         
         def check_mononoticity(workers, r, rm, history):
                     nonlocal lst
+                    if tenant_nb == 10 and (previous_conf == [1,0,0,1] or previous_conf == [1,0,0,0]):
+                        import pdb; pdb.set_trace()
                     if not r["Successfull"] == "true":
                         print("Result is not successfull")
                         return False
@@ -724,7 +728,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #if last_tenant_nb > tenant_nb:
                         #    return False
                         previous_rm=runtime_manager[last_tenant_nb]
-                        tmp_result=previous_rm.list_of_results[-1]
+                        tmp_result=previous_rm.get_last_sampled_result()
                         qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
                         shrd_replicas=qualities_of_sample['nb_shrd_repls']
                         shrd_resources=qualities_of_sample['shrd_resources']
@@ -742,13 +746,15 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
                                                     if key in initial_conf["dominant_resources"]:
-                                                        if shrd_resources[key] < rm.current_min_shrd_resources[key]:
-                                                            print("!!!!!! ADJUSTING shared_resources for resource type " + key +  ": "  + str(rm.minimum_shared_resources[key]) +  " -> " + str(shrd_resources[key]+initial_conf['increments'][key])) 
-                                                            rm.minimum_shared_resources[key]=shrd_resources[key]+initial_conf['increments'][key]
-                                                            resources_incremented=True
+                                                        if rm.current_min_shrd_resources[key] == -1 or  shrd_resources[key] < rm.current_min_shrd_resources[key]:
+                                                            if shrd_resources[key] + initial_conf['increments'][key] > rm.minimum_shared_resources[key]:
+                                                                print("!!!!!! ADJUSTING shared_resources for resource type " + key +  ": "  + str(rm.minimum_shared_resources[key]) +  " -> " + str(shrd_resources[key]+initial_conf['increments'][key]))
+                                                                rm.minimum_shared_resources[key]=shrd_resources[key]+initial_conf['increments'][key]
+                                                                resources_incremented=True
                                                 if not resources_incremented:
-                                                    print("!!!!ADJUSTUNG shared_replicas: "  + str(rm.minimum_shared_replicas) +  " -> " + str(shrd_replicas+1))
-                                                    rm.minimum_shared_replicas=shrd_replicas+1
+                                                    if shrd_replicas+1 > rm.minimum_shared_replicas:
+                                                        print("!!!!ADJUSTUNG shared_replicas: "  + str(rm.minimum_shared_replicas) +  " -> " + str(shrd_replicas+1))
+                                                        rm.minimum_shared_replicas=shrd_replicas+1
                                                 mono_constraint_violated=True
                                                 lst=rm.update_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                                 for t in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
@@ -775,6 +781,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 rm.add_result(r,tenant_nb,shrd_replicas,shrd_resources)
                             else:
                                 rm.add_result(r,tenant_nb)
+    
+                    else:
+                        rm.set_last_sampled_result(r, tenant_nb, shrd_replicas, shrd_resources)
                     return mono_constraint_violated
 
 
