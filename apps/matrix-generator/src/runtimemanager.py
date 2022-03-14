@@ -285,8 +285,6 @@ class RuntimeManager:
         return self.adaptive_window
 
     def add_result(self,result,tenant_nb,nb_shrd_replicas=None, shrd_resources=None):
-        if tenant_nb == 10 and generator.get_conf(self.adaptive_scaler.workers,result) == [0,0,2,0]:
-            import pdb; pdb.set_trace()
         if not nb_shrd_replicas==None and not shrd_resources==None:
             if self.current_min_shrd_replicas == -1 or  nb_shrd_replicas < self.current_min_shrd_replicas:
                 self.current_min_shrd_replicas=nb_shrd_replicas

@@ -717,8 +717,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         
         def check_mononoticity(workers, r, rm, history):
                     nonlocal lst
-                    if tenant_nb == 10 and (previous_conf == [1,0,0,1] or previous_conf == [1,0,0,0]):
-                        import pdb; pdb.set_trace()
                     if not r["Successfull"] == "true":
                         print("Result is not successfull")
                         return False
