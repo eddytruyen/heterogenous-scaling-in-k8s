@@ -48,7 +48,7 @@ dominant_resources:
 minimum_shared_resources:
   cpu: 0
   memory: 0
-maximum_transition_cost: 2
+maximum_transition_cost: 5
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
   cpu: 1.0
