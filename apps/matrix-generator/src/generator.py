@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -196,6 +196,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         return start_and_window
                                                     except IndexError as e:
                                                         print("No config exists that meets all filtering constraints")
+                                                        print(str(e))
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
                                                         adaptive_scaler.validate_result({},opt_conf,slo)
@@ -1295,12 +1296,14 @@ def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, win
            return []
 
 
-def involves_worker(workers, conf, worker_index):
+def involves_worker(workers, conf, worker_index, log=LOG_FILTERING):
 	if worker_index < 0 or worker_index >= len(workers):
 		return True
 	if conf[worker_index] > 0:
 		return True
 	else:
+		if log:
+			print("Failed check of worker for vertical scaling")
 		return False
 
 
@@ -1559,21 +1562,22 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
                         if not adaptive_scaler.equal_workers(other_as.workers):
                             if other_as.ScalingDownPhase and other_as.StartScalingDown:
                                 if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE or not (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100):
+                                    continu=True
                                     if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE:
-                                        previous_result_from_history=runtime_manager[int(t)].list_of_results[-1]
-                                        previous_results[t]=create_result(previous_result_from_history["workers"], previous_result_from_history["CompletionTime"], previous_result_from_history["conf"], previous_results[t]['SLAName'])
-                                        update_adaptive_scaler_with_results(other_as, previous_results, int(t), get_conf(other_as.workers, previous_results[t]))
-                                    if float(previous_results[t]['CompletionTime']) > slo and has_smaller_incremental_workers_than(other_as, adaptive_scaler, other_conf):
+                                        try: 
+                                            previous_result_from_history=runtime_manager[int(t)].list_of_results[-1]
+                                            previous_results[t]=create_result(previous_result_from_history["workers"], previous_result_from_history["CompletionTime"], previous_result_from_history["conf"], previous_results[t]['SLAName'])
+                                            update_adaptive_scaler_with_results(other_as, previous_results, int(t), get_conf(other_as.workers, previous_results[t]))
+                                        except:
+                                            continu=False
+                                    if continu and float(previous_results[t]['CompletionTime']) > slo and has_smaller_incremental_workers_than(other_as, adaptive_scaler, other_conf):
                                         stop=False
-                                    elif float(previous_results[t]['CompletionTime'])* scaling_down_threshold <= slo and has_smaller_incremental_workers_than(adaptive_scaler, other_as, other_conf):
+                                    elif continu and float(previous_results[t]['CompletionTime'])* scaling_down_threshold <= slo and has_smaller_incremental_workers_than(adaptive_scaler, other_as, other_conf):
                                         stop=False
                             #elif not adaptive_scaler.equal_workers(other_as.workers):
                             if not stop:
                                 for i,w in enumerate(adaptive_scaler.workers):
-                                                changed=False
                                                 if not other_as.workers[i].equals(w):
-                                                        changed=True
-                                                if changed:
                                                         changed_scaler=True
                                                         if not t in cloned_other_as.keys():
                                                             cloned_other_as[t]=other_as.clone(start_fresh=True)
@@ -1775,7 +1779,15 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
-                                                print("removed")
+                                                print("Moved because:")
+                                                if remove:
+                                                    print("due to failed worker check triggered by vertical scaling or too high resource cost or conf has already been sampled")
+                                                elif cost > maximum_transition_cost:
+                                                    print("due to exceeding maximum transition cost (" + str(maximum_transition_cost) + ") with " +  str(cost-maximum_transition_cost) + " replicas") 
+                                                elif nb_shrd_replicas < min_shared_replicas:
+                                                    print("due to exceeding minimum shared replicas constraint (" + str(min_shared_replicas) + ") with " +  str(min_shared_replicas-nb_shrd_replicas) + " replicas")
+                                                else:
+                                                    print("due to exceeding minimal shared resources (see above for more explanation)")
                                             if i <= tenant_nb:
                                                 tmp_conf=result_conf
                                             else:
@@ -1785,7 +1797,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             new_window-=1
                                         else:
                                             if log:
-                                                print("not removed")
+                                                print("Mot moved")
                                 if new_window == 0:
                                         #unflag_all_workers(adaptive_scaler.workers)
                                         #flag_all_workers_for_tenants_up_to_nb_tenants(previous_results, tenant_nb, adaptive_scaler,slo, include_current_tenant_nb=False)

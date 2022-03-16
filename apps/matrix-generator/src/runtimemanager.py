@@ -30,7 +30,7 @@ class RuntimeManager:
             self.current_min_shrd_resources[key]=-1
 
     def copy_to_tenant_nb(self, tenant_nb):
-        rm=RuntimeManager(self.adaptive_scaler.clone(start_fresh=True),tenant_nb,self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, self.minimum_shared_resources)
+        rm=RuntimeManager(self.adaptive_scaler.clone(start_fresh=True),tenant_nb,self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, dict(self.minimum_shared_resources))
         rm.sorted_combinations=self.sorted_combinations[:]
         return rm
 
@@ -334,6 +334,9 @@ class RuntimeManager:
         found=False
         for r in self.list_of_results:
             if  conf == r["conf"] and self.equal_workers(workers, r["workers"]):
+                    print(utils.array_to_delimited_str(conf,"_") + " has already been sampled for the following workers:")
+                    for w in workers:
+                        print(w.resources)
                     found=True
                     break
         return found
