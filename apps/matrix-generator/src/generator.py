@@ -63,8 +63,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 print_results(adaptive_scaler,sample_list)
         
         def check_and_get_next_exps(adaptive_scaler, rm, lst,previous_conf, start_index, window, tenants, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=False, retry_window=None, higher_tenants_only=False):
-            nonlocal start
-            nonlocal next_conf
+            if not higher_tenants_only:
+                nonlocal start
+                nonlocal next_conf
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and (rm.no_experiments_left() and not rm.last_experiment_in_queue()):
                 print("Getting next batch of experiments for " + str(tenants) + " tenants")
                 try:
@@ -956,13 +957,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
                                                     process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) )
                                                 else:
-                                                    print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
-                                                    tmp_rm.reset()
-                                                    check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[start],start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
-                                                    d[sla['name']][str(i)]=tmp_rm.get_next_sample()
+                                                    if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
+                                                        print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
+                                                        tmp_rm.reset()
+                                                        check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[start],start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                        d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
                                             current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
-                                            if not current_conf in tmp_lst:
+                                            if not current_conf in tmp_lst and tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
                                                 print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                 tmp_rm.reset()
                                                 check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[tmp_start],tmp_start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
