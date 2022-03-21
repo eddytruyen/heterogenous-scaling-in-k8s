@@ -1013,7 +1013,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                 if not last_experiment:
                     print("There still remains configs to be tested in the current k8-resource-optimizer experiment batch")
-                    rm.update_experiment_list(i,ws,sample_list)
+                    if not mono_constraint_violated:
+                        rm.update_experiment_list(i,ws,sample_list)
                     d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                     #we have still samples left for k8-resource-optimizer, yield further processing and exit while loop
                     tenant_nb+=1
