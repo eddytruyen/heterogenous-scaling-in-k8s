@@ -358,8 +358,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             state=states.pop(0)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 tipped_over_results=return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
-                if tipped_over_results:
-                    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
+                #if tipped_over_results:
+                #    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
             if state == NO_COST_EFFECTIVE_RESULT:
                 print("NO COST EFFECTIVE RESULT")
                 if states and states.pop(0) == UNDO_SCALE_ACTION:
@@ -910,6 +910,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             intermediate_state=intermediate_states.pop(0)
             print("State of adaptive_scaler")
             adaptive_scaler.status()
+            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                if tipped_over_intermediate_confs:
+                    rm.add_tipped_over_result({"workers": [w.clone() for w in tmp_adaptive_scaler.workers], "results": tipped_over_intermediate_confs})
             #if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
             #        remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
             for i in range(1, max([int(t) for t in d[sla['name']].keys()])+1):
