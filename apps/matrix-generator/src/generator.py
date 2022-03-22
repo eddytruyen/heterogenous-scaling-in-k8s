@@ -1458,17 +1458,23 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				failed_range=tmp_combinations.index(failed_conf)
 				for i in range(0, failed_range):
 					possible_removal=tmp_combinations[i]
-					if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(other_workers, failed_conf, False):  
-						print(possible_removal)
-						if possible_removal in sorted_combinations:
-							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
-							if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
-								next_index-=1
-							sorted_combinations.remove(possible_removal)
-							if rm.conf_in_experiments(possible_removal):
-								rm.remove_sample_for_conf(possible_removal)
-							if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
-								rm.remove_tipped_over_result(possible_removal)
+					do_remove=True
+					if not higher_tenant_remove and rm.conf_X_workers_has_been_sampled_already(possible_removal, workers):
+						possible_removal_result=rm.get_result(possible_removal,workers)
+						if float(possible_removal_result['CompletionTime']) <= slo*scaling_up_threshold:
+							do_remove=False
+					if do_remove:
+						if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(other_workers, failed_conf, False):  
+							print(possible_removal)
+							if possible_removal in sorted_combinations:
+								print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
+								if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
+									next_index-=1
+								sorted_combinations.remove(possible_removal)
+								if rm.conf_in_experiments(possible_removal):
+									rm.remove_sample_for_conf(possible_removal)
+								if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
+									rm.remove_tipped_over_result(possible_removal)
 				#if (not failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]) or (careful_scaling or higher_tenant_remove or tipped_over_results):
 				if resource_cost(workers, failed_conf, False) <= resource_cost(other_workers, failed_conf, False):
 					print("Removing failed conf")

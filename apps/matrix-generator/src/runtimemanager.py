@@ -341,6 +341,13 @@ class RuntimeManager:
                     break
         return found
 
+    def get_result(self, conf, workers):
+         for r in self.list_of_results:
+            if  conf == r["conf"] and self.equal_workers(workers, r["workers"]):
+                return r
+         return None   
+
+
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
