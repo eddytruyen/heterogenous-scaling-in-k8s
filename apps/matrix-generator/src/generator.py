@@ -1459,6 +1459,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				failed_range=tmp_combinations.index(failed_conf)
 				for i in range(0, failed_range):
 					possible_removal=tmp_combinations[i]
+					#HACKHACK:debug remove sample with completion time < slo*threshold because of failed result with higher resource_conf -> non_monotonic_result, should we increase shared_resources?
 					do_remove=True
 					if not higher_tenant_remove and rm.conf_X_workers_has_been_sampled_already(possible_removal, workers):
 						possible_removal_result=rm.get_result(possible_removal,workers)
