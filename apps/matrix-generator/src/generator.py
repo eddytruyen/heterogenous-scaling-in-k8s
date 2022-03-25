@@ -357,7 +357,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print(states)
             state=states.pop(0)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                tipped_over_results=return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                tipped_over_results=return_failed_confs(runtime_manager, tenant_nb, adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 #if tipped_over_results:
                 #    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
             if state == NO_COST_EFFECTIVE_RESULT:
@@ -904,8 +904,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
             print("Removing all configs that are useless to actually test as a result of the current result")
             tmp_adaptive_scaler=adaptive_scaler.clone()
-            intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
-            tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+            intermediate_result=find_optimal_result(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers,results,slo)
+            tipped_over_intermediate_confs=return_failed_confs(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
             intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
             intermediate_state=intermediate_states.pop(0)
             print("State of adaptive_scaler")
@@ -949,7 +949,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 print(ws)
                                                 results_tmp1=process_samples(tmp_rm,i)
-                                                result_tmp1=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)
+                                                result_tmp1=find_optimal_result(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)
                                                 if result_tmp1:
                                                     if not result_tmp1 in tmp_lst:
                                                         tmp_lst.append(get_conf(adaptive_scaler.workers, result_tmp1))
@@ -957,7 +957,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
-                                                    result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    result_tmp2=find_optimal_result(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo)
                                                     process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) )
                                                 else:
                                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
@@ -979,8 +979,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #    remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
             if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 tmp_adaptive_scaler=adaptive_scaler.clone()
-                intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
-                tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                intermediate_result=find_optimal_result(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers,results,slo)
+                tipped_over_intermediate_confs=return_failed_confs(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 #Remembering current experiment_nb and experiment_spec:
@@ -1022,7 +1022,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb)
-            result=find_optimal_result(adaptive_scaler.workers,results,slo)
+            result=find_optimal_result(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
             process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
         if positive_outlier:
@@ -1393,11 +1393,12 @@ def equal_conf(conf1, conf2):
 
 
 def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False, other_workers=[]):
-		if rm == runtime_manager[tenant_nb] and not runtime_manager[tenant_nb].result_is_stored(workers, previous_result):
-			return start
-		next_index=start
 		if not other_workers:
 			other_workers=workers
+		if not runtime_manager[tenant_nb].result_is_stored(other_workers, previous_result): #and rm == runtime_manager[tenant_nb]:
+			print("Abort removing due to no valid result found in history")
+			return start
+		next_index=start
 		if optimal_conf and careful_scaling:
 		#	if not intermediate_remove:
 		#		if tipped_over_results and optimal_conf in tipped_over_results:
@@ -1452,7 +1453,7 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 		#		w.resources=extract_resources_from_result(previous_result, w.worker_id, resource_types)
 		#else:
 		#	workers_result=[]
-		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
+		for failed_conf in return_failed_confs(runtime_manager, tenant_nb, workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
 			if failed_conf in sorted_combinations:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=tmp_combinations.index(failed_conf)
@@ -1954,9 +1955,9 @@ def get_conf(workers, result):
 
 
 
-def return_failed_confs(workers,results, f):
+def return_failed_confs(runtime_manager, tenant_nb,workers,results, f):
 #	if DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT:
-	failed_results=[result for result in results if f(result)]
+	failed_results=[result for result in results if runtime_manager[tenant_nb].result_is_stored(workers, result) and f(result)]
 	return sort_configs(workers,[get_conf(workers,failed_result) for failed_result in failed_results])
 #	else:
 #		return []
@@ -1969,10 +1970,10 @@ def return_failed_confs(workers,results, f):
 #				workers[k].tested()
 
 
-def find_optimal_result(workers,results, slo, just_return_best=False):
+def find_optimal_result(runtime_manager, tenant_nb, workers,results, slo, just_return_best=False):
 	print("Results")
 	print(results)
-	filtered_results=[result for result in results if (just_return_best or float(result['CompletionTime']) <= slo) and float(result['CompletionTime']) > 1.0]
+	filtered_results=[result for result in results if runtime_manager[tenant_nb].result_is_stored(workers, result) and (just_return_best or float(result['CompletionTime']) <= slo) and float(result['CompletionTime']) > 1.0]
 	print("Filtered results")
 	if filtered_results:
 		filtered_results=sort_results(workers,slo,filtered_results)
