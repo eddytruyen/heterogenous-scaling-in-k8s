@@ -13,7 +13,6 @@ class RuntimeManager:
         self.sorted_combinations=[]
         self.runtime_manager=runtime_manager
         self.adaptive_scalers=runtime_manager["adaptive_scalers"]
-        self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}#{"experiment_spec": experiment_spec, "experiment_nb": experiment_nb, "sample_nb": sample_nb, "sample": next_exp}
         self.previous_returned_experiment={}
@@ -39,7 +38,6 @@ class RuntimeManager:
         self.current_experiment={"experiment_nb":0,"sample_nb":0}
         self.finished=True
         #self.sorted_combinations=[]
-        self.not_cost_effective_results=[]
         self.tipped_over_results=[]
         self.last_experiment={}
         self.previous_returned_experiment={}
@@ -245,13 +243,6 @@ class RuntimeManager:
     def no_experiments_left(self):
         return self.finished
 
-    def add_not_cost_effective_result(self, result):
-        self.not_cost_effective_results+=[result]
-
-    def get_not_cost_effective_results(self):
-        results=self.not_cost_effective_results
-        self.not_cost_effective_results=[]
-        return results
 
     def add_tipped_over_result(self, results):
         self.tipped_over_results+=[results]

@@ -127,6 +127,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 new_tmp_index+=1
             if original_resource_cost < resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
                 if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) > resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
+                    print("Resource_cost of scaled up workers conf for " + utils.array_to_delimited_str(opt_conf,"_") + " is larger than the closest conf in lst, which is larger than opt_connf:" + utils.array_to_delimited_str(tmp_combinations[new_tmp_index],"_"))
+                    print("Passing over scaled worker")
                     return True
                 else:
                     return False
@@ -212,15 +214,17 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
                                                     #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
-                                                    if d[sla['name']]:
-                                                        previous_tenant_results=d[sla['name']]
-                                                    else:
-                                                        previous_tenant_results={}
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
                                                     try:
                                                         if resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, scaled_conf):
                                                             raise IndexError
+                                                        if d[sla['name']]:
+                                                            previous_tenant_results=d[sla['name']]
+                                                        else:
+                                                            previous_tenant_results={}
+                                                        print("Moving filtered samples in sorted combinations after the window")
+                                                        print([utils.array_to_str(el) for el in lst])
                                                         print("Filtering from index " + str(lst.index(scaled_conf)) +  " with window 1")
                                                         start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, lst.index(scaled_conf), 1, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=scaled_conf, include_current_tenant_nb=tenant_nb == startTenants)
                                                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
@@ -376,6 +380,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 new_window=start_and_window[1]
                 next_conf=lst[start]
                 print(next_conf)
+                if next_conf != get_conf(adaptive_scaler.workers, d[sla['name']][str(tenant_nb)]):
+                    rm.reset()
+                    check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=False)
+                    d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                 #if next_conf != previous_conf:
                 #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
                 #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,previous_conf=previous_conf,next_conf=next_conf,result=result)
@@ -398,6 +406,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 new_window=window
                 start=lst.index(next_conf)
                 rm.reset()
+                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True)
+                d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
                 #if not (evaluate_previous or evaluate_current):
                 #    result={}
             elif state == NO_RESULT:
@@ -1025,7 +1035,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             result=find_optimal_result(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
             process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
-        if positive_outlier:
+        if positive_outlier or not next_tenant_nb_processed:
             rm=get_rm_for_closest_tenant_nb(startTenants)
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             start=0
@@ -1395,7 +1405,7 @@ def equal_conf(conf1, conf2):
 def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False, tenant_nb_workers=[]):
 		if not tenant_nb_workers:
 			tenant_nb_workers=workers
-		if not runtime_manager[tenant_nb].result_is_stored(tenant_nb_workers, previous_result): #and rm == runtime_manager[tenant_nb]:
+		if not runtime_manager[tenant_nb].conf_X_workers_has_been_sampled_already(get_conf(tenant_nb_workers, previous_result), tenant_nb_workers): #and rm == runtime_manager[tenant_nb]:
 			print("Abort removing due to no valid result found in history")
 			return start
 		next_index=start

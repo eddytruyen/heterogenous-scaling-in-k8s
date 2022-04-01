@@ -1,11 +1,9 @@
 load:
   - trace:
     - segment: stable
-      initialCount: 0
-      endCount: 0
-      duration: 180
+      initialCount: 1
+      endCount: 1
     - segment: stable
       initialCount: 4
       endCount: 4
-      duration: 180
     repeat: 3
