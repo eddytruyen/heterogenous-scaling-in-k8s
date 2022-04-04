@@ -241,7 +241,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         return process_states(adaptive_scaler,adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL),original_adaptive_scaler=original_adaptive_scaler)  
                                                     #return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
-                                            print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
                                                     print("REDOING_CHEAPEST_SCALED_DOWN")
                                                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
@@ -253,6 +252,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
+                                                    print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                                     if not adaptive_scaler.tipped_over_confs:
                                                         if only_failed_results:
                                                             start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),results[0], adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
@@ -301,7 +301,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                                 return [lst.index(previous_conf)+1, min(window, len(lst)-lst.index(previous_conf))]
 
                                             else:
-                                                    #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
+                                                if adaptive_scaler.optimal_results:
+                                                    result=adaptive_scaler.optimal_results.pop(0)
+                                                    opt_conf=get_conf(adaptive_scaler.workers,result)
+                                                    print("Trying out with another conf that has the same resource cost:" + utils.array_to_delimited_str(opt_conf,"_"))
+                                                    adaptive_scaler.StartScalingDown=True
+                                                    adaptive_scaler.redo_scale_action(slo)
+                                                    adaptive_scaler.initial_confs=[[result,opt_conf,[w.clone() for w in adaptive_scaler.workers]]]+adaptive_scaler.initial_confs
+                                                    return process_states(adaptive_scaler,[[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results, use_performance_model=USE_PERFORMANCE_MODEL)], original_adaptive_scaler=original_adaptive_scaler)
+                                                else:
+                                                    print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
+
+                                                        #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
                                                     #if changePhase:
                                                     tors=rm.get_tipped_over_results(nullify=False)
                                                     adaptive_scaler.failed_results=tors["results"]
@@ -914,7 +925,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             #if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
             print("Removing all configs that are useless to actually test as a result of the current result")
             tmp_adaptive_scaler=adaptive_scaler.clone()
-            intermediate_result=find_optimal_result(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers,results,slo)
+            intermediate_result=find_optimal_results(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers,results,slo)[0]
             tipped_over_intermediate_confs=return_failed_confs(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
             intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
             intermediate_state=intermediate_states.pop(0)
@@ -959,7 +970,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 print(ws)
                                                 results_tmp1=process_samples(tmp_rm,i)
-                                                result_tmp1=find_optimal_result(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)
+                                                result_tmp1=find_optimal_results(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)[0]
                                                 if result_tmp1:
                                                     if not result_tmp1 in tmp_lst:
                                                         tmp_lst.append(get_conf(adaptive_scaler.workers, result_tmp1))
@@ -967,7 +978,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
-                                                    result_tmp2=find_optimal_result(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    result_tmp2=find_optimal_results(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo)[0]
                                                     process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) )
                                                 else:
                                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
@@ -989,7 +1000,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #    remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
             if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 tmp_adaptive_scaler=adaptive_scaler.clone()
-                intermediate_result=find_optimal_result(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers,results,slo)
+                intermediate_result=find_optimal_results(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers,results,slo)[0]
                 tipped_over_intermediate_confs=return_failed_confs(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
                 intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
@@ -1032,7 +1043,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb)
-            result=find_optimal_result(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
+            optimal_results=find_optimal_results(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
+            if adaptive_scaler.ScalingDownPhase and not adaptive_scaler.optimal_results:
+                adaptive_scaler.optimal_results=optimal_results
+                result=adaptive_scaler.optimal_results.pop(0)
+            else:
+                result=optimal_results[0]
             process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
         if positive_outlier or not next_tenant_nb_processed:
@@ -1981,7 +1997,7 @@ def return_failed_confs(runtime_manager, tenant_nb,workers,results, f):
 #				workers[k].tested()
 
 
-def find_optimal_result(runtime_manager, tenant_nb, workers,results, slo, just_return_best=False):
+def find_optimal_results(runtime_manager, tenant_nb, workers,results, slo, just_return_best=False):
 	print("Results")
 	print(results)
 	filtered_results=[result for result in results if runtime_manager[tenant_nb].result_is_stored(workers, result) and (just_return_best or float(result['CompletionTime']) <= slo) and float(result['CompletionTime']) > 1.0]
@@ -1989,9 +2005,14 @@ def find_optimal_result(runtime_manager, tenant_nb, workers,results, slo, just_r
 	if filtered_results:
 		filtered_results=sort_results(workers,slo,filtered_results)
 		print(filtered_results)
-		return filtered_results[0]
+		optimal_results=[filtered_results[0]]
+		index=1
+		while index < len(filtered_results) and resource_cost(workers,get_conf(workers,filtered_results[index])) == resource_cost(workers,get_conf(workers,filtered_results[0])):
+                        optimal_results+=[filtered_results[index]]
+                        index+=1
+		return optimal_results
 	else:
-		return {}
+		return [{}]
 
 
 
