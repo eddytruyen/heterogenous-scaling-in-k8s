@@ -120,13 +120,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if not original_adaptive_scaler.careful_scaling:
                 return False
             tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
+            #tmp_combinations=lst
             tmp_index_conf=tmp_combinations.index(opt_conf)
             original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
             new_tmp_index=tmp_index_conf+1
             while new_tmp_index < len(tmp_combinations) and (original_resource_cost == resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index])):
                 new_tmp_index+=1
             if original_resource_cost < resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
-                if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) > resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
+                if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) > resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index], cost_aware=True):
                     print("Resource_cost of scaled up workers conf for " + utils.array_to_delimited_str(opt_conf,"_") + " is larger than the closest conf in lst, which is larger than opt_connf:" + utils.array_to_delimited_str(tmp_combinations[new_tmp_index],"_"))
                     print("Passing over scaled worker")
                     return True
@@ -214,8 +215,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     scaled_conf=adaptive_scaler.current_tipped_over_conf
                                                     #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
-                                                    print("Moving filtered samples in sorted combinations after the window")
-                                                    print([utils.array_to_str(el) for el in lst])
                                                     try:
                                                         if resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, scaled_conf):
                                                             raise IndexError
