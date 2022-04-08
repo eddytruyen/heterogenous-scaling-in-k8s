@@ -84,7 +84,7 @@ class RuntimeManager:
                 found=True
                 print("Runtime manager:: Sample list before remove:")
                 for exp_nb_tmp in self.experiments.keys():
-                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
+                    print([generator.get_conf(self.adaptive_scaler.workers, r) for r in self.experiments[exp_nb_tmp][1]])
                 already_next_current_experiment=False
                 sample_nb=self.get_nb_of_sample_for_conf(exp_nb,conf)
                 experiment_spec=self.experiments[exp_nb][0]
@@ -101,7 +101,7 @@ class RuntimeManager:
                 if not self.no_experiments_left():
                     (self.experiments[exp_nb][1]).pop(self.get_nb_of_sample_for_conf(exp_nb,conf))
                 for exp_nb_tmp in self.experiments.keys():
-                    print([generator.get_conf(self.adaptive_scalers["init"].workers, r) for r in self.experiments[exp_nb_tmp][1]])
+                    print([generator.get_conf(self.adaptive_scaler.workers, r) for r in self.experiments[exp_nb_tmp][1]])
                 if (exp_nb == self.get_current_experiment_nb()):
                     if (not already_next_current_experiment) and self.get_total_nb_of_samples(exp_nb) == 0:
                         print("Runtime manager:: Going to next experiment")
@@ -226,19 +226,26 @@ class RuntimeManager:
             self.current_experiment={"experiment_nb":0,"sample_nb":0}
 
     def previous_current_experiment(self):
-        experiment_nb=self.get_current_experiment_nb()
-        sample_nb=self.current_experiment["sample_nb"]
-        if sample_nb > 0:
-            self.current_experiment["sample_nb"]=sample_nb-1
-        elif experiment_nb > 0:
-            self.current_experiment["experiment_nb"]=experiment_nb-1
-            self.current_experiment["sample_nb"]=self.get_total_nb_of_samples(experiment_nb-1)-1
-            if self.get_total_nb_of_samples(experiment_nb-1) == 0:
-                self.previous_current_experiment()
+        if self.finished and self.last_experiment:
+            self.set_experiment_list(self.last_experiment["experiment_nb"],self.last_experiment["experiment_spec"], [self.last_experiment["sample"]])
+            self.current_experiment={"experiment_nb": self.last_experiment["experiment_nb"], "sample_nb": 0}
+            self.last_experiment={}
         else:
-            total_exp=self.get_total_nb_of_experiments()
-            total_samples=self.get_total_nb_of_samples(total_exp-1)
-            self.current_experiment={"experiment_nb": total_exp-1,"sample_nb":total_samples-1}
+            experiment_nb=self.get_current_experiment_nb()
+            sample_nb=self.current_experiment["sample_nb"]
+            if sample_nb > 0:
+                self.current_experiment["sample_nb"]=sample_nb-1
+            elif experiment_nb > 0:
+                self.current_experiment["experiment_nb"]=experiment_nb-1
+                self.current_experiment["sample_nb"]=self.get_total_nb_of_samples(experiment_nb-1)-1
+                if self.get_total_nb_of_samples(experiment_nb-1) == 0:
+                    self.previous_current_experiment()
+            else:
+                total_exp=self.get_total_nb_of_experiments()
+                total_samples=self.get_total_nb_of_samples(total_exp-1)
+                self.current_experiment={"experiment_nb": total_exp-1,"sample_nb":total_samples-1}
+            
+
 
     def no_experiments_left(self):
         return self.finished

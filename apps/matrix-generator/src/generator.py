@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -1017,9 +1017,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     print("For " + str(tenant_nb) + " tenants, the current sample equals " + utils.array_to_delimited_str(next_conf,"_") + " and is positioned at index " + str(start))
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                     print("New index positioned at " + str(start))
-                # if still configs remain to be tested
-                last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
-                if not mono_constraint_violated:
+                # if still configs remain to be testedz
+                if mono_constraint_violated:
+                    print("Adding conf back to list of experiments")
+                    rm.previous_current_experiment()
+                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                else:
+                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                #if not mono_constraint_violated:
                     print("Processing current sample")
                     sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                     samples=int(ws[4]*sampling_ratio)
