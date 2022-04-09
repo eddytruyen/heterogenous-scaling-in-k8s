@@ -785,11 +785,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #for key in rm.minimum_shared_resources.keys():
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
-                        mono_constraint_violated=False
                         for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
                                         if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
+                                             if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
@@ -817,7 +817,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             if not lst_updated:
                                                                 lst_updated=True
                                                                 runtime_manager[t].update_sorted_combinations(_sort(adaptive_scaler.workers,base))
-
+                                                print("Adding conf back to list of experiments")
+                                                rm.previous_current_experiment()
+                                                rm.add_pushed_back_result(r,shrd_replicas,shrd_resources)
                                                 break
                     if not mono_constraint_violated:
                             print("ADDING CORRECT RESULT TO HISTORY:")
@@ -829,12 +831,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 rm.add_result(r,tenant_nb,shrd_replicas,shrd_resources)
                             else:
                                 rm.add_result(r,tenant_nb)
-    
                     else:
                         rm.set_last_sampled_result(r, tenant_nb, shrd_replicas, shrd_resources)
                     return mono_constraint_violated
-
-
 
         bin_path=initial_conf['bin']['path']
         chart_dir=initial_conf['charts']['chartdir']
@@ -1018,13 +1017,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
                     print("New index positioned at " + str(start))
                 # if still configs remain to be testedz
-                if mono_constraint_violated:
-                    print("Adding conf back to list of experiments")
-                    rm.previous_current_experiment()
-                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
-                else:
-                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
-                #if not mono_constraint_violated:
+                last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                if not mono_constraint_violated:
                     print("Processing current sample")
                     sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                     samples=int(ws[4]*sampling_ratio)

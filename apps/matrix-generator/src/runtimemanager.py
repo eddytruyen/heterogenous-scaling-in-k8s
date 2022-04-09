@@ -27,6 +27,7 @@ class RuntimeManager:
         self.current_min_shrd_resources={}
         for key in minimum_shared_resources.keys():
             self.current_min_shrd_resources[key]=-1
+        self.pushed_back_results=[]
 
     def copy_to_tenant_nb(self, tenant_nb):
         rm=RuntimeManager(self.adaptive_scaler.clone(start_fresh=True),tenant_nb,self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, dict(self.minimum_shared_resources))
@@ -345,6 +346,20 @@ class RuntimeManager:
                 return r
          return None   
 
+    def add_pushed_back_result(self, result, nb_shrd_replicas=None, shrd_resources=None):
+        workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
+        self.pushed_back_results+=[{"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}]
+
+    def conf_X_workers_has_been_pushed_back_already(self, conf, workers):
+        found=False
+        for r in self.pushed_back_results:
+            if  conf == r["conf"] and self.equal_workers(workers, r["workers"]):
+                    print(utils.array_to_delimited_str(conf,"_") + " has already been pushed back for the following workers:")
+                    for w in workers:
+                        print(w.resources)
+                    found=True
+                    break
+        return found
 
 
 def instance(runtime_manager, tenant_nb, window):
