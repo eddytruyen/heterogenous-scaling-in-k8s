@@ -69,7 +69,7 @@ class RuntimeManager:
         self.experiments[experiment_nb]=[experiment_specification,samples]
 
     def conf_in_samples(self, conf, samples):
-        return conf in [generator.get_conf(self.adaptive_scalers["init"].workers,r) for r in samples]
+        return conf in [generator.get_conf(self.adaptive_scaler.workers,r) for r in samples]
 
     def conf_in_experiments(self,conf):
         for exp in self.experiments.values():
@@ -122,7 +122,7 @@ class RuntimeManager:
         experiment=self.experiments[experiment_nb]
         experiment[0]=experiment_specification
         for sample in samples:
-            sample_index=self.get_nb_of_sample_for_conf(experiment_nb, generator.get_conf(self.adaptive_scalers["init"].workers,sample))
+            sample_index=self.get_nb_of_sample_for_conf(experiment_nb, generator.get_conf(self.adaptive_scaler.workers,sample))
             if sample_index >= 0:
                 experiment[1][sample_index]=sample
 
@@ -156,7 +156,7 @@ class RuntimeManager:
 
     def get_nb_of_sample_for_conf(self,experiment_nb,conf):
         if self.conf_in_experiments(conf):
-            for i, elem in enumerate([generator.get_conf(self.adaptive_scalers["init"].workers,r) for r in self.experiments[experiment_nb][1]]):
+            for i, elem in enumerate([generator.get_conf(self.adaptive_scaler.workers,r) for r in self.experiments[experiment_nb][1]]):
                 if generator.equal_conf(conf, elem):
                     return i
         return -1
@@ -208,7 +208,7 @@ class RuntimeManager:
         while experiment_nb < self.get_total_nb_of_experiments()-1:
             experiment_nb+=1
             lst+=self.experiments[experiment_nb][1]
-        return [generator.get_conf(self.adaptive_scalers["init"].workers,s) for s in lst]   
+        return [generator.get_conf(self.adaptive_scaler.workers,s) for s in lst]   
 
 
     def next_current_experiment(self):
@@ -302,8 +302,8 @@ class RuntimeManager:
 
     def set_last_sampled_result(self,result,tenant_nb, nb_shrd_replicas=None, shrd_resources=None):
         self.runtime_manager['last_tenant_nb'] = tenant_nb
-        workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
-        resource_types=self.adaptive_scalers["init"].workers[0].resources.keys()
+        workers_result=[w.clone() for w in self.adaptive_scaler.workers]
+        resource_types=self.adaptive_scaler.workers[0].resources.keys()
         for w in workers_result:
              w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
         self.last_result={"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}
@@ -347,7 +347,7 @@ class RuntimeManager:
          return None   
 
     def add_pushed_back_result(self, result, nb_shrd_replicas=None, shrd_resources=None):
-        workers_result=[w.clone() for w in self.adaptive_scalers["init"].workers]
+        workers_result=[w.clone() for w in self.adaptive_scaler.workers]
         self.pushed_back_results+=[{"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}]
 
     def conf_X_workers_has_been_pushed_back_already(self, conf, workers):

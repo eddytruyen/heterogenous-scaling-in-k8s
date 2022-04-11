@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -785,11 +785,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #for key in rm.minimum_shared_resources.keys():
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
-                        for h in history:
+                        if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
+                            for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
                                         if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
-                                             if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
+                                             #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
@@ -818,7 +819,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                                 lst_updated=True
                                                                 runtime_manager[t].update_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                                 print("Adding conf back to list of experiments")
-                                                rm.previous_current_experiment()
+                                                if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                                                    rm.previous_current_experiment()
                                                 rm.add_pushed_back_result(r,shrd_replicas,shrd_resources)
                                                 break
                     if not mono_constraint_violated:
@@ -920,6 +922,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
+            print("Result for conf: " + utils.array_to_delimited_str(next_conf,"_") + " with completion time " + results[0]["CompletionTime"])
             #if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
             print("Removing all configs that are useless to actually test as a result of the current result")
             tmp_adaptive_scaler=adaptive_scaler.clone()
@@ -1041,13 +1044,17 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb)
+            else:
+                if mono_constraint_violated:
+                    evaluate=False
             optimal_results=find_optimal_results(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
-            if adaptive_scaler.ScalingDownPhase and not adaptive_scaler.optimal_results:
+            if evaluate and adaptive_scaler.ScalingDownPhase and not adaptive_scaler.optimal_results:
                 adaptive_scaler.optimal_results=optimal_results
                 result=adaptive_scaler.optimal_results.pop(0)
-            else:
+            elif evaluate:
                 result=optimal_results[0]
-            process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
+            if evaluate:
+                process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
             tenant_nb+=1
         if positive_outlier or not next_tenant_nb_processed:
             rm=get_rm_for_closest_tenant_nb(startTenants)
@@ -1667,13 +1674,17 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         def check_resource_cost():
             nonlocal resource_cost_is_too_high
             if original_adaptive_scaler and check_workers:
+                if initial_conf == [0,0,1,2] and sorted_combinations[el-(window-new_window)] == [0,0,2,1]:
+                    import pdb; pdb.set_trace()
                 if adaptive_scaler.ScalingDownPhase and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True):
                     resource_cost_is_too_high=True
-                    print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
+                    if log:
+                        print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
                     return True
                 elif adaptive_scaler.ScalingUpPhase and not equal_conf(sorted_combinations[el-(window-new_window)], initial_conf):
                     resource_cost_is_too_high=True
-                    print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
+                    if log:
+                        print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
                     return True
                 else:
                     return False
