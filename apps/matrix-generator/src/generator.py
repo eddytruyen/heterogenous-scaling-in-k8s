@@ -748,7 +748,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             else:
             #We start from tenants+2 due prevent non-linear scaling effects
                 for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
-                    history+=runtime_manager[k].get_results()
+                    if k in runtime_manager.keys():
+                        history+=runtime_manager[k].get_results()
             return history
 
         def check_outlier(r, history):
@@ -912,6 +913,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
                 adaptive_window=rm.get_adaptive_window()
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+                results=[tmp_result]
 
         else:
             next_tenant_nb_processed=False
@@ -1750,7 +1753,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                 while i <= max_tenants:
                         #if (include_current_tenant_nb and i == tenant_nb):
                         #    flag_all_workers_for_tenants_up_to_nb_tenants(previous_results, tenant_nb, adaptive_scaler,slo, include_current_tenant_nb=True)
-                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys() and (i <= tenant_nb or check_higher_tenant_nb(i, previous_results)):
+                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys(): #and (i <= tenant_nb or check_higher_tenant_nb(i, previous_results)):
                                 if i <= tenant_nb:
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                     minimum_shared_replicas=runtime_manager[tenant_nb].minimum_shared_replicas
