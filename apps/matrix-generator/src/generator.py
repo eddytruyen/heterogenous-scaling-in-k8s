@@ -119,8 +119,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
             if not original_adaptive_scaler.careful_scaling:
                 return False
-            tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
-            #tmp_combinations=lst
+            #tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)           
+            tmp_combinations=lst
             tmp_index_conf=tmp_combinations.index(opt_conf)
             original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
             new_tmp_index=tmp_index_conf+1
@@ -417,7 +417,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 start=lst.index(next_conf)
                 rm.reset()
                 check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True)
-                d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                next_result=rm.get_next_sample()
+                next_one=get_conf(adaptive_scaler.workers,next_result)
+                if next_one != next_conf:
+                    d[sla['name']][str(tenant_nb)]=next_result
                 #if not (evaluate_previous or evaluate_current):
                 #    result={}
             elif state == NO_RESULT:
@@ -1671,11 +1674,11 @@ def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previo
 #        return False
 
 def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, update_done=False):        
+        
+    
         def check_resource_cost():
             nonlocal resource_cost_is_too_high
             if original_adaptive_scaler and check_workers:
-                if initial_conf == [0,0,1,2] and sorted_combinations[el-(window-new_window)] == [0,0,2,1]:
-                    import pdb; pdb.set_trace()
                 if adaptive_scaler.ScalingDownPhase and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) < resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True):
                     resource_cost_is_too_high=True
                     if log:
@@ -1690,6 +1693,17 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                     return False
             else:
                 return False
+        
+        def check_higher_tenant_nb(higher_tenant_nb, previous_results):
+            if not str(higher_tenant_nb) in previous_results.keys():
+                return False
+            rslt=previous_results[str(higher_tenant_nb)]
+            if float(rslt['CompletionTime']) <= slo  and float(rslt['CompletionTime']) > 1.0:
+                return True
+            else:
+                return False
+        
+        
         if log:
             print("Starting at index " + str(start) + " with window " + str(window))
         i=start_tenant
@@ -1736,7 +1750,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                 while i <= max_tenants:
                         #if (include_current_tenant_nb and i == tenant_nb):
                         #    flag_all_workers_for_tenants_up_to_nb_tenants(previous_results, tenant_nb, adaptive_scaler,slo, include_current_tenant_nb=True)
-                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys():
+                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys() and (i <= tenant_nb or check_higher_tenant_nb(i, previous_results)):
                                 if i <= tenant_nb:
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                     minimum_shared_replicas=runtime_manager[tenant_nb].minimum_shared_replicas
