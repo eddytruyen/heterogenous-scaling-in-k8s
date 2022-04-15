@@ -28,7 +28,7 @@ def create_app():
             sla=s
 
     alphabet=sla['alphabet']
-    scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], initial_config["dominant_resources"],NODES, initial_config)
+    scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['elements'],alphabet['costs'], initial_config["dominant_resources"],NODES, initial_config)
     workers=_create_workers(alphabet['elements'], alphabet['costs'], alphabet['base'])
 
     # HARDCODED => make more generic by putting workers into an array

@@ -14,12 +14,16 @@ NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
 
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c, resources, costs, dominant_resources, nodes,initial_conf=None):
+	def __init__(self, coef_a, coef_b, coef_c, resources, elements, costs, dominant_resources, nodes,initial_conf=None):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
 		self.resources=resources
+		self.elements=elements
+		self.sizes=[]
+		for el in elements:
+			self.sizes+=[el['size']]
 		self.costs=costs
 		self.maxWeights={}
 		self.minWeights={}
@@ -43,7 +47,7 @@ class ScalingFunction:
 			self.increments=initial_conf["increments"]
 
 	def clone(self, clone_scaling_records=False):
-                sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+                sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.elements,self.costs,self.DominantResources, self.Nodes)
                 if clone_scaling_records:
                     sc.workersScaledDown = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledDown]
                     sc.workersScaledUp = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledUp]
@@ -120,7 +124,7 @@ class ScalingFunction:
                 if not self.workersScaledDown:
                         self.workersScaledDown=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
                 worker=workers[worker_index]
-                scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
+                scaleSecondaryResource=True if (self.sizes[worker_index][self.DominantResources[0]] - worker.resources[self.DominantResources[0]]) % 2 == 1 else False
                 for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments[res] >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
@@ -145,7 +149,8 @@ class ScalingFunction:
 		if not self.workersScaledUp:
 			self.workersScaledUp=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
 		worker=workers[worker_index]
-		scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
+		scaleSecondaryResource=True if (worker.resources[self.DominantResources[0]] - self.sizes[worker_index][self.DominantResources[0]] ) % 2 == 1 else False
+		#scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
 		for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]+nb_of_units*self.increments[res] <= self.Max[res]:
                             worker.scale(res, worker.resources[res]+nb_of_units*self.increments[res])
