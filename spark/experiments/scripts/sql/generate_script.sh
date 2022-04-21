@@ -17,6 +17,12 @@ fi
 matches_nb=$((`grep -o 'y\.' fragment | wc -l` - 1))
 
 iterations=$(($nrOfTenants - 1))
+
+if [ -f "tmp" ]
+then
+ rm tmp
+fi
+
 cat header >> tmp
 if [ $executorMemory -gt 0 ]
 then
