@@ -9,13 +9,13 @@ slas:
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
       tenantGroup: "2"
-      completionTime: 77
+      completionTime: 250
       #jobsize: 10
       #throughput: 0.5
     maxTenants: 10
     startTenant: 1
     alphabet:
-      searchWindow: 10
+      searchWindow: 2
       base: 4
       elements:
         - size:
@@ -29,7 +29,7 @@ slas:
             memory: 2 
         - size:
             cpu: 2
-            memory: 2
+            memory: 1
       costs:
         -  cpu: 1
            memory: 1
@@ -41,24 +41,24 @@ slas:
            memory: 1      
 utilFunc: sparkbenchalphabet
 output: Results/exp3
-sampling_ratio: 0.75
+sampling_ratio: 1.0
 minimum_shared_replicas: 0
 dominant_resources:
   - "cpu"
 minimum_shared_resources:
   cpu: 0
   memory: 0
-maximum_transition_cost: 5
+maximum_transition_cost: 100
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
   cpu: 1.0
   memory: 1.0
 minimum_resources:
   cpu: 1 
-  memory: 2
+  memory: 1
 increments:
   cpu: 1
-  memory: 2
+  memory: 1
 suffix:
   cpu:
   memory: Gi
@@ -68,7 +68,7 @@ prefix:
 scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: False
-careful_scaling: True
+careful_scaling: True # When set to False, tipped over results of lower tenants for a specific conf,  this conf will not be removed for higher tenants to anticipate up-scaling 
 exploration_rate: 0.5
 monotonicity_threshold: 10
 outlier_threshold: 2.0

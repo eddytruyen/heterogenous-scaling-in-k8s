@@ -194,6 +194,7 @@ class AdaptiveScaler:
 		self.only_failed_results=True
 		self.sla_name=sla_name
 		self.optimal_results=[]
+		self.already_adapted_shared_resources_during_scaling_down=False
 		for w in workers:
 			self._tested[w.worker_id]=False
 		if initial_conf:
@@ -271,6 +272,7 @@ class AdaptiveScaler:
 			self.ScalingUpPhase = True
 			self.ScaledUp=False
 			self.optimal_results=[]
+			self.already_adapted_shared_resources_during_scaling_down=False
 		elif self.ScalingUpPhase:
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
