@@ -14,7 +14,7 @@ then
  rm $outputFile
 fi
 
-matches_nb=$((`grep -o 'y\.' fragment | wc -l` - 1))
+matches_nb=$((`grep -o 'y\.' fragment | wc -l`))
 
 iterations=$(($nrOfTenants - 1))
 
