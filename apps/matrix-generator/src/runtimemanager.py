@@ -28,6 +28,7 @@ class RuntimeManager:
         for key in minimum_shared_resources.keys():
             self.current_min_shrd_resources[key]=-1
         self.pushed_back_results=[]
+        self.already_retuned=False
 
     def copy_to_tenant_nb(self, tenant_nb):
         rm=RuntimeManager(self.adaptive_scaler.clone(start_fresh=True),tenant_nb,self.runtime_manager, AdaptiveWindow(self.initial_window),self.minimum_shared_replicas,self.maximum_transition_cost, dict(self.minimum_shared_resources))
@@ -350,6 +351,23 @@ class RuntimeManager:
         workers_result=[w.clone() for w in self.adaptive_scaler.workers]
         self.pushed_back_results+=[{"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}]
 
+
+    def remove_pushed_back_results_after_retuning(self):
+        print("Removing the folloing pushed back results:")
+        tmp_pushed_back_results=self.pushed_back_results[:]
+        for pbr in tmp_pushed_back_results:
+            if pbr["nb_shrd_replicas"] >= self.minimum_shared_replicas:
+                self.pushed_back_results.remove(pbr)
+                print(pbr)
+            else:
+                for res in self.minimum_shared_resources.keys():
+                    if pbr["shrd_resources"][res] >= self.minimum_shared_resources[res]:
+                        self.pushed_back_results.remove(pbr)
+                        print(prb)
+                        break
+
+
+
     def conf_X_workers_has_been_pushed_back_already(self, conf, workers):
         found=False
         for r in self.pushed_back_results:
@@ -360,6 +378,30 @@ class RuntimeManager:
                     found=True
                     break
         return found
+
+
+    def retune(self):
+        tenant_success=False
+        if not self.adaptive_scaler.already_adapted_shared_resources_during_scaling_down:
+            if self.minimum_shared_replicas > 0:
+                print("!!!!!!!!!!Reducing minimum shared replicas from " + str(self.minimum_shared_replicas) + " to " + str(self.minimum_shared_replicas-1))
+                self.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                self.minimum_shared_replicas=self.minimum_shared_replicas-1
+                tenant_success=True
+            for res in self.minimum_shared_resources.keys():
+                if self.minimum_shared_resources[res] > 0:
+                    print("!!!!!!!!!!Reducing minimum shared resources for " + res + " from " + str(self.minimum_shared_resources[res]) + " to " + str(self.minimum_shared_resources[res]-self.adaptive_scaler.increments[res]))
+                    self.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                    self.minimum_shared_resources[res]=self.minimum_shared_resources[res]-self.adaptive_scaler.increments[res]
+                    tenant_success=True
+            if tenant_success:
+                print("!!!!!Removing pushed back results with an equal amount of shared resources as the reduced minimum")
+                self.remove_pushed_back_results_after_retuning()
+                print("!!!!Setting already_retuned flag")
+                self.already_retuned=True
+        else:
+            print("Already reduced shared resources during scaling down for " + str(tx) + " tenants")
+        return tenant_success
 
 
 def instance(runtime_manager, tenant_nb, window):
