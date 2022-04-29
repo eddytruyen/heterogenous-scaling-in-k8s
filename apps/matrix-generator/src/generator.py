@@ -1867,7 +1867,6 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                     if isinstance(runtime_manager[t],RuntimeManager):
                                                         runtime_manager[t].adaptive_scalers=adaptive_scalers
                                             if adaptive_scaler.ScalingDownPhase and shared_resources_violated:
-                                                import pdb; pdb.set_trace()
                                                 raise IndexError("shared_resources_violated") from e
                                             elif adaptive_scaler.ScalingDownPhase and resource_cost_is_too_high:
                                                 raise IndexError("recursive_scaling_may_help") from e
