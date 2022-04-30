@@ -516,8 +516,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 adaptive_scaler.reset()
                             elif adaptive_scaler.StartScalingDown:
                                 adaptive_scaler.initial_confs=[]
-                            else:
-                                adaptive_scaler.initial_confs.pop(0)
+                            #else:
+                            #    adaptive_scaler.initial_confs.pop()
                             filter=False
                         except IndexError:
                                 print("No config found that meets all constraints")
@@ -1012,7 +1012,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, tenant_nb_workers=adaptive_scaler.workers, positive_outlier=positive_outlier)
                                     print("New index positioned at " + str(tmp_start))
                                     if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
-                                            print("SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: " + str(i))
+                                            print("SHIFTING TO NEXT SAMPLE FOR NB OF TENANTS: " + str(i))
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
                                             if not last_experiment:
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
@@ -1034,7 +1034,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
                                                         print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
                                                         tmp_rm.reset()
-                                                        check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[start],start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                        check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[tmp_start],tmp_start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
                                                         d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
                                             current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
@@ -1093,6 +1093,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb)
+                    if not results and mono_constraint_violated:
+                        evaluate=False
             else:
                 if mono_constraint_violated:
                     evaluate=False

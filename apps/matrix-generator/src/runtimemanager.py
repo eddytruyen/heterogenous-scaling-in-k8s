@@ -363,7 +363,7 @@ class RuntimeManager:
                 for res in self.minimum_shared_resources.keys():
                     if pbr["shrd_resources"][res] >= self.minimum_shared_resources[res]:
                         self.pushed_back_results.remove(pbr)
-                        print(prb)
+                        print(pbr)
                         break
 
 
