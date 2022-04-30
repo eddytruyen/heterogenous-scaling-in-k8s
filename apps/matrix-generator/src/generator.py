@@ -514,8 +514,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             rm.reset()
                             if adaptive_scaler.ScalingUpPhase:
                                 adaptive_scaler.reset()
-                            else:
+                            elif adaptive_scaler.StartScalingDown:
                                 adaptive_scaler.initial_confs=[]
+                            else:
+                                adaptive_scaler.initial_confs.pop(0)
                             filter=False
                         except IndexError:
                                 print("No config found that meets all constraints")
@@ -1498,11 +1500,12 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				if positive_outlier:
 					threshold=0
 				else:
-					if len(sorted_combinations) > start+window:
+					if len(sorted_combinations) <= start+window:
 						tmp_pos16=len(sorted_combinations)-1
 					else:
 						tmp_pos16=start+window
 					threshold=int((resource_cost(tenant_nb_workers, sorted_combinations[tmp_pos16], cost_aware=False) - resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False))*(1 + 1*(completionTime/slo)))
+				print("Starting to remove from resource_cost higher than " + str(resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False) + threshold))
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
