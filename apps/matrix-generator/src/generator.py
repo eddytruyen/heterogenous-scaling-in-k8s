@@ -195,6 +195,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print([utils.array_to_str(el) for el in lst])
                                                     try:
                                                         print("Filtering from index " + str(start) +  " with window " + str(window))
+                                                        print("Status of adaptive_scaler before oassing on first conf from initial confs to filter_samples func:")
+                                                        adaptive_scaler.status()
                                                         start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=adaptive_scaler.initial_confs[0][1], include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
                                                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                         print([utils.array_to_str(el) for el in lst])
@@ -512,12 +514,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                             rm.reset()
-                            if adaptive_scaler.ScalingUpPhase:
-                                adaptive_scaler.reset()
-                            elif adaptive_scaler.StartScalingDown:
-                                adaptive_scaler.initial_confs=[]
-                            #else:
-                            #    adaptive_scaler.initial_confs.pop()
                             filter=False
                         except IndexError:
                                 print("No config found that meets all constraints")
@@ -540,6 +536,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 #start=lst.index(opt_conf)
                                 #new_window=1
                         #retry_attempt+=nr_of_experiments
+                        if adaptive_scaler.ScalingUpPhase:
+                            adaptive_scaler.reset()
+                        elif adaptive_scaler.StartScalingDown:
+                            adaptive_scaler.initial_confs=[]
+                        #else:
+                        #    adaptive_scaler.initial_confs.pop()
+                            filter=False
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:i
@@ -984,7 +987,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
             intermediate_state=intermediate_states.pop(0)
             print("State of adaptive_scaler")
-            adaptive_scaler.status()
+            tmp_adaptive_scaler.status()
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 if tipped_over_intermediate_confs:
                     rm.add_tipped_over_result({"workers": [w.clone() for w in tmp_adaptive_scaler.workers], "results": tipped_over_intermediate_confs})
@@ -1098,6 +1101,24 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             else:
                 if mono_constraint_violated:
                     evaluate=False
+                    #if d[sla['name']]:
+                    #    previous_tenant_results=d[sla['name']]
+                    #else:
+                    #    previous_tenant_results={}
+                    #print("Filtering from index " + str(start_index) +  " with window " + str(window))
+                    #if previous_tenants:
+                    #    include_current_tenant_nb=not higher_tenants_only and tenants == int(previous_tenants)
+                    #else:
+                    #    include_current_tenant_nb=False
+                    #if not (adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown):
+                    #    x_workers=True
+                    #    scaled_down_worker_index=adaptive_scaler.ScaledWorkerIndex
+                    #else:
+                    #    x_workers=False
+                    #    scaled_down_worker_index=-1
+                    #start_and_window=filter_samples(adaptive_scalers, lst,tmp_adaptive_scaler,start, window, previous_tenant_results, 1, tenants, runtime_manager, scaling_down_threshold, slo, check_workers=x_workers, ScaledDownWorkerIndex=scaled_down_worker_index, log=LOG_FILTERING, include_current_tenant_nb=include_current_tenant_nb)        
+                    #d[sla['name']][str(tenant_nb)]=create_result(.....lst[star_window[0])
+
             optimal_results=find_optimal_results(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
             if evaluate and adaptive_scaler.ScalingDownPhase and not adaptive_scaler.optimal_results:
                 adaptive_scaler.optimal_results=optimal_results
@@ -1502,12 +1523,14 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 				if positive_outlier:
 					threshold=0
 				else:
-					if len(sorted_combinations) <= start+window:
+					if len(sorted_combinations) <= start+2*window:
 						tmp_pos16=len(sorted_combinations)-1
 					else:
-						tmp_pos16=start+window
-					threshold=int((resource_cost(tenant_nb_workers, sorted_combinations[tmp_pos16], cost_aware=False) - resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False))*(1 + 1*(completionTime/slo)))
-				print("Starting to remove from resource_cost higher than " + str(resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False) + threshold))
+						tmp_pos16=start+2*window
+					max_resource_cost=max([resource_cost(tenant_nb_workers, comb, cost_aware=False) for comb in sorted_combinations[start:tmp_pos16+1]])
+					threshold=10
+					#5+int((max_resource_cost - resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False))*(1 + 1*(completionTime/slo)))
+				#print("Starting to remove from resource_cost higher than " + str(resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False) + threshold))
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
