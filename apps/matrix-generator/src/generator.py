@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -999,19 +999,29 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(tmp_rm, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                                    tmp_start=tmp_lst.index(get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)]))
+                                    conf_i=get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)])
+                                    tmp_start=tmp_lst.index(conf_i)
                                     print("For " + str(i) + " tenants, the current sample equals " + utils.array_to_delimited_str(get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)]),"_") + " and is positioned at index " + str(tmp_start))
                                     if tipped_over_intermediate_confs and not adaptive_scaler.careful_scaling:
                                         do_higher_tenant_remove=False
                                     else:
                                         do_higher_tenant_remove=True
+                                    if i < tenant_nb and (intermediate_state==COST_EFFECTIVE_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT):
+                                        print("RESULT FOUND")
+                                        rc_nc=resource_cost(adaptive_scaler.workers, next_conf)
+                                        rc_i=resource_cost(tmp_adaptive_scaler2.workers, conf_i)
+                                        if str(i) in d[sla['name']] and (rc_nc < rc_i or (rc_nc == rc_i and next_conf != conf_i)):
+                                            print("There are higher configs or different configs with same resource cost tested for lower number of tenants (i.e., " + str(i) + "): the found result is copied and the search is stopped")
+                                            d[sla['name']][str(i)]=dict(results[0])
+                                            tmp_rm.reset()
+                                            tmp_adaptive_scaler2=adaptive_scaler.clone(start_fresh=True)
                                     if positive_outlier or (tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION)):
                                         if i > tenant_nb and intermediate_state==NO_RESULT:
-                                            print("Current result is NO RESULT, therefore, we remove all configs with lower resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
+                                            print("Current result is NO RESULT, therefore, we remove all configs with lower resource_cost than current result for higher number of tenants " + str(i))
                                             print("REMOVING CONFS FOR NB OF TENANTS: " + str(i))
                                             tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, [], tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True,higher_tenant_remove=do_higher_tenant_remove, tenant_nb_workers=adaptive_scaler.workers)
                                         elif i < tenant_nb and (intermediate_state==COST_EFFECTIVE_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT):
-                                            print("RESULT FOUND,  we remove all configs with higher resource_cost than current result for lower number of tenants: 1 .. " + str(tenant_nb-1))
+                                            print("We remove all configs with higher resource_cost than current result for lower number of tenants " + str(i))
                                             tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, tenant_nb_workers=adaptive_scaler.workers, positive_outlier=positive_outlier)
                                     print("New index positioned at " + str(tmp_start))
                                     if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
