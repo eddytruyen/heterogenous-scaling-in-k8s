@@ -38,7 +38,7 @@ kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
 old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"' | xargs)
 echo 
 echo Old memory size spark_client: $old_memory_size_client
-memory_size=0
+memory_size=1000
 old_conf=""
 new_conf=""
 old_resource_size=""
@@ -72,7 +72,10 @@ for i in `seq $alphabetLength`
                         cpu_size=$((valueCpu))
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2 | xargs)
-                        memory_size=$valueMemory
+			if [ $valueMemory -lt $memory_size ]
+			then
+                        	memory_size=$valueMemory
+			fi
 			if [ ! $previous_conf == "no" ]  
 			#&& [ $old_replicas -eq 0 ]
 			# && [ $nb_of_tenants -gt $previous_tenant_nb 
@@ -115,7 +118,7 @@ then
 fi
 
 echo "New memory size: " $memory_size
-if [ $memory_size -ne 0 ] && [ ${memory_size}Gi != $old_memory_size_client ]
+if [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
 	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml
