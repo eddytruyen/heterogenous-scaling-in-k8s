@@ -556,7 +556,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 next_result=rm.get_next_sample()
                 d[sla['name']][str(tenant_nb)]=next_result
                 if float(next_result['CompletionTime']) > 1.0:
-                    rm.reset()#
+                    rm.reset()## if sample has already been evaluated, we have to ensure that k8-resource optimizer is not consulted again for an update. It might be that in the mean time the configuration is vertically scaled during filtering
             print("Saving optimal results into matrix for previous results")
             utils.saveToYaml(d,'Results/matrix.yaml')
 
@@ -1027,7 +1027,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             print("There are higher configs or different configs with same resource cost tested for lower number of tenants (i.e., " + str(i) + "): the found result is copied and the search is stopped")
                                             d[sla['name']][str(i)]=dict(results[0])
                                             tmp_rm.reset()
-                                            update_adaptive_scaler_with_results(tmp_rm.adaptive_scaler, d[sla['name']], i, next_conf)
+                                            tmp_rm.adaptive_scaler=tmp_adaptive_scaler.clone(start_fresh=True)
+                                            #update_adaptive_scaler_with_results(tmp_rm.adaptive_scaler, d[sla['name']], i, next_conf)
+                                            if not next_conf in tmp_lst:
+                                                tmp_lst.append(next_conf)
+                                                tmp_list=tmp_rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, tenant_nb_workers=adaptive_scaler.workers, positive_outlier=positive_outlier)
+                                            print("New index positioned at " + str(tmp_start))
+                                            continue
                                             #tmp_rm.adaptive_scaler=tmp_adaptive_scaler.clone(start_fresh=True)
                                     if positive_outlier or (tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION)):
                                         if i > tenant_nb and intermediate_state==NO_RESULT:
