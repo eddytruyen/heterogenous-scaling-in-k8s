@@ -1027,7 +1027,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             print("There are higher configs or different configs with same resource cost tested for lower number of tenants (i.e., " + str(i) + "): the found result is copied and the search is stopped")
                                             d[sla['name']][str(i)]=dict(results[0])
                                             tmp_rm.reset()
-                                            tmp_rm.adaptive_scaler=tmp_adaptive_scaler.clone(start_fresh=True)
+                                            tmp_rm.adaptive_scaler=adaptive_scaler.clone(start_fresh=True)
                                             #update_adaptive_scaler_with_results(tmp_rm.adaptive_scaler, d[sla['name']], i, next_conf)
                                             if not next_conf in tmp_lst:
                                                 tmp_lst.append(next_conf)
