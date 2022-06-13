@@ -124,7 +124,7 @@ class ScalingFunction:
                 if not self.workersScaledDown:
                         self.workersScaledDown=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
                 worker=workers[worker_index]
-                scaleSecondaryResource=True if (self.sizes[worker_index][self.DominantResources[0]] - worker.resources[self.DominantResources[0]]) % 2 == 1 else False
+                scaleSecondaryResource=True if  (worker.resources[self.DominantResources[0]] <= self.sizes[worker_index][self.DominantResources[0]]) and (self.sizes[worker_index][self.DominantResources[0]] - worker.resources[self.DominantResources[0]]) % 2 == 1 else False
                 for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments[res] >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
@@ -149,7 +149,7 @@ class ScalingFunction:
 		if not self.workersScaledUp:
 			self.workersScaledUp=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
 		worker=workers[worker_index]
-		scaleSecondaryResource=True if (worker.resources[self.DominantResources[0]] - self.sizes[worker_index][self.DominantResources[0]] ) % 2 == 1 else False
+		scaleSecondaryResource=True if (worker.resources[self.DominantResources[0]] >= self.sizes[worker_index][self.DominantResources[0]]) and (worker.resources[self.DominantResources[0]] - self.sizes[worker_index][self.DominantResources[0]] ) % 2 == 1 else False
 		#scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
 		for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]+nb_of_units*self.increments[res] <= self.Max[res]:
