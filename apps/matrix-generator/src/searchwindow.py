@@ -521,7 +521,7 @@ class AdaptiveScaler:
                         response=True
             return response
 
-	def redo_scale_action(self, slo):
+	def redo_scale_action(self, slo, retune=False):
                 self.scale_action_re_undone=True
                 old_workers=[]
                 print("CURRENT CONFS")
@@ -533,7 +533,7 @@ class AdaptiveScaler:
                 print(self.initial_confs)
                 copy_of_initial_confs=self.initial_confs[:]
                 for v in copy_of_initial_confs:
-                        if (self.ScalingDownPhase and not self.StartScalingDown) or ((self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown)) and v[0]):
+                        if (self.ScalingUpPhase and retune) or (self.ScalingDownPhase and not self.StartScalingDown) or ((self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown)) and v[0]):
                             tmp_workers=v[2]
                             worker_confs+=[tmp_workers]
                         elif (self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown)) and not v[0]:

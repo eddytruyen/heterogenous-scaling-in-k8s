@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -181,6 +181,41 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         states=conf_and_states[1]
                                         state=states.pop(0)
 
+                                        def looking_to_retune():
+                                            success=False
+                                            for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            #for tx in range(1, tenant_nb+1):
+                                                                print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
+                                                                if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
+                                                                    success=runtime_manager[tx].retune()
+                                                                    #rm_t=runtime_manager[tx]
+                                                                    #tenant_success=False
+                                                                    #if not rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down:
+                                                                    #    if rm_t.minimum_shared_replicas > 0:
+                                                                    #        print("!!!!!!!!!!Reducing minimum shared replicas from " + str(rm_t.minimum_shared_replicas) + " to " + str(rm_t.minimum_shared_replicas-1))
+                                                                     #       rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                                                                    #        rm_t.minimum_shared_replicas=rm_t.minimum_shared_replicas-1
+                                                                    #        tenant_success=True
+                                                                    #        success=True
+                                                                    #    for res in rm_t.minimum_shared_resources.keys():
+                                                                    #        if rm_t.minimum_shared_resources[res] > 0:
+                                                                    #            print("!!!!!!!!!!Reducing minimum shared resources for " + res + " from " + str(rm_t.minimum_shared_resources[res]) + " to " + str(rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]))
+                                                                    #            rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                                                                    #            rm_t.minimum_shared_resources[res]=rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]
+                                                                    #            tenant_success=True
+                                                                    #            success=True
+                                                                    #    if tenant_success:
+                                                                    #        print("!!!!!Removing pushed back results with an equal amount of shared resources as the reduced minimum")
+                                                                    #        rm_t.remove_pushed_back_results_after_retuning()
+                                                                    #        print("!!!!Setting already_retuned flag")
+                                                                    #        rm_t.already_retuned=True
+                                                                    #else:
+                                                                    #    print("Already reduced shared resources during scaling down for " + str(tx) + " tenants")
+                                                                else:
+                                                                    print("It has already been tried to retune it")
+                                            return success
+
+
                                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
                                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                             if opt_conf != None:
@@ -216,36 +251,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             recursive_scale_down=True
                                                             success=True
                                                         elif str(e) == "shared_resources_violated":
-                                                            for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
-                                                            #for tx in range(1, tenant_nb+1):
-                                                                print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
-                                                                if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
-                                                                    success=runtime_manager[tx].retune()
-                                                                    #rm_t=runtime_manager[tx]
-                                                                    #tenant_success=False
-                                                                    #if not rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down:
-                                                                    #    if rm_t.minimum_shared_replicas > 0:
-                                                                    #        print("!!!!!!!!!!Reducing minimum shared replicas from " + str(rm_t.minimum_shared_replicas) + " to " + str(rm_t.minimum_shared_replicas-1)) 
-                                                                     #       rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
-                                                                    #        rm_t.minimum_shared_replicas=rm_t.minimum_shared_replicas-1
-                                                                    #        tenant_success=True
-                                                                    #        success=True
-                                                                    #    for res in rm_t.minimum_shared_resources.keys():
-                                                                    #        if rm_t.minimum_shared_resources[res] > 0:
-                                                                    #            print("!!!!!!!!!!Reducing minimum shared resources for " + res + " from " + str(rm_t.minimum_shared_resources[res]) + " to " + str(rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]))
-                                                                    #            rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
-                                                                    #            rm_t.minimum_shared_resources[res]=rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]
-                                                                    #            tenant_success=True
-                                                                    #            success=True
-                                                                    #    if tenant_success:
-                                                                    #        print("!!!!!Removing pushed back results with an equal amount of shared resources as the reduced minimum")
-                                                                    #        rm_t.remove_pushed_back_results_after_retuning()
-                                                                    #        print("!!!!Setting already_retuned flag")
-                                                                    #        rm_t.already_retuned=True
-                                                                    #else:
-                                                                    #    print("Already reduced shared resources during scaling down for " + str(tx) + " tenants")
-                                                                else:
-                                                                    print("It has already been tried to retune it")
+                                                            success=looking_to_retune()
+                                                            #for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            #    print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
+                                                            #    if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
+                                                            #        success=runtime_manager[tx].retune()
+                                                            #    else:
+                                                            #        print("It has already been tried to retune it")
                                                             if success:
                                                                 adaptive_scaler.StartScalingDown=True
                                                                 adaptive_scaler.redo_scale_action(slo)
@@ -275,10 +287,18 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         adaptive_scaler=add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
                                                         print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                         return start_and_window
-                                                    except IndexError:
+                                                    except IndexError as e:
                                                         print("No config exists that meets all filtering constraints")
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
+                                                        #success=False
+                                                        #if str(e) == "shared_resources_violated":
+                                                        #    success=looking_to_retune()
+                                                        #    if success:
+                                                        #        #adaptive_scaler.redo_scale_action(slo,retune=True)
+                                                        #        if adaptive_scaler.FailedScalings:
+                                                        #            adaptive_scaler.FailedScalings.pop()
+                                                        #if not success:
                                                         adaptive_scaler.validate_result({},scaled_conf,slo)
                                                         return process_states(adaptive_scaler,adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL),original_adaptive_scaler=original_adaptive_scaler)  
                                                     #return [lst.index(scaled_conf), 1]
