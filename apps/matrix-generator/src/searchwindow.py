@@ -551,14 +551,14 @@ class AdaptiveScaler:
                         for w in i:
                                 print(w.str())
                         print("---------------------------------")
-                if self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown):
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                      costs=[generator.resource_cost(wcomb[0], wcomb[1][1]) for wcomb in zip(worker_confs,self.initial_confs)]
                 else:
                      costs=[generator.resource_cost(wcomb, [1 for w in self.workers]) for wcomb in worker_confs]
                 cheapest_worker_index=costs.index(min(costs))
                 print("cheapest_worker_index: " + str(cheapest_worker_index))
                 self.workers=worker_confs[cheapest_worker_index] 
-                if self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown):
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                     print("Going back to worker configuration with lowest cost for combination " + utils.array_to_delimited_str(self.initial_confs[cheapest_worker_index][1]) + " and result")
                     print(self.initial_confs[cheapest_worker_index][0])
                 else:
@@ -582,7 +582,7 @@ class AdaptiveScaler:
                         print(w.str())
                 print("Double checking scaling function:")
                 print(self.ScalingFunction.workersScaledDown)
-                if self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown):
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                     return self.initial_confs[cheapest_worker_index]
                 else:
                     if cheapest_worker_index == 0 and self.initial_confs[0][0]['CompletionTime']:

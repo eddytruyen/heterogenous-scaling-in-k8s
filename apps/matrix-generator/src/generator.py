@@ -291,15 +291,16 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         print("No config exists that meets all filtering constraints")
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
-                                                        #success=False
-                                                        #if str(e) == "shared_resources_violated":
-                                                        #    success=looking_to_retune()
-                                                        #    if success:
-                                                        #        #adaptive_scaler.redo_scale_action(slo,retune=True)
-                                                        #        if adaptive_scaler.FailedScalings:
-                                                        #            adaptive_scaler.FailedScalings.pop()
-                                                        #if not success:
                                                         adaptive_scaler.validate_result({},scaled_conf,slo)
+                                                        success=False
+                                                        if str(e) == "shared_resources_violated":
+                                                            success=looking_to_retune()
+                                                            if success:
+                                                                #adaptive_scaler.redo_scale_action(slo,retune=True)
+                                                                if adaptive_scaler.FailedScalings:
+                                                                    adaptive_scaler.FailedScalings.pop()
+                                                        #if not success:
+                                                        #    adaptive_scaler.validate_result({},scaled_conf,slo)
                                                         return process_states(adaptive_scaler,adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL),original_adaptive_scaler=original_adaptive_scaler)  
                                                     #return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
@@ -1951,7 +1952,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                 for t in runtime_manager.keys():
                                                     if isinstance(runtime_manager[t],RuntimeManager):
                                                         runtime_manager[t].adaptive_scalers=adaptive_scalers
-                                            if adaptive_scaler.ScalingDownPhase and shared_resources_violated:
+                                            if shared_resources_violated:
                                                 raise IndexError("shared_resources_violated") from e
                                             elif adaptive_scaler.ScalingDownPhase and resource_cost_is_too_high:
                                                 raise IndexError("recursive_scaling_may_help") from e
