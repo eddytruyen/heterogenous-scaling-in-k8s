@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -216,7 +216,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             recursive_scale_down=True
                                                             success=True
                                                         elif str(e) == "shared_resources_violated":
-                                                            for tx in range(tenant_nb, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            #for tx in range(1, tenant_nb+1):
                                                                 print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
                                                                 if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
                                                                     success=runtime_manager[tx].retune()
@@ -850,8 +851,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #for key in rm.minimum_shared_resources.keys():
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
-                        if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
-                            for h in history:
+                        #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
+                        for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
                                         if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
