@@ -865,6 +865,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         previous_rm=runtime_manager[last_tenant_nb]
                         tmp_result=previous_rm.get_last_sampled_result()
                         qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
+                        stop=True
+                        for a,b in zip(tmp_result["workers"], adaptive_scaler.workers):
+                            if not a.equals(b):
+                                stop=False
+                                
+    
                         shrd_replicas=qualities_of_sample['nb_shrd_repls']
                         shrd_resources=qualities_of_sample['shrd_resources']
                         #if shrd_replicas < rm.minimum_shared_replicas:
@@ -873,7 +879,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
                         #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
-                        for h in history:
+                        if not stop: 
+                            for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
                                         if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
