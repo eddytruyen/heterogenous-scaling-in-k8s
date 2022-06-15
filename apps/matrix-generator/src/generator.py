@@ -684,11 +684,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         next_exp=rm.get_raw_experiments()
                         results=[]
                         nr_of_experiments=len(next_exp)
-                        print("Running " + str(nr_of_experiments) + " experiments")
+                        print("Processing samples " + str(nr_of_experiments) + " experiments")
                         for i,ws in enumerate(next_exp):
-                            if tenant_nb == 4:
-                                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
-                                print(ws[0][2].resources['cpu'])
                             sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                             samples=int(ws[4]*sampling_ratio)
                             if samples == 0:
@@ -867,12 +864,22 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
                         stop=True
                         for a,b in zip(tmp_result["workers"], adaptive_scaler.workers):
-                            if not a.equals(b):
-                                stop=False
-                                
+                            for res in a.resources.keys():
+                                if a.resources[res] != b.resources[res]:
+                                    stop=False
+                                break
+                            if not stop:
+                                break
     
                         shrd_replicas=qualities_of_sample['nb_shrd_repls']
                         shrd_resources=qualities_of_sample['shrd_resources']
+                        if stop:
+                            if shrd_replicas <= rm.minimum_shared_replicas:
+                                stop=False
+                            for key in rm.minimum_shared_resources.keys():
+                                if shrd_resources[key] <= rm.minimum_shared_resources[key]:
+                                    stop=False
+
                         #if shrd_replicas < rm.minimum_shared_replicas:
                         #    raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
                         #for key in rm.minimum_shared_resources.keys():
@@ -967,7 +974,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             maxTenants=int(previous_tenants)
             rm=get_rm_for_closest_tenant_nb(tenant_nb)
             adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
-            #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
             check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
             adaptive_window=rm.get_adaptive_window()
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
@@ -989,25 +995,25 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             results=[tmp_result]
             #else:
             #    tenant_nb=maxTenants+1
-        if not positive_outlier and not str(startTenants) in d[sla['name']]:
-            rm=get_rm_for_closest_tenant_nb(startTenants)
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            start=0
-            adaptive_window=rm.get_adaptive_window()
-            process_request_for_next_tenant_nb()
-            next_tenant_nb_processed=True
-            if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
-                rm=get_rm_for_closest_tenant_nb(tenant_nb)
-                adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
-            #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
-                check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
-                adaptive_window=rm.get_adaptive_window()
-                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                next_conf=get_conf(adaptive_scaler.workers, tmp_result)
-                results=[tmp_result]
+        #if not positive_outlier and not str(startTenants) in d[sla['name']]:
+        #    rm=get_rm_for_closest_tenant_nb(startTenants)
+        #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        #    start=0
+        #    adaptive_window=rm.get_adaptive_window()
+            #process_request_for_next_tenant_nb()
+            #next_tenant_nb_processed=True
+        #    if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+        #        rm=get_rm_for_closest_tenant_nb(tenant_nb)
+        #        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
+        #    #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
+        #        check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
+        #        adaptive_window=rm.get_adaptive_window()
+        #        lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        #        next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+        #        results=[tmp_result]
 
-        else:
-            next_tenant_nb_processed=False
+        #else:
+            #next_tenant_nb_processed=False
         #if not outlier:
         start=0
         if next_conf:
@@ -1115,6 +1121,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 tmp_adaptive_scaler=adaptive_scaler.clone()
                 intermediate_result=find_optimal_results(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers,results,slo)[0]
                 tipped_over_intermediate_confs=return_failed_confs(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                print("Current_tipped_over_intermediate_confs")
+                print(tipped_over_intermediate_confs)
                 intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 #Remembering current experiment_nb and experiment_spec:
@@ -1127,16 +1135,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     raise RuntimeError("No experiments left in runtime manager")
                 #removing failed_conf
-                if tenant_nb == 4:
-                    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                    print(ws[0][2].resources['cpu'])
                 if not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
                     print("For " + str(tenant_nb) + " tenants, the current sample equals " + utils.array_to_delimited_str(next_conf,"_") + " and is positioned at index " + str(start))
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, positive_outlier=positive_outlier)
                     print("New index positioned at " + str(start))
                 # if still configs remain to be testedz
-                last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                last_experiment=False
                 if not mono_constraint_violated:
+                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
                     print("Processing current sample")
                     sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                     samples=int(ws[4]*sampling_ratio)
@@ -1191,12 +1197,12 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if evaluate:
                 process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf, positive_outlier=positive_outlier)
             tenant_nb+=1
-        if positive_outlier or not next_tenant_nb_processed:
-            rm=get_rm_for_closest_tenant_nb(startTenants)
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            start=0
-            adaptive_window=rm.get_adaptive_window()
-            process_request_for_next_tenant_nb()
+        #if positive_outlier or not next_tenant_nb_processed:
+        rm=get_rm_for_closest_tenant_nb(startTenants)
+        lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        start=0
+        adaptive_window=rm.get_adaptive_window()
+        process_request_for_next_tenant_nb()
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
         #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
@@ -1959,7 +1965,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                 for t in runtime_manager.keys():
                                                     if isinstance(runtime_manager[t],RuntimeManager):
                                                         runtime_manager[t].adaptive_scalers=adaptive_scalers
-                                            if shared_resources_violated:
+                                            if adaptive_scaler.ScalingDownPhase and shared_resources_violated:
                                                 raise IndexError("shared_resources_violated") from e
                                             elif adaptive_scaler.ScalingDownPhase and resource_cost_is_too_high:
                                                 raise IndexError("recursive_scaling_may_help") from e
