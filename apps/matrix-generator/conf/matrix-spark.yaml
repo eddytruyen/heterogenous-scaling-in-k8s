@@ -8,14 +8,14 @@ slas:
     slos: 
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
-      tenantGroup: "2"
-      completionTime: 25
+      tenantGroup: "1"
+      completionTime: 50
       #jobsize: 10
       #throughput: 0.5
     maxTenants: 10
     startTenant: 1
     alphabet:
-      searchWindow: 2
+      searchWindow: 10
       base: 4
       elements:
         - size:
@@ -41,7 +41,7 @@ slas:
            memory: 1      
 utilFunc: sparkbenchalphabet
 output: Results/exp3
-sampling_ratio: 1.0
+sampling_ratio: 0.1
 minimum_shared_replicas: 0
 dominant_resources:
   - "cpu"

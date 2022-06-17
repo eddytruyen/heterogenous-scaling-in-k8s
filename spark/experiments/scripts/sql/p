@@ -25,15 +25,15 @@ spark-bench = {
     workload-suites = [
      {
         descr = "Run two different SQL queries over the dataset in two different formats"
-        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-gx-t-y.csv"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-gx-t1.csv"
         parallel = false
         repeat = 1
         save-mode = "append"
         workloads = [
           {
             name = "sql"
-            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-gx-y.csv"]
-            query = ["select c0, c6 from input where c0 < -0.9"]
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-datay.csv", "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-gx-y.parquet"]
+            query = ["select * from input", "select c0, c6 from input where c0 < -0.9"]
             cache = false
             //partitions = p
             //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-gx-t-y.parquet"

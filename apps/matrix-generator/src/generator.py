@@ -354,14 +354,15 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             print(previous_conf)
                                                             if previous_conf in lst:
                                                                 if only_failed_results:
-                                                                    tmp_window=min(window,len(lst)-lst.index(previous_conf)+1)
+                                                                    tmp_window=min(window,len(lst)-lst.index(previous_conf)-1)
+                                                                    return [lst.index(previous_conf)+1,tmp_window]
                                                                 else:
                                                                     tmp_window=1
-                                                                return [lst.index(previous_conf),tmp_window]
+                                                                    return [lst.index(previous_conf),tmp_window]
                                                             else:
-                                                                lst+=[previous_conf]
-                                                                lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
-                                                                return [lst.index(previous_conf)+1, min(window, len(lst)-lst.index(previous_conf))]
+                                                                #lst+=[previous_conf]
+                                                                #lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                                                                return [start, min(window, len(lst)-start)]
 
                                             else:
                                                 if adaptive_scaler.optimal_results:
@@ -545,7 +546,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         except IndexError:
                                 print("No config found that meets all constraints")
                                 rm.reset()
-                                start=0
+                                #start=0
                                 new_window=window
                                 if adaptive_scaler.ScalingUpPhase:
                                     adaptive_scaler.reset()
@@ -574,7 +575,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:i
             if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,new_window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=filter)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,lst[random.choice(range(start,start+new_window))],start,new_window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=filter)
                 next_result=rm.get_next_sample()
                 d[sla['name']][str(tenant_nb)]=next_result
                 if float(next_result['CompletionTime']) > 1.0:
@@ -1000,20 +1001,20 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
         #    start=0
         #    adaptive_window=rm.get_adaptive_window()
-            #process_request_for_next_tenant_nb()
-            #next_tenant_nb_processed=True
+        #    process_request_for_next_tenant_nb()
+        #    next_tenant_nb_processed=True
         #    if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
-        #        rm=get_rm_for_closest_tenant_nb(tenant_nb)
-        #        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
-        #    #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
-        #        check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
-        #        adaptive_window=rm.get_adaptive_window()
-        #        lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-        #        next_conf=get_conf(adaptive_scaler.workers, tmp_result)
-        #        results=[tmp_result]
+         #       rm=get_rm_for_closest_tenant_nb(tenant_nb)
+         #       adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
+            #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
+          #      check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
+           #     adaptive_window=rm.get_adaptive_window()
+            #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+             #   next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+              #  results=[tmp_result]
 
-        #else:
-            #next_tenant_nb_processed=False
+       # else:
+        #    next_tenant_nb_processed=False
         #if not outlier:
         start=0
         if next_conf:
@@ -1140,9 +1141,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, positive_outlier=positive_outlier)
                     print("New index positioned at " + str(start))
                 # if still configs remain to be testedz
-                last_experiment=False
-                if not mono_constraint_violated:
-                    last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                #last_experiment=False
+                last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
+                if not mono_constraint_violated:    
                     print("Processing current sample")
                     sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                     samples=int(ws[4]*sampling_ratio)
@@ -1165,8 +1166,14 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
                     results=process_samples(rm,tenant_nb)
-                    if not results and mono_constraint_violated:
+                    if not results:
                         evaluate=False
+                        print("No samples left, asking k8-resource-optimizer for other samples")
+                        rm.reset()
+                        check_and_get_next_exps(tmp_adaptive_scaler, rm, lst, lst[start],start+1,window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=rm.get_adaptive_window().get_current_window(), higher_tenants_only=False)
+                        d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                    else:
+                        evaluate=True
             else:
                 if mono_constraint_violated:
                     evaluate=False
