@@ -575,7 +575,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:i
             if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                check_and_get_next_exps(adaptive_scaler,rm,lst,lst[random.choice(range(start,start+new_window))],start,new_window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=filter)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,new_window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=filter)#lst[random.choice(range(start,start+new_window))]
                 next_result=rm.get_next_sample()
                 d[sla['name']][str(tenant_nb)]=next_result
                 if float(next_result['CompletionTime']) > 1.0:
@@ -886,8 +886,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #for key in rm.minimum_shared_resources.keys():
                         #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
                         #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
-                        #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
-                        if not stop: 
+                        if not stop and not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers): 
                             for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
                                         print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
