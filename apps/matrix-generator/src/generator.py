@@ -113,7 +113,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             lst+=[previous_conf]
                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
                             start=lst.index(previous_conf)+1        
-                            tmp_window=min(window, len(lst)-lst.index(previous_conf))
+                            tmp_window=min(window, len(lst)-lst.index(previous_conf)-1)
                         get_next_exps(adaptive_scaler, rm, lst, lst[start], sampling_ratio, tmp_window, tenants)
 
         def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf, positive_outlier):
