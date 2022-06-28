@@ -2,7 +2,8 @@ spark-bench = {
   spark-submit-parallel = false
   spark-submit-config = [{
     spark-args = {
-      master = "spark://Release-master-svc.Namespace.svc.cluster.local:7077"
+      master = "spark://Release-master-svc:7077"
+      //Release-master-svc.Namespace.svc.cluster.local:7077"
       executor-memory = "13G"
       //total-executor-cores = "26"
       //executor-cores = "2"
