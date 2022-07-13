@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tenantGroup=1
+tenantGroup=0
 startingTenantId=$1
 lastTenantId=$2
 namespace=$3
@@ -26,7 +26,7 @@ fi
 for i in `seq $startingTenantId $increment $lastTenantId`
 do
   #nrOfPartitions=$(($i * 2))
-  nrOfPartitions=0
+  nrOfPartitions=10
   #2 cores per tenant
   if [ $i -eq $startingTenantId ] && [ $new_csv_file -eq 1 ]
      then 
