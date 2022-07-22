@@ -162,7 +162,9 @@ def generate_load():
 
 
 	last=None
-
+	tmp_command="cp ./run-bench.sh /mnt/nfs-disk-2/spark-bench/"
+	print(tmp_command)
+	p_tmp = subprocess.check_output(tmp_command.split())
 	for i, trace in enumerate(traces):
 		for k in range(trace['repeat']):
 			for j,segment in enumerate(trace['trace']):

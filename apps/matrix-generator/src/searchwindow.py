@@ -14,12 +14,16 @@ NO_COST_EFFECTIVE_ALTERNATIVE = 111994848484
 
 
 class ScalingFunction:
-	def __init__(self, coef_a, coef_b, coef_c, resources, costs, dominant_resources, nodes,initial_conf=None):
+	def __init__(self, coef_a, coef_b, coef_c, resources, elements, costs, dominant_resources, nodes,initial_conf=None):
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
 		self.resources=resources
+		self.elements=elements
+		self.sizes=[]
+		for el in elements:
+			self.sizes+=[el['size']]
 		self.costs=costs
 		self.maxWeights={}
 		self.minWeights={}
@@ -43,7 +47,7 @@ class ScalingFunction:
 			self.increments=initial_conf["increments"]
 
 	def clone(self, clone_scaling_records=False):
-                sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.costs,self.DominantResources, self.Nodes)
+                sc=ScalingFunction(self.CoefA, self.CoefB,self.CoefC,self.resources,self.elements,self.costs,self.DominantResources, self.Nodes)
                 if clone_scaling_records:
                     sc.workersScaledDown = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledDown]
                     sc.workersScaledUp = [[scalingRecord[0],copy.deepcopy(scalingRecord[1])] for scalingRecord in self.workersScaledUp]
@@ -120,7 +124,7 @@ class ScalingFunction:
                 if not self.workersScaledDown:
                         self.workersScaledDown=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
                 worker=workers[worker_index]
-                scaleSecondaryResource=True if self.workersScaledDown[worker_index][0] % 2 == 0 else False
+                scaleSecondaryResource=True if  (worker.resources[self.DominantResources[0]] <= self.sizes[worker_index][self.DominantResources[0]]) and (self.sizes[worker_index][self.DominantResources[0]] - worker.resources[self.DominantResources[0]]) % 2 == 1 else False
                 for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]-nb_of_units*self.increments[res] >= self.minimum_resources[res]:
                             worker.scale(res, worker.resources[res]-nb_of_units*self.increments[res])
@@ -145,7 +149,8 @@ class ScalingFunction:
 		if not self.workersScaledUp:
 			self.workersScaledUp=[[1,{res: [] for res in self.resources.keys()}] for w in workers]
 		worker=workers[worker_index]
-		scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
+		scaleSecondaryResource=True if (worker.resources[self.DominantResources[0]] >= self.sizes[worker_index][self.DominantResources[0]]) and (worker.resources[self.DominantResources[0]] - self.sizes[worker_index][self.DominantResources[0]] ) % 2 == 1 else False
+		#scaleSecondaryResource=True if self.workersScaledUp[worker_index][0] % 2 == 0 else False
 		for res in self.resources.keys():
                         if (res in self.DominantResources) and worker.resources[res]+nb_of_units*self.increments[res] <= self.Max[res]:
                             worker.scale(res, worker.resources[res]+nb_of_units*self.increments[res])
@@ -188,6 +193,8 @@ class AdaptiveScaler:
 		self.scale_action_re_undone=False
 		self.only_failed_results=True
 		self.sla_name=sla_name
+		self.optimal_results=[]
+		self.already_adapted_shared_resources_during_scaling_down=False
 		for w in workers:
 			self._tested[w.worker_id]=False
 		if initial_conf:
@@ -221,6 +228,7 @@ class AdaptiveScaler:
                 a_s._tested=dict(self._tested)
                 a_s.scale_action_re_undone=self.scale_action_re_undone
                 a_s.only_failed_results=self.only_failed_results
+                a_s.optimal_results=self.optimal_results
             a_s.failed_results=[c[:] for c in self.failed_results]
             a_s.minimum_resources=self.minimum_resources
             a_s.node_resources_offset_for_scaling_function=self.node_resources_offset_for_scaling_function
@@ -263,6 +271,8 @@ class AdaptiveScaler:
 			self.ScalingDownPhase = False
 			self.ScalingUpPhase = True
 			self.ScaledUp=False
+			self.optimal_results=[]
+			self.already_adapted_shared_resources_during_scaling_down=False
 		elif self.ScalingUpPhase:
 			self.ScalingDownPhase = True
 			self.ScalingUpPhase = False
@@ -333,7 +343,7 @@ class AdaptiveScaler:
 				undo_scale_action(True)
 			return states
 
-	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False):
+	def find_cost_effective_config(self, opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=False, recursive_scale_down=False, use_performance_model=False):
 
 		def is_testable(worker, conf):
                       nonlocal scale_down
@@ -365,6 +375,8 @@ class AdaptiveScaler:
                                return False
 
 		def difference(conf_cost, total_cost):
+                        if total_cost < 0:
+                                return 1
                         nonlocal scale_down
                         if scale_down:
                                 print("SCALE DOWN DIFF")
@@ -432,13 +444,16 @@ class AdaptiveScaler:
 		if not only_failed_results:
 			self.only_failed_results=False
 		states=[]
-		totalcost = self.ScalingFunction.target(slo,tenant_nb)
+		if use_performance_model:
+			totalcost = self.ScalingFunction.target(slo,tenant_nb)
+			absolute_totalcost=0
+			for res in totalcost.keys():
+				absolute_totalcost+=totalcost[res]
+		else:
+			absolute_totalcost=-1
 		new_workers=[w.clone() for w in self.workers]
 		for w in self.workers:
 			print(w.resources)
-		absolute_totalcost=0
-		for res in totalcost.keys():
-			absolute_totalcost+=totalcost[res]
 		diff=difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
 		print("difference between resource_cost optimal conf and predicted total cost -1")
 		print(diff)
@@ -506,7 +521,7 @@ class AdaptiveScaler:
                         response=True
             return response
 
-	def redo_scale_action(self, slo):
+	def redo_scale_action(self, slo, retune=False):
                 self.scale_action_re_undone=True
                 old_workers=[]
                 print("CURRENT CONFS")
@@ -518,10 +533,10 @@ class AdaptiveScaler:
                 print(self.initial_confs)
                 copy_of_initial_confs=self.initial_confs[:]
                 for v in copy_of_initial_confs:
-                        if self.ScalingDownPhase or (self.ScalingUpPhase and v[0]):
+                        if (self.ScalingUpPhase and retune) or (self.ScalingDownPhase and not self.StartScalingDown) or ((self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown)) and v[0]):
                             tmp_workers=v[2]
                             worker_confs+=[tmp_workers]
-                        elif self.ScalingUpPhase and not v[0]:
+                        elif (self.ScalingUpPhase or (self.ScalingDownPhase and self.StartScalingDown)) and not v[0]:
                             self.initial_confs.remove(v)
                 if not self.initial_confs:
                     print("No initial confs left")
@@ -536,14 +551,14 @@ class AdaptiveScaler:
                         for w in i:
                                 print(w.str())
                         print("---------------------------------")
-                if self.ScalingUpPhase:
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                      costs=[generator.resource_cost(wcomb[0], wcomb[1][1]) for wcomb in zip(worker_confs,self.initial_confs)]
                 else:
                      costs=[generator.resource_cost(wcomb, [1 for w in self.workers]) for wcomb in worker_confs]
                 cheapest_worker_index=costs.index(min(costs))
                 print("cheapest_worker_index: " + str(cheapest_worker_index))
                 self.workers=worker_confs[cheapest_worker_index] 
-                if self.ScalingUpPhase:
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                     print("Going back to worker configuration with lowest cost for combination " + utils.array_to_delimited_str(self.initial_confs[cheapest_worker_index][1]) + " and result")
                     print(self.initial_confs[cheapest_worker_index][0])
                 else:
@@ -567,7 +582,7 @@ class AdaptiveScaler:
                         print(w.str())
                 print("Double checking scaling function:")
                 print(self.ScalingFunction.workersScaledDown)
-                if self.ScalingUpPhase:
+                if (not retune and self.ScalingUpPhase) or (self.ScalingDownPhase and self.StartScalingDown):
                     return self.initial_confs[cheapest_worker_index]
                 else:
                     if cheapest_worker_index == 0 and self.initial_confs[0][0]['CompletionTime']:
@@ -603,13 +618,13 @@ class AdaptiveScaler:
                         print(self.tipped_over_confs)
 		return self.tipped_over_confs
 
-	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb):
+	def find_cost_effective_tipped_over_conf(self, slo, tenant_nb, use_performance_model=False):
                 conf_index = 0
                 result_conf_and_workers=[]
                 states=[]
                 state=None
                 while len(self.tipped_over_confs) > 0:
-                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True)
+                        states=self.find_cost_effective_config(self.tipped_over_confs[conf_index], slo, tenant_nb, scale_down=False, only_failed_results=True, use_performance_model=use_performance_model)
                         copy_of_states=states[:]
                         state=states.pop(0)
                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:

@@ -1,17 +1,24 @@
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=190&previoustenants=2&previousconf=0_1_0_0" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=140&previoustenants=2&previousconf=0_1_0_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=140&previoustenants=2&previousconf=0_1_0_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=160&previoustenants=3&previousconf=0_1_0_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=140&previoustenants=3&previousconf=0_1_1_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=140&previoustenants=3&previousconf=0_1_1_1" | jq '.'
-sleep 1
-curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=160&previoustenants=4&previousconf=0_1_1_1" | jq '.'
-sleep 1
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1" | jq '.' 
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1&completiontime=52&previoustenants=1&previousconf=0_0_0_3" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=47&previoustenants=1&previousconf=0_0_0_2" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=68&previoustenants=2&previousconf=0_0_0_2" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=104&previoustenants=3&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=99&previoustenants=4&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=118&previoustenants=5&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=195&previoustenants=5&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=118&previoustenants=5&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=146&previoustenants=4&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=138&previoustenants=3&previousconf=0_0_1_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1&completiontime=138&previoustenants=2&previousconf=0_0_0_2" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1&completiontime=53&previoustenants=1&previousconf=0_0_1_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=1&completiontime=53&previoustenants=1&previousconf=0_1_1_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=2&completiontime=53&previoustenants=1&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=3&completiontime=53&previoustenants=2&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=109&previoustenants=3&previousconf=0_0_1_1" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=141&previoustenants=4&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=5&completiontime=195&previoustenants=5&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=6&completiontime=99&previoustenants=5&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=7&completiontime=156&previoustenants=6&previousconf=0_1_0_0" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=8&completiontime=95&previoustenants=7&previousconf=0_0_1_2" | jq '.'
+curl "http://172.17.13.119:80/conf?namespace=silver&tenants=9&completiontime=94&previoustenants=8&previousconf=0_0_1_2" | jq '.'
 

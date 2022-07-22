@@ -1,5 +1,6 @@
 #!/bin/bash
 
+tenantGroup=0
 startingTenantId=$1
 lastTenantId=$2
 namespace=$3
@@ -15,7 +16,6 @@ then
 else
 	increment=1	
 fi
-tenantGroup=2
 clientmode=`grep '\/\/deploy' $workload/header | wc -l` 
 #kubectl create -f spark-client/ -n $namespace
 #kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s

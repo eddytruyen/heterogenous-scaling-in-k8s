@@ -18,7 +18,7 @@ start=0
 #curl "http://172.17.13.119:80/conf?namespace=silver&tenants=4&completiontime=149&previoustenants=2&previousconf=2_0_0_0"
 if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
-	echo "previous_conf"
+	echo previous_conf: $previous_conf 
 	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
 then
@@ -38,7 +38,7 @@ kubectl get statefulset spark-client -n $namespace -o yaml > old_pod.yaml
 old_memory_size_client=$(grep 'memory: .*Gi' old_pod.yaml | head -1 | cut -d ":" -f2 |  tr -d '"' | xargs)
 echo 
 echo Old memory size spark_client: $old_memory_size_client
-memory_size=0
+memory_size=1000
 old_conf=""
 new_conf=""
 old_resource_size=""
@@ -65,14 +65,17 @@ for i in `seq $alphabetLength`
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
                 replicas=$((value))
 		new_conf=${new_conf}${replicas}_
-                if [ $replicas -gt 0 ]
+                if [ $replicas -ge 0 ]
                 then
                         cpuKeyName=worker$i.resources.requests.cpu
                         valueCpu=$(grep $cpuKeyName $fileName | cut -d ":" -f2)
                         cpu_size=$((valueCpu))
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2 | xargs)
-                        memory_size=$valueMemory
+			if [ $valueMemory -lt $memory_size ]
+			then
+                        	memory_size=$valueMemory
+			fi
 			if [ ! $previous_conf == "no" ]  
 			#&& [ $old_replicas -eq 0 ]
 			# && [ $nb_of_tenants -gt $previous_tenant_nb 
@@ -115,7 +118,7 @@ then
 fi
 
 echo "New memory size: " $memory_size
-if [ $memory_size -ne 0 ] && [ ${memory_size}Gi != $old_memory_size_client ]
+if [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
 	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml

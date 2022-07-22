@@ -1,7 +1,6 @@
 val df = spark.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data1.csv")
 df.createOrReplaceTempView("people")
 val sqlDF = spark.sql("select _c0, _c6 from people where _c0 < -0.9")
-val sqlDF = spark.sql("select _c0, _c6 from people where _c0 < -0.9")
 sqlDF.collect()
 
 
@@ -9,7 +8,6 @@ sqlDF.collect()
 
 val df = spark.read.csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data2.csv")
 df.createOrReplaceTempView("people")
-val sqlDF = spark.sql("select _c0, _c7, _c6 from people where _c0 < -0.9 and _c7 < -0.9")
 val sqlDF = spark.sql("select _c0, _c7, _c6 from people where _c0 < -0.9 and _c7 < -0.9")
 sqlDF.collect()
 

@@ -5,6 +5,7 @@ from .analyzer import ExperimentAnalizer
 from .sla import SLAConf,WorkerConf
 from .searchwindow import AdaptiveWindow, ScalingFunction, AdaptiveScaler, COST_EFFECTIVE_RESULT, NO_RESULT, NO_COST_EFFECTIVE_RESULT, UNDO_SCALE_ACTION, REDO_SCALE_ACTION, RETRY_WITH_ANOTHER_WORKER_CONFIGURATION,NO_COST_EFFECTIVE_ALTERNATIVE
 from . import runtimemanager
+from .runtimemanager import RuntimeManager
 from functools import reduce
 import yaml
 import sys
@@ -15,9 +16,9 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=True
+LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
-USE_PERFORMANCE_MODEL=True
+USE_PERFORMANCE_MODEL=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -26,6 +27,12 @@ def create_workers(elements, costs, base):
         worker_conf=WorkerConf(worker_id=i+1, resources=resources[i], costs=costs[i], min_replicas=0,max_replicas=base-1)
         workers.append(worker_conf)
     return workers
+
+
+def debug(runtime_manager, startTenants):
+    if startTenants == 2:
+        if 2 not in runtime_manager.keys():
+            import pdb; pdb.set_trace()
 
 
 def print_results(adaptive_scaler,results):
@@ -55,8 +62,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 rm.set_experiment_list(i,ws,sample_list)#sort_results(adaptive_scaler.workers,slo,sample_list))
                                 print_results(adaptive_scaler,sample_list)
         
-        def check_and_get_next_exps(adaptive_scaler, rm, lst,previous_conf, start_index, window, tenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=True, retry=False, retry_window=None, higher_tenants_only=False):
-            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and (rm.no_experiments_left() and not rm.last_experiment_in_queue()):
+        def check_and_get_next_exps(adaptive_scaler, rm, lst,previous_conf, start_index, window, tenants, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=False, retry_window=None, higher_tenants_only=False):
+            if not higher_tenants_only:
+                nonlocal start
+                nonlocal next_conf
+            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 print("Getting next batch of experiments for " + str(tenants) + " tenants")
                 try:
                     if filter:
@@ -83,25 +93,45 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         start=start_index
                     get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, new_window, tenants)
                 except IndexError:
+                    print("No config found that meets filtering constraint")
                     if retry and retry_window:
-                        get_next_exps(adaptive_scaler, rm, lst, get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function), sampling_ratio, retry_window, tenants)
+                        next_conf=get_conf_for_closest_tenant_nb(tenants, window_offset_for_scaling_function)
+                        if not next_conf in lst:
+                            lst+=[next_conf]
+                            lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                            start_index=lst.index(next_conf)
+                        tmp_window=min(retry_window, len(lst)-start_index)
+                        get_next_exps(adaptive_scaler, rm, lst, next_conf, sampling_ratio, tmp_window, tenants)
                     else:
-                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
-                        start=0
-                        tmp_window=min(window, lst.index(previous_conf))
-                        get_next_exps(adaptive_scaler, rm, lst, lst[0], sampling_ratio, tmp_window, tenants)
+                        print("Previous_conf:")
+                        print(previous_conf)
+                        if previous_conf in lst:
+                            start=lst.index(previous_conf)
+                            next_conf=previous_conf
+                            tmp_window=1
+                        else:
+                            lst+=[previous_conf]
+                            lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                            start=lst.index(previous_conf)+1        
+                            tmp_window=min(window, len(lst)-lst.index(previous_conf)-1)
+                        get_next_exps(adaptive_scaler, rm, lst, lst[start], sampling_ratio, tmp_window, tenants)
 
-        def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf):
+        def resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, opt_conf, positive_outlier):
             if not original_adaptive_scaler.careful_scaling:
                 return False
-            tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)
+            if positive_outlier:
+                tmp_combinations=sort_configs(original_adaptive_scaler.workers, lst)           
+            else:
+                tmp_combinations=lst
             tmp_index_conf=tmp_combinations.index(opt_conf)
             original_resource_cost=resource_cost(original_adaptive_scaler.workers,opt_conf)
             new_tmp_index=tmp_index_conf+1
             while new_tmp_index < len(tmp_combinations) and (original_resource_cost == resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index])):
                 new_tmp_index+=1
             if original_resource_cost < resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
-                if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) > resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index]):
+                if resource_cost(adaptive_scaler.workers, opt_conf, cost_aware=True) > resource_cost(original_adaptive_scaler.workers, tmp_combinations[new_tmp_index], cost_aware=True):
+                    print("Resource_cost of scaled up workers conf for " + utils.array_to_delimited_str(opt_conf,"_") + " is larger than the closest conf in lst, which is larger than opt_connf:" + utils.array_to_delimited_str(tmp_combinations[new_tmp_index],"_"))
+                    print("Passing over scaled worker")
                     return True
                 else:
                     return False
@@ -109,9 +139,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 return False
 
 
-        def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf):
+        def process_results(result,results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf, positive_outlier=False):
 
-            def get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=None):
+            def get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=None, recursive_scaling_down=False):
 
                                     only_failed_results=False if result else True
 
@@ -151,6 +181,41 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         states=conf_and_states[1]
                                         state=states.pop(0)
 
+                                        def looking_to_retune():
+                                            success=False
+                                            for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            #for tx in range(1, tenant_nb+1):
+                                                                print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
+                                                                if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
+                                                                    success=runtime_manager[tx].retune()
+                                                                    #rm_t=runtime_manager[tx]
+                                                                    #tenant_success=False
+                                                                    #if not rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down:
+                                                                    #    if rm_t.minimum_shared_replicas > 0:
+                                                                    #        print("!!!!!!!!!!Reducing minimum shared replicas from " + str(rm_t.minimum_shared_replicas) + " to " + str(rm_t.minimum_shared_replicas-1))
+                                                                     #       rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                                                                    #        rm_t.minimum_shared_replicas=rm_t.minimum_shared_replicas-1
+                                                                    #        tenant_success=True
+                                                                    #        success=True
+                                                                    #    for res in rm_t.minimum_shared_resources.keys():
+                                                                    #        if rm_t.minimum_shared_resources[res] > 0:
+                                                                    #            print("!!!!!!!!!!Reducing minimum shared resources for " + res + " from " + str(rm_t.minimum_shared_resources[res]) + " to " + str(rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]))
+                                                                    #            rm_t.adaptive_scaler.already_adapted_shared_resources_during_scaling_down=True
+                                                                    #            rm_t.minimum_shared_resources[res]=rm_t.minimum_shared_resources[res]-initial_conf['increments'][res]
+                                                                    #            tenant_success=True
+                                                                    #            success=True
+                                                                    #    if tenant_success:
+                                                                    #        print("!!!!!Removing pushed back results with an equal amount of shared resources as the reduced minimum")
+                                                                    #        rm_t.remove_pushed_back_results_after_retuning()
+                                                                    #        print("!!!!Setting already_retuned flag")
+                                                                    #        rm_t.already_retuned=True
+                                                                    #else:
+                                                                    #    print("Already reduced shared resources during scaling down for " + str(tx) + " tenants")
+                                                                else:
+                                                                    print("It has already been tried to retune it")
+                                            return success
+
+
                                         if state == RETRY_WITH_ANOTHER_WORKER_CONFIGURATION:
                                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
                                             if opt_conf != None:
@@ -165,53 +230,80 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print([utils.array_to_str(el) for el in lst])
                                                     try:
                                                         print("Filtering from index " + str(start) +  " with window " + str(window))
-                                                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=adaptive_scaler.initial_confs[0][1], include_current_tenant_nb=tenant_nb == startTenants)
+                                                        print("Status of adaptive_scaler before oassing on first conf from initial confs to filter_samples func:")
+                                                        adaptive_scaler.status()
+                                                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=adaptive_scaler.initial_confs[0][1], include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
                                                         print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                         print([utils.array_to_str(el) for el in lst])
                                                         scaled_conf=lst[start_and_window[0]]
-                                                        adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
+                                                        adaptive_scaler=add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
+                                                        print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
+                                                        return start_and_window
+                                                    except IndexError as e:
+                                                        print("No config exists that meets all filtering constraints")
+                                                        print(str(e))
+                                                        for w in adaptive_scaler.workers:
+                                                            adaptive_scaler.untest(w)
+                                                        adaptive_scaler.validate_result({},opt_conf,slo)
+                                                        success=False
+                                                        recursive_scale_down=False
+                                                        if str(e) == "recursive_scaling_may_help":
+                                                            recursive_scale_down=True
+                                                            success=True
+                                                        elif str(e) == "shared_resources_violated":
+                                                            success=looking_to_retune()
+                                                            #for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                                                            #    print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
+                                                            #    if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
+                                                            #        success=runtime_manager[tx].retune()
+                                                            #    else:
+                                                            #        print("It has already been tried to retune it")
+                                                            if success:
+                                                                adaptive_scaler.StartScalingDown=True
+                                                                adaptive_scaler.redo_scale_action(slo)
+                                                                if adaptive_scaler.FailedScalings:
+                                                                    adaptive_scaler.FailedScalings.pop()
+                                                        if not success:
+                                                            recursive_scale_down=False 
+                                                            print("Recursive down scaling disabled")
+                                                        return process_states(adaptive_scaler,[[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results,recursive_scale_down=recursive_scale_down, use_performance_model=USE_PERFORMANCE_MODEL)], original_adaptive_scaler=original_adaptive_scaler)
+                                            else:
+                                                    scaled_conf=adaptive_scaler.current_tipped_over_conf
+                                                    #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
+                                                    try:
+                                                        if resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, scaled_conf, positive_outlier=positive_outlier):
+                                                            raise IndexError
+                                                        if d[sla['name']]:
+                                                            previous_tenant_results=d[sla['name']]
+                                                        else:
+                                                            previous_tenant_results={}
+                                                        print("Moving filtered samples in sorted combinations after the window")
+                                                        print([utils.array_to_str(el) for el in lst])
+                                                        print("Filtering from index " + str(lst.index(scaled_conf)) +  " with window 1")
+                                                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, lst.index(scaled_conf), 1, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=scaled_conf, include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
+                                                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                                                        print([utils.array_to_str(el) for el in lst])
+                                                        scaled_conf=lst[start_and_window[0]]
+                                                        adaptive_scaler=add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
                                                         print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                         return start_and_window
                                                     except IndexError as e:
                                                         print("No config exists that meets all filtering constraints")
                                                         for w in adaptive_scaler.workers:
                                                             adaptive_scaler.untest(w)
-                                                        adaptive_scaler.validate_result({},opt_conf,slo)
-                                                        if str(e) == "recursive_scaling_may_help":
-                                                            recursive_scale_down=True
-                                                        else:
-                                                            recursive_scale_down=False
-                                                            print("Recursive down scaling disabled")
-                                                        return process_states(adaptive_scaler,[[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results,recursive_scale_down=recursive_scale_down)], original_adaptive_scaler=original_adaptive_scaler)
-                                            else:
-                                                    scaled_conf=adaptive_scaler.current_tipped_over_conf
-                                                    #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf, next_conf=scaled_conf)
-                                                    if d[sla['name']]:
-                                                        previous_tenant_results=d[sla['name']]
-                                                    else:
-                                                        previous_tenant_results={}
-                                                    print("Moving filtered samples in sorted combinations after the window")
-                                                    print([utils.array_to_str(el) for el in lst])
-                                                    try:
-                                                        if resource_cost_for_scale_up_is_too_high(original_adaptive_scaler, scaled_conf):
-                                                            raise IndexError
-                                                        print("Filtering from index " + str(lst.index(scaled_conf)) +  " with window 1")
-                                                        start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, lst.index(scaled_conf), 1, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, True, adaptive_scaler.ScaledWorkerIndex, log=LOG_FILTERING, original_adaptive_scaler=original_adaptive_scaler, initial_conf=scaled_conf, include_current_tenant_nb=tenant_nb == startTenants)
-                                                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                                                        print([utils.array_to_str(el) for el in lst])
-                                                        scaled_conf=lst[start_and_window[0]]
-                                                        adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=scaled_conf)
-                                                        print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
-                                                        return start_and_window
-                                                    except IndexError:
-                                                        print("No config exists that meets all filtering constraints")
-                                                        for w in adaptive_scaler.workers:
-                                                            adaptive_scaler.untest(w)
                                                         adaptive_scaler.validate_result({},scaled_conf,slo)
-                                                        return process_states(adaptive_scaler,adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb),original_adaptive_scaler=original_adaptive_scaler)  
+                                                        success=False
+                                                        if str(e) == "shared_resources_violated":
+                                                            success=looking_to_retune()
+                                                            if success:
+                                                                #adaptive_scaler.redo_scale_action(slo,retune=True)
+                                                                if adaptive_scaler.FailedScalings:
+                                                                    adaptive_scaler.FailedScalings.pop()
+                                                        #if not success:
+                                                        #    adaptive_scaler.validate_result({},scaled_conf,slo)
+                                                        return process_states(adaptive_scaler,adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL),original_adaptive_scaler=original_adaptive_scaler)  
                                                     #return [lst.index(scaled_conf), 1]
                                         elif state ==  NO_COST_EFFECTIVE_ALTERNATIVE:
-                                            print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                             if states and states.pop(0) == REDO_SCALE_ACTION:
                                                     print("REDOING_CHEAPEST_SCALED_DOWN")
                                                     lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
@@ -223,6 +315,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                             else:
                                                     do_remove=True
                                             if adaptive_scaler.ScalingUpPhase:
+                                                    print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
                                                     if not adaptive_scaler.tipped_over_confs:
                                                         if only_failed_results:
                                                             start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),results[0], adaptive_scaler.failed_results, scaling_up_threshold, sampling_ratio)
@@ -233,13 +326,16 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             #window=adaptive_window.get_current_window()
                                                     elif do_remove:
                                                         start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, [], start, adaptive_window.get_current_window(),results[0], [], scaling_up_threshold, sampling_ratio)
-                                                    if  opt_conf and previous_conf != opt_conf:
-                                                            adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,opt_conf)
                                                     if not only_failed_results:
-                                                            add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime']) <= 1.0,result=result)
-                                                            next_conf=opt_conf
-                                                            start=lst.index(opt_conf)
-                                                            window=1
+                                                            add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime']) <= 1.0,result=result)
+                                                            if float(result['CompletionTime'])*initial_conf["outlier_threshold"] < slo:
+                                                                next_conf=lst[0]
+                                                                start=0
+                                                                window=window
+                                                            else:
+                                                                next_conf=opt_conf
+                                                                start=lst.index(opt_conf)
+                                                                window=1
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
                                                     if d[sla['name']]:
@@ -248,17 +344,39 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             previous_tenant_results={}
                                                     try:
                                                             print("Filtering from index " + str(start) +  " with window " + str(window))
-                                                            start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                                                            start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
                                                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                                                             print([utils.array_to_str(el) for el in lst])
                                                             return start_and_window
                                                     except IndexError:
                                                             print("No config exists that meets all filtering constraints")
-                                                            print("Returning first config")
-                                                            return [0, window] 
+                                                            print("Previous_conf:")
+                                                            print(previous_conf)
+                                                            if previous_conf in lst:
+                                                                if only_failed_results:
+                                                                    tmp_window=min(window,len(lst)-lst.index(previous_conf)-1)
+                                                                    return [lst.index(previous_conf)+1,tmp_window]
+                                                                else:
+                                                                    tmp_window=1
+                                                                    return [lst.index(previous_conf),tmp_window]
+                                                            else:
+                                                                #lst+=[previous_conf]
+                                                                #lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                                                                return [start, min(window, len(lst)-start)]
 
                                             else:
-                                                    #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
+                                                if adaptive_scaler.optimal_results:
+                                                    result=adaptive_scaler.optimal_results.pop(0)
+                                                    opt_conf=get_conf(adaptive_scaler.workers,result)
+                                                    print("Trying out with another conf that has the same resource cost:" + utils.array_to_delimited_str(opt_conf,"_"))
+                                                    adaptive_scaler.StartScalingDown=True
+                                                    adaptive_scaler.redo_scale_action(slo)
+                                                    adaptive_scaler.initial_confs=[[result,opt_conf,[w.clone() for w in adaptive_scaler.workers]]]+adaptive_scaler.initial_confs
+                                                    return process_states(adaptive_scaler,[[],adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results, use_performance_model=USE_PERFORMANCE_MODEL)], original_adaptive_scaler=original_adaptive_scaler)
+                                                else:
+                                                    print("NO BETTER COST EFFECTIVE ALTERNATIVE IN SIGHT")
+
+                                                        #changePhase=False if adaptive_scaler.workers_are_scaleable() else True
                                                     #if changePhase:
                                                     tors=rm.get_tipped_over_results(nullify=False)
                                                     adaptive_scaler.failed_results=tors["results"]
@@ -266,7 +384,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                         adaptive_scaler.workers=tors["workers"][0]
                                                     adaptive_scaler.reset()
                                                     adaptive_scaler.set_tipped_over_failed_confs()
-                                                    conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                                    conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL)
                                                     return process_states(adaptive_scaler,conf_and_states, original_adaptive_scaler=original_adaptive_scaler)
                                                     #else:
                                                     #        adaptive_scaler.redo_scale_action()
@@ -293,13 +411,13 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     original_adaptive_scaler=copy_state_of_adaptive_scaler()
                                     if adaptive_scaler.ScalingDownPhase:
                                             print(adaptive_scaler.ScalingFunction.workersScaledDown)
-                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results)
+                                            states=adaptive_scaler.find_cost_effective_config(opt_conf, slo, tenant_nb, scale_down=True, only_failed_results=only_failed_results, recursive_scale_down=recursive_scaling_down, use_performance_model=USE_PERFORMANCE_MODEL)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
                                             return process_states(adaptive_scaler,[[],states],original_adaptive_scaler=original_adaptive_scaler)
                                     elif adaptive_scaler.ScalingUpPhase:
                                             adaptive_scaler.set_tipped_over_failed_confs()
-                                            conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb)
+                                            conf_and_states=adaptive_scaler.find_cost_effective_tipped_over_conf(slo, tenant_nb, use_performance_model=USE_PERFORMANCE_MODEL)
                                             for w in adaptive_scaler.workers:
                                                     print(w.resources['cpu'])
                                             return process_states(adaptive_scaler,conf_and_states,original_adaptive_scaler=original_adaptive_scaler) 
@@ -318,9 +436,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print(states)
             state=states.pop(0)
             if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                tipped_over_results=return_failed_confs(adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
-                if tipped_over_results:
-                    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
+                tipped_over_results=return_failed_confs(runtime_manager, tenant_nb, adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                #if tipped_over_results:
+                #    rm.add_tipped_over_result({"workers": [w.clone() for w in adaptive_scaler.workers], "results": tipped_over_results})
             if state == NO_COST_EFFECTIVE_RESULT:
                 print("NO COST EFFECTIVE RESULT")
                 if states and states.pop(0) == UNDO_SCALE_ACTION:
@@ -331,14 +449,21 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, careful_scaling=adaptive_scaler.careful_scaling)#, tenant_nb == startTenant)
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 start=lst.index(next_conf)
-                start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler)
+                start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler, recursive_scaling_down=True)
                 print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                 start=start_and_window[0]
                 new_window=start_and_window[1]
                 next_conf=lst[start]
                 print(next_conf)
+                #if next_conf != get_conf(adaptive_scaler.workers, d[sla['name']][str(tenant_nb)]):
+                #    rm.reset()
+                #    check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=False)
+                #    next_result=rm.get_next_sample()
+                #    d[sla['name']][str(tenant_nb)]=next_result
+                #    if float(next_result['CompletionTime']) > 1.0:
+                #        rm.reset()# if sample has already been evaluated, we have to ensure that k8-resource optimizer is not consulted again for an update. I might be that in the mean time the configuration is vertically scaled during filtering.
                 #if next_conf != previous_conf:
-                #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
+                #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,d[sla['name']],tenant_nb,next_conf,slo, clone_scaling_function=True)
                 #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: float(x['CompletionTime']) > slo,previous_conf=previous_conf,next_conf=next_conf,result=result)
             elif state == COST_EFFECTIVE_RESULT:
                 print("COST-EFFECTIVE-RESULT")
@@ -350,52 +475,43 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 #if adaptive_scaler.ScalingUpPhase:
                 #    adaptive_scaler.reset()
                 adaptive_scaler.failed_results=[]
-                add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo or float(x['CompletionTime']) <= 1.0, result=result)
+                add_incremental_result(tenant_nb,d,sla,adaptive_scaler,slo,lambda x, slo: float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo or float(x['CompletionTime']) <= 1.0, result=result)
                 #d[sla['name']][str(tenant_nb)]=result
                 #tenant_nb+=1
                 #retry_attempt=0
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 #flag_workers(adaptive_scaler.workers,next_conf)
                 new_window=window
-                if not next_conf in lst:
-                    print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) + " -> " + str(rm.minimum_shared_replicas+1))
-                    rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
-                    #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
-                    lst.append(next_conf)
-                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                    #raise RuntimeError('It seems the alphabet does not scale monotonically anymore. Adjust your transition constraints or opt out for restart!!!')
                 start=lst.index(next_conf)
                 rm.reset()
+                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True)
+                next_result=rm.get_next_sample()
+                next_one=get_conf(adaptive_scaler.workers,next_result)
+                if next_one != next_conf:
+                    d[sla['name']][str(tenant_nb)]=next_result
+                if float(next_result['CompletionTime']) > 1.0:
+                    rm.reset()# if sample has already been evaluated, we have to ensure that k8-resource optimizer is not consulted again for an update. I might be that in the mean time the configuration is vertically scaled during filtering.
                 #if not (evaluate_previous or evaluate_current):
                 #    result={}
             elif state == NO_RESULT:
                 print("NO RESULT")
                 if states and states.pop(0) == UNDO_SCALE_ACTION:
-                    try:
-                        print("Previous scale action undone")
-                        lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
-                        if adaptive_scaler.ScalingDownPhase:
-                            start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.initial_confs[0][1])
-                        else:
-                            start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.current_tipped_over_conf)
-                        print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
-                        start=start_and_window[0]
-                        new_window=start_and_window[1]
-                        next_conf=lst[start]
-                        #if previous_conf != next_conf:
-                        #    adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,next_conf)
-                        #adaptive_scaler=add_incremental_result(adaptive_scalers,tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
-                        result={}
-                        #retry_attempt+=nr_of_experiments
-                        filter=False
-                    except:
-                        rm.reset()
-                        start=0
-                        new_window=window
-                        filter=True
+                    print("Previous scale action undone")
+                    lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))
+                    if adaptive_scaler.ScalingDownPhase:
+                        start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.initial_confs[0][1])
+                    else:
+                        start_and_window=get_start_and_window_for_next_experiments(adaptive_scaler,opt_conf=adaptive_scaler.current_tipped_over_conf)
+                    print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
+                    start=start_and_window[0]
+                    new_window=start_and_window[1]
+                    next_conf=lst[start]
+                    result={}
+                    filter=False
                 else:
                     if adaptive_scaler.ScalingDownPhase and rm.tipped_over_results:
-                        remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
+                        if results: 
+                            remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
                         tors=rm.get_tipped_over_results(nullify=False)
                         adaptive_scaler.failed_results=tors["results"]
                         adaptive_scaler.reset()
@@ -408,7 +524,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         #adaptive_scaler=add_incremental_result(adaptive_scalers, tenant_nb,d,sla,adaptive_scaler,slo, lambda x, slo: True, previous_conf=previous_conf,next_conf=next_conf)
                     else:
                         lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers,lst))    
-                        start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],adaptive_scaler.failed_results,scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
+                        if results:
+                            start=remove_failed_confs(runtime_manager, tenant_nb, lst, adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, result), start, adaptive_window.get_current_window(),results[0],adaptive_scaler.failed_results,scaling_up_threshold, sampling_ratio)#,tenant_nb == startTenant)
                         if d[sla['name']]:
                             previous_tenant_results=d[sla['name']]
                         else:
@@ -417,7 +534,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         print([utils.array_to_str(el) for el in lst])
                         try:
                             print("Filtering from index " + str(start) +  " with window " + str(window))
-                            start_and_window=filter_samples(adaptive_scalers,lst, adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                            start_and_window=filter_samples(adaptive_scalers,lst, adaptive_scaler, start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                             print([utils.array_to_str(el) for el in lst])
                             next_conf=lst[start_and_window[0]]
@@ -425,13 +542,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                             new_window=start_and_window[1]
                             result={}
                             rm.reset()
-                            if adaptive_scaler.ScalingUpPhase:
-                                adaptive_scaler.reset()
                             filter=False
                         except IndexError:
                                 print("No config found that meets all constraints")
                                 rm.reset()
-                                start=0
+                                #start=0
                                 new_window=window
                                 if adaptive_scaler.ScalingUpPhase:
                                     adaptive_scaler.reset()
@@ -449,13 +564,22 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 #start=lst.index(opt_conf)
                                 #new_window=1
                         #retry_attempt+=nr_of_experiments
+                        if adaptive_scaler.ScalingUpPhase:
+                            adaptive_scaler.reset()
+                        elif adaptive_scaler.StartScalingDown:
+                            adaptive_scaler.initial_confs=[]
+                        #else:
+                        #    adaptive_scaler.initial_confs.pop()
+                            filter=False
             for w in adaptive_scaler.workers:
                 adaptive_scaler.untest(w)
             #if not (evaluate_current or evaluate_previous) and not no_exps:i
             if state == NO_RESULT and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
-                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,new_window,tenant_nb, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=filter)
-                d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
-                update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
+                check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,new_window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=filter)#lst[random.choice(range(start,start+new_window))]
+                next_result=rm.get_next_sample()
+                d[sla['name']][str(tenant_nb)]=next_result
+                if float(next_result['CompletionTime']) > 1.0:
+                    rm.reset()## if sample has already been evaluated, we have to ensure that k8-resource optimizer is not consulted again for an update. It might be that in the mean time the configuration is vertically scaled during filtering
             print("Saving optimal results into matrix for previous results")
             utils.saveToYaml(d,'Results/matrix.yaml')
 
@@ -465,7 +589,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         k=tenants
                         while k >= 1:
                                 if str(k) in d[sla['name']].keys():
-                                        as_predictedConf=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scaler, d[sla['name']], k, get_conf(adaptive_scaler.workers,d[sla['name']][str(k)]),slo, include_current_tenant_nb=True)
+                                        as_predictedConf=runtime_manager[k].adaptive_scaler
                                         k=0
                                 else:
                                         k-=1
@@ -502,8 +626,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                         k-=1
                         if closest_conf:
                                 return closest_conf
-                        else:
+                        elif USE_PERFORMANCE_MODEL:
                                 return get_conf_for_start_tenant(slo,tenants,adaptive_scaler,lst,window, window_offset_for_scaling_function)
+                        else:
+                                return lst[random.choice(range(0,len(lst)))] 
+
 
 
         def update_conf_array(rm,lst,adaptive_scaler,tenant_nb):
@@ -526,10 +653,11 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                         else:
                             previous_tenant_results={}
                         try:
-                            #tmp_array0=sort_configs(adaptive_scaler.workers, conf_array[:])
-                            #print("Filtering from index " + str(tmp_lst.index(tmp_array0[0])) +  " with window " + str(window))
-                            print("Filtering from index " + str(start) +  " with window " + str(window))
-                            start_and_window=filter_samples(adaptive_scalers,tmp_lst,adaptive_scaler,start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                            tmp_array0=sort_configs(adaptive_scaler.workers, conf_array[:])
+                            print("Filtering from index " + str(tmp_lst.index(tmp_array0[0])) +  " with window " + str(window))
+                            #print("Filtering from index " + str(start) +  " with window " + str(window))
+                            #start_and_window=filter_samples(adaptive_scalers,lst,adaptive_scaler,start, window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants)
+                            start_and_window=filter_samples(adaptive_scalers,tmp_lst,adaptive_scaler,tmp_lst.index(tmp_array0[0]), window, previous_tenant_results, 1, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=LOG_FILTERING, include_current_tenant_nb=tenant_nb == startTenants, positive_outlier=positive_outlier)
                             print("Starting at index " + str(start_and_window[0]) + " with window " +  str(start_and_window[1]))
                             print([utils.array_to_str(el) for el in tmp_lst])
                             next_conf=tmp_lst[start_and_window[0]]
@@ -541,21 +669,23 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 if not conf in tmp_array:
                                     print("Removing conf " + utils.array_to_str(conf) + " from left experiments in runtime manager because of this conf violates transition constraints")
                                     rm.remove_sample_for_conf(conf)
+                            if not rm.get_left_over_configs():
+                                last_experiment=True
                         except IndexError:
+                            print("No config meets the filtering constraints")
+                            #rm.reset()
                             last_experiment=True
                         # there is no better experiment sample than the inputted previous result, therefore end this set of samples.
-                        if not rm.get_left_over_configs():
-                            last_experiment=True
                     else:
                         # there is no experiment sample left, therefore end this set of samples.
                         last_experiment=True
                     return last_experiment
 
-        def process_samples(rm,tenant_nb,ws):
+        def process_samples(rm,tenant_nb):
                         next_exp=rm.get_raw_experiments()
                         results=[]
                         nr_of_experiments=len(next_exp)
-                        print("Running " + str(nr_of_experiments) + " experiments")
+                        print("Processing samples " + str(nr_of_experiments) + " experiments")
                         for i,ws in enumerate(next_exp):
                             sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
                             samples=int(ws[4]*sampling_ratio)
@@ -563,9 +693,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                 samples=1
                             for res in _generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, initial_conf):
                                 results.append(res)
-                        # if we evaluate a result for a conf that is not part of the configs selected by k8-resource-optimizer, than make sure this result is part of the results
-                        #if not (get_conf(adaptive_scaler.workers, tmp_result) in [get_conf(adaptive_scaler.workers, r) for r in results]):
-                            #results.append(tmp_result)i
+                        tmp_results=results[:]
+                        for r in tmp_results:
+                            if not rm.result_is_stored(rm.adaptive_scaler.workers, r):
+                                results.remove(r)
                         print_results(adaptive_scaler, results)
                         return results
         
@@ -578,52 +709,92 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             nonlocal rm
             nonlocal adaptive_window
 
+            print("Processing request for " + str(startTenants) + " tenants")
             predictedConf=[]
             currentResult={}
-            maximum_transition_cost=rm.maximum_transition_cost
-            minimum_shared_replicas=rm.minimum_shared_replicas
+            previousResult={}
             if str(startTenants) in d[sla['name']]:
                 currentResult=d[sla['name']][str(startTenants)]
-            elif startTenants > 1 and str(startTenants-1) in d[sla['name']]:
+                print("currentResult found:")
+                print(get_conf(adaptive_scaler.workers,currentResult))
+            if startTenants > 1 and startTenants-1 in runtime_manager.keys():
                 #copy result for startTenants-1 but set an artificial high  completion time
                 #so that a later actual result will always outperform this completion time.
-                if float(d[sla['name']][str(startTenants-1)]['CompletionTime']) > 1.0 and float(d[sla['name']][str(startTenants-1)]['CompletionTime']) < slo and d[sla['name']][str(startTenants-1)]['Successfull'] == 'true':
-                    currentResult=d[sla['name']][str(startTenants-1)]
-                    transfer_result(d, sla, adaptive_scalers, int(tenants)-1,int(tenants),slo,scaling_down_threshold) #previous_conf, previous_tenants)
-                    adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)], 1, False)
+                found_result={}
+                result_list=runtime_manager[startTenants-1].list_of_results
+                for r in result_list:
+                    if float(r["CompletionTime"]) < slo and adaptive_scaler.equal_workers(r["workers"]): 
+                        if found_result:
+                            if resource_cost(adaptive_scaler.workers, get_conf(adaptive_scaler.workers, found_result)) > resource_cost(r["workers"], r["conf"]):
+                                found_result=create_result(r["workers"], r["CompletionTime"], r["conf"], d[sla['name']][str(startTenants-1)]['SLAName'])
+                        else:
+                            found_result=create_result(r["workers"], r["CompletionTime"], r["conf"], d[sla['name']][str(startTenants-1)]['SLAName'])
+                if found_result:
+                    previousConf=get_conf(adaptive_scaler.workers, found_result)
+                    if not rm.conf_X_workers_has_been_sampled_already(previousConf,adaptive_scaler.workers):
+                        previousResult=found_result
+                        print("previousResult found:") 
+                        print(previousConf)
+                        if not currentResult: 
+                            transfer_result_direct(d, sla, runtime_manager, startTenants-1,found_result,int(tenants),slo,scaling_down_threshold) #previous_conf, previous_tenants)ii
+                            adaptive_window.adapt_search_window(d[sla['name']][str(startTenants-1)], 1, False)
             #rm=get_rm_for_closest_tenant_nb(startTenants)
             #adaptive_window=rm.get_adaptive_window()
             if currentResult:
-                found_conf=get_conf(adaptive_scalers['init'].workers, d[sla['name']][str(startTenants)])
-                if len(previous_conf)==len(alphabet['elements']):
-                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_closest_tenant_nb(startTenants),d[sla['name']],startTenants,found_conf,slo, include_current_tenant_nb=int(previous_tenants) == startTenants)
-                else:
-                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_closest_tenant_nb(startTenants),d[sla['name']],startTenants,found_conf,slo)
+                found_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(startTenants)])
+                adaptive_scaler=rm.adaptive_scaler
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                 start=lst.index(found_conf)
-                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue() and (1 in [random.choice(range(1,int(100/(100*(adaptive_scaler.exploration_rate+0.00000000001)))+1))]): #i#(previous_tenants and startTenants != int(previous_tenants)):
+                if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown and rm.no_experiments_left() and not rm.last_experiment_in_queue():
                     if can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, startTenants, slo, scaling_up_threshold):
+                        tmp_window=window
                 #if can_be_improved_by_larger_config(d[sla['name']], startTenants, slo, scaling_up_threshold):
                         if can_be_improved_by_smaller_config(d[sla['name']], lst, adaptive_scaler, startTenants):
+                            stopExploration=False
                             lst=rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
-                            start=0
-                            tmp_window=min(window, lst.index(found_conf))
-                        check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, tmp_window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function)
+                            if previousResult and found_conf != previousConf:
+                                if not previousConf in lst:
+                                    lst+=[previousConf]
+                                    lst=rm.update_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                                start=lst.index(previousConf)
+                            elif (1 in [random.choice(range(1,int(100/(100*(adaptive_scaler.exploration_rate+0.00000000001)))+1))]): #i#(previous_tenants and startTenants != int(previous_tenants)
+                                start=0
+                            else:
+                                stopExploration=True
+                            if not stopExploration:
+                                print("Exploration phase started...")
+                                if previousResult and found_conf != previousConf:
+                                    print("Testing previous result")
+                                else:
+                                    print("Testing from the smallest possible conf")
+                                tmp_window=min(window, lst.index(found_conf)-start)
+                            else:
+                               print("Using currentResult as basis")
+                        else:
+                            print("Using currentResult as basis")
+                        check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, tmp_window, startTenants, sampling_ratio, window_offset_for_scaling_function)
                         if (found_conf == lst[start]) and found_conf in rm.get_left_over_configs():
                             rm.remove_sample_for_conf(lst[start])
-                        else:
+                        elif not rm.no_experiments_left():
                             d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                    else:
+                        print("Using currentResult as is, only vertical scaling is possible!")
+            elif previousResult:
+                print("Using previousResult as basis")
+                found_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(startTenants)])
+                adaptive_scaler=rm.adaptive_scaler
+                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                start=lst.index(found_conf)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, adaptive_window.get_current_window(), startTenants, sampling_ratio, window_offset_for_scaling_function)
+                if (found_conf == lst[start]) and found_conf in rm.get_left_over_configs():
+                    rm.remove_sample_for_conf(lst[start])
+                elif not rm.no_experiments_left():
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
             elif USE_PERFORMANCE_MODEL:
                 print("using curve-fitted scaling function to estimate configuration for tenants " + str(startTenants))
-                adaptive_scaler_closest_tenant=get_adaptive_scaler_for_closest_tenant_nb(startTenants)
-                lst=rm.set_sorted_combinations(_sort(adaptive_scaler_closest_tenant.workers,base))
-                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler_closest_tenant,lst,window,window_offset_for_scaling_function)
-                adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler_closest_tenant,startTenants,predictedConf, start_fresh=True)
-                if len(previous_conf)==len(alphabet['elements']):
-                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,predictedConf,slo, include_current_tenant_nb=int(previous_tenants) == startTenants)
-                else:
-                    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,predictedConf,slo)
+                adaptive_scaler=rm.adaptive_scaler
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window,window_offset_for_scaling_function)
                 start=lst.index(predictedConf)
                 if start >= window:
                     conf_in_case_of_IndexError=lst[start-window]
@@ -633,46 +804,139 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     retry_wdw=window-start+1
 
                 next_conf=predictedConf
-                check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
-                d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw) 
+                if not rm.no_experiments_left():
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                else:
+                    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                    next_conf=lst[0]
+                    start=0
+                    check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=window)
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
             else:
+                print("Searching from the smallest possible combination")
+                adaptive_scaler=rm.adaptive_scaler
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
                 next_conf=lst[0]
                 start=0
-                tmp_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scalers['init'],d[sla['name']],startTenants,next_conf,slo)
-                check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, retry=True, retry_window=window)
+                check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=window)
                 d[sla['name']][str(startTenants)]=rm.get_next_sample()
 
-        def check_mononoticity(workers, r, rm):
-                        mono_constraint_violated=False
-                        history=runtime_manager[tenant_nb].get_results()
-                        #We start from tenants due prevent non-linear scaling effects
-                        for k in range(tenant_nb+2, max([int(t) for t in d[sla['name']].keys()])+1):
-                            history+=runtime_manager[k].get_results()
-                        for h in history:
+        def get_history(skip_tenants=0):
+            history=[]
+            if skip_tenants < 0:
+                history=runtime_manager[tenant_nb].get_results()
+            else:
+            #We start from tenants+2 due prevent non-linear scaling effects
+                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
+                    if k in runtime_manager.keys():
+                        history+=runtime_manager[k].get_results()
+            return history
+
+        def check_outlier(r, history):
+            outlier=False
+            if len(history) >= 2:
+                completiontimes=[h['CompletionTime'] for h in history]
+                average=sum(completiontimes)/len(completiontimes)
+                if float(r['CompletionTime']) > average*float(initial_conf['outlier_threshold']):
+                    print("!!!!!!!!!!!Outlier disturbing result!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    outlier=True
+            return outlier
+
+        def check_positive_outlier(r):
+            if float(r['CompletionTime'])*float(initial_conf['outlier_threshold']) < slo:
+                return True
+            else:
+                return False
+
+        
+        def check_mononoticity(workers, r, rm, history):
+                    nonlocal lst
+                    if not r["Successfull"] == "true":
+                        print("Result is not successfull")
+                        return False
+                    mono_constraint_violated=False
+                    if "last_tenant_nb" in runtime_manager.keys(): 
+                        last_tenant_nb=runtime_manager["last_tenant_nb"]
+                        #if last_tenant_nb > tenant_nb:
+                        #    return False
+                        previous_rm=runtime_manager[last_tenant_nb]
+                        tmp_result=previous_rm.get_last_sampled_result()
+                        qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
+                        stop=True
+                        for a,b in zip(tmp_result["workers"], adaptive_scaler.workers):
+                            for res in a.resources.keys():
+                                if a.resources[res] != b.resources[res]:
+                                    stop=False
+                                break
+                            if not stop:
+                                break
+    
+                        shrd_replicas=qualities_of_sample['nb_shrd_repls']
+                        shrd_resources=qualities_of_sample['shrd_resources']
+                        if stop:
+                            if shrd_replicas <= rm.minimum_shared_replicas:
+                                stop=False
+                            for key in rm.minimum_shared_resources.keys():
+                                if shrd_resources[key] <= rm.minimum_shared_resources[key]:
+                                    stop=False
+
+                        #if shrd_replicas < rm.minimum_shared_replicas:
+                        #    raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
+                        #for key in rm.minimum_shared_resources.keys():
+                        #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
+                        #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
+                        if not stop and not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers): 
+                            for h in history:
                                 if resource_cost(workers, get_conf(workers,r), False) >= resource_cost(h["workers"], h["conf"], False):
-                                        print("Conf " + str(h["conf"]) + " with completion time " + str(h['result']['CompletionTime']) + "s has smaller resource amount") 
-                                        if  float(r['CompletionTime']) > (float(h['result']['CompletionTime']) + initial_conf['monotonicity_threshold']):
-                                                print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING minimum_shared_replicas!!!!!!!!!!!!!!!!!!!!!!!!:" + str(rm.minimum_shared_replicas) +  " -> " + str(rm.minimum_shared_replicas+1))
-                                                rm.minimum_shared_replicas=rm.minimum_shared_replicas+1
+                                        print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
+                                        if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
+                                             #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
+                                                print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
+                                                resources_incremented=False
+                                                for key in shrd_resources.keys():
+                                                    if key in initial_conf["dominant_resources"]:
+                                                        if rm.current_min_shrd_resources[key] == -1 or  shrd_resources[key] < rm.current_min_shrd_resources[key]:
+                                                            if shrd_resources[key] + initial_conf['increments'][key] > rm.minimum_shared_resources[key]:
+                                                                print("!!!!!! ADJUSTING shared_resources for resource type " + key +  ": "  + str(rm.minimum_shared_resources[key]) +  " -> " + str(shrd_resources[key]+initial_conf['increments'][key]))
+                                                                rm.minimum_shared_resources[key]=shrd_resources[key]+initial_conf['increments'][key]
+                                                                resources_incremented=True
+                                                if not resources_incremented:
+                                                    if shrd_replicas+1 > rm.minimum_shared_replicas:
+                                                        print("!!!!ADJUSTUNG shared_replicas: "  + str(rm.minimum_shared_replicas) +  " -> " + str(shrd_replicas+1))
+                                                        rm.minimum_shared_replicas=shrd_replicas+1
                                                 mono_constraint_violated=True
+                                                lst=rm.update_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                                 for t in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
+                                                    lst_updated=False
                                                     if runtime_manager[t].minimum_shared_replicas < rm.minimum_shared_replicas:
                                                         runtime_manager[t].minimum_shared_replicas=rm.minimum_shared_replicas
+                                                        lst_updated=True
+                                                        runtime_manager[t].update_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                                                    for key in rm.minimum_shared_resources.keys():
+                                                        if runtime_manager[t].minimum_shared_resources[key] < rm.minimum_shared_resources[key]:
+                                                            runtime_manager[t].minimum_shared_resources[key]=rm.minimum_shared_resources[key]
+                                                            if not lst_updated:
+                                                                lst_updated=True
+                                                                runtime_manager[t].update_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                                                print("Adding conf back to list of experiments")
+                                                if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                                                    rm.previous_current_experiment()
+                                                rm.add_pushed_back_result(r,shrd_replicas,shrd_resources)
                                                 break
-                        if not mono_constraint_violated:
-                            rm.add_result(r)
-
-
-        def debug():
-            if '3' in d[sla['name']].keys():
-                conf56 = get_conf(adaptive_scaler.workers,  d[sla['name']]['3'])
-                as2 = get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],3,conf56,slo)
-                print(as2.ScalingFunction.workersScaledDown)
-                print(as2.ScalingFunction.LastScaledDownWorker)
-                if len(as2.ScalingFunction.LastScaledDownWorker) >= 2:
-                    raise RuntimeError("ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-
+                    if not mono_constraint_violated:
+                            print("ADDING CORRECT RESULT TO HISTORY:")
+                            print(r)
+                            if "last_tenant_nb" in runtime_manager.keys():
+                                print("shared_replicas: " + str(shrd_replicas))
+                                for key in shrd_resources.keys():
+                                    print("shared_resources for resource type " + key + ": " + str(shrd_resources[key]))
+                                rm.add_result(r,tenant_nb,shrd_replicas,shrd_resources)
+                            else:
+                                rm.add_result(r,tenant_nb)
+                    else:
+                        rm.set_last_sampled_result(r, tenant_nb, shrd_replicas, shrd_resources)
+                    return mono_constraint_violated
 
         bin_path=initial_conf['bin']['path']
         chart_dir=initial_conf['charts']['chartdir']
@@ -694,31 +958,23 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         base=alphabet['base']
         slo=float(sla['slos']['completionTime'])
         adaptive_scaler=adaptive_scalers['init']
-        check_consistency_adaptive_scalers_and_results(d, sla, adaptive_scalers, adaptive_scaler, slo, initial_conf)
         startTenants = int(tenants)
         tenant_nb=startTenants
         maxTenants = -1
         result={}
         next_conf=[]
         evaluate=False
-        if not str(startTenants) in d[sla['name']]:
-            rm=get_rm_for_closest_tenant_nb(startTenants)
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            start=0
-            adaptive_window=rm.get_adaptive_window()
-            process_request_for_next_tenant_nb()
-            next_tenant_nb_processed=True
-        else:
-            next_tenant_nb_processed=False
+        mono_constraint_violated=False
+        #outlier=False
+        positive_outlier=False
         if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
             evaluate=True
             tenant_nb=int(previous_tenants)
             maxTenants=int(previous_tenants)
-            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
             rm=get_rm_for_closest_tenant_nb(tenant_nb)
-            maximum_transition_cost=rm.maximum_transition_cost
-            minimum_shared_replicas=rm.minimum_shared_replicas
+            adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
+            check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
             adaptive_window=rm.get_adaptive_window()
             lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
             print([utils.array_to_str(el) for el in lst])
@@ -726,11 +982,39 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 #if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                 no_exps=True
-            tmp_result=create_result(adaptive_scaler, completion_time, previous_conf, sla['name'])
-            check_mononoticity(adaptive_scaler.workers, tmp_result, rm)
+            tmp_result=create_result(adaptive_scaler.workers, completion_time, previous_conf, sla['name'])
+            #history=get_history(-1)
+            #outlier=check_outlier(tmp_result, history)
+            #if not outlier:
+            history=get_history()
+            mono_constraint_violated=check_mononoticity(adaptive_scaler.workers, tmp_result, rm, history)
+            positive_outlier=check_positive_outlier(tmp_result)
+                
+            #if not outlier:     
             next_conf=get_conf(adaptive_scaler.workers, tmp_result)
             results=[tmp_result]
+            #else:
+            #    tenant_nb=maxTenants+1
+        #if not positive_outlier and not str(startTenants) in d[sla['name']]:
+        #    rm=get_rm_for_closest_tenant_nb(startTenants)
+        #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        #    start=0
+        #    adaptive_window=rm.get_adaptive_window()
+        #    process_request_for_next_tenant_nb()
+        #    next_tenant_nb_processed=True
+        #    if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+         #       rm=get_rm_for_closest_tenant_nb(tenant_nb)
+         #       adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm, get_adaptive_scaler_for_closest_tenant_nb(tenant_nb), d[sla['name']], tenant_nb, previous_conf,slo,include_current_tenant_nb=int(previous_tenants) == startTenants)
+            #rm=get_rm_for_closest_tenant_nb(tenant_nb)i
+          #      check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, initial_conf)
+           #     adaptive_window=rm.get_adaptive_window()
+            #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+             #   next_conf=get_conf(adaptive_scaler.workers, tmp_result)
+              #  results=[tmp_result]
 
+       # else:
+        #    next_tenant_nb_processed=False
+        #if not outlier:
         start=0
         if next_conf:
             start=lst.index(next_conf)
@@ -740,50 +1024,72 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             print("Tenant_nb: " + str(tenant_nb)  + ", maxTenants: " + str(maxTenants))
             #slo=float(sla['slos']['completionTime'])
             print("SLO is " + str(slo))
+            print("Result for conf: " + utils.array_to_delimited_str(next_conf,"_") + " with completion time " + results[0]["CompletionTime"])
             #if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
             print("Removing all configs that are useless to actually test as a result of the current result")
             tmp_adaptive_scaler=adaptive_scaler.clone()
-            intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
-            tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+            print("State of adaptive_scaler before validation")
+            tmp_adaptive_scaler.status()
+            intermediate_result=find_optimal_results(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers,results,slo)[0]
+            tipped_over_intermediate_confs=return_failed_confs(runtime_manager, tenant_nb, tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
             intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
             intermediate_state=intermediate_states.pop(0)
-            print("State of adaptive_scaler")
-            adaptive_scaler.status()
+            print("State of adaptive_scaler after validation")
+            tmp_adaptive_scaler.status()
+            if adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
+                if tipped_over_intermediate_confs:
+                    rm.add_tipped_over_result({"workers": [w.clone() for w in tmp_adaptive_scaler.workers], "results": tipped_over_intermediate_confs})
             #if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
             #        remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
             for i in range(1, max([int(t) for t in d[sla['name']].keys()])+1):
-                            if i != tenant_nb and str(i) in d[sla['name']].keys():
-                                    print("UPDATING RUNTIME MANAGER FOR NB OF TENANTS: " + str(i))
-                                    tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)   
+                                if i != tenant_nb and str(i) in d[sla['name']].keys():
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
+                                    tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(tmp_rm, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
                                     tmp_adaptive_window=tmp_rm.get_adaptive_window()
                                     tmp_lst=tmp_rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                                    #if intermediate result is tipped_over_result, then remove conf of intermediate_result, if tmp_adaptive_scaler2 has all workers of conf flagged
+                                    conf_i=get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)])
+                                    tmp_start=tmp_lst.index(conf_i)
+                                    print("For " + str(i) + " tenants, the current sample equals " + utils.array_to_delimited_str(get_conf(tmp_adaptive_scaler2.workers, d[sla['name']][str(i)]),"_") + " and is positioned at index " + str(tmp_start))
                                     if tipped_over_intermediate_confs and not adaptive_scaler.careful_scaling:
-                                        #if all_flagged_tipped_over_conf_for_all_worker_indices_of_conf(tmp_adaptive_scaler2, tipped_over_intermediate_confs[0]):
-                                        #    do_higher_tenant_remove=True
-                                        #else:
                                         do_higher_tenant_remove=False
                                     else:
                                         do_higher_tenant_remove=True
-                                    if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
+                                    if i < tenant_nb and (intermediate_state==COST_EFFECTIVE_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT):
+                                        print("RESULT FOUND")
+                                        rc_nc=resource_cost(adaptive_scaler.workers, next_conf)
+                                        rc_i=resource_cost(tmp_adaptive_scaler2.workers, conf_i)
+                                        if str(i) in d[sla['name']] and (rc_nc < rc_i or (rc_nc == rc_i and next_conf != conf_i)):
+                                            print("There are higher configs or different configs with same resource cost tested for lower number of tenants (i.e., " + str(i) + "): the found result is copied and the search is stopped")
+                                            d[sla['name']][str(i)]=dict(results[0])
+                                            tmp_rm.reset()
+                                            tmp_rm.adaptive_scaler=adaptive_scaler.clone(start_fresh=True)
+                                            #update_adaptive_scaler_with_results(tmp_rm.adaptive_scaler, d[sla['name']], i, next_conf)
+                                            if not next_conf in tmp_lst:
+                                                tmp_lst.append(next_conf)
+                                                tmp_list=tmp_rm.update_sorted_combinations(sort_configs(adaptive_scaler.workers, lst))
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, tenant_nb_workers=adaptive_scaler.workers, positive_outlier=positive_outlier)
+                                            print("New index positioned at " + str(tmp_start))
+                                            continue
+                                            #tmp_rm.adaptive_scaler=tmp_adaptive_scaler.clone(start_fresh=True)
+                                    if positive_outlier or (tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION)):
                                         if i > tenant_nb and intermediate_state==NO_RESULT:
-                                            print("Current result is NO RESULT, therefore, we remove all configs with lower resource_cost than current result for higher number of tenants: " + str(tenant_nb+1) + ".." + str(max([int(t) for t in d[sla['name']].keys()])))
+                                            print("Current result is NO RESULT, therefore, we remove all configs with lower resource_cost than current result for higher number of tenants " + str(i))
                                             print("REMOVING CONFS FOR NB OF TENANTS: " + str(i))
-                                            remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, [], 0, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True,higher_tenant_remove=do_higher_tenant_remove)
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, [], tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True,higher_tenant_remove=do_higher_tenant_remove, tenant_nb_workers=adaptive_scaler.workers)
                                         elif i < tenant_nb and (intermediate_state==COST_EFFECTIVE_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT):
-                                            print("RESULT FOUND,  we remove all configs with higher resource_cost than current result for lower number of tenants: 1 .. " + str(tenant_nb-1))
-                                            remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), 0, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
-                                        if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
-                                            print("SHIFTING TO NEXT SAMPLE FOR HIGHER NB OF TENANTS: " + str(i))
+                                            print("We remove all configs with higher resource_cost than current result for lower number of tenants " + str(i))
+                                            tmp_start=remove_failed_confs(runtime_manager, tenant_nb, tmp_lst, tmp_adaptive_scaler2.workers, tmp_rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), tmp_start, tmp_adaptive_window.get_current_window(),results[0],[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, tenant_nb_workers=adaptive_scaler.workers, positive_outlier=positive_outlier)
+                                    print("New index positioned at " + str(tmp_start))
+                                    if not get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) in tmp_lst:
+                                            print("SHIFTING TO NEXT SAMPLE FOR NB OF TENANTS: " + str(i))
                                             last_experiment=update_conf_array(tmp_rm,tmp_lst,tmp_adaptive_scaler2,i)
                                             if not last_experiment:
                                                 d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             elif tmp_rm.last_experiment:
                                                 ws=tmp_rm.get_current_experiment_specification()
                                                 print(ws)
-                                                results_tmp1=process_samples(tmp_rm,i,ws)
-                                                result_tmp1=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)
+                                                results_tmp1=process_samples(tmp_rm,i)
+                                                result_tmp1=find_optimal_results(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo, just_return_best=True)[0]
                                                 if result_tmp1:
                                                     if not result_tmp1 in tmp_lst:
                                                         tmp_lst.append(get_conf(adaptive_scaler.workers, result_tmp1))
@@ -791,22 +1097,32 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     print("NO SAMPLES LEFT, BUT THERE IS AN EVALUATED SAMPLE THAT NEEDS TO BE PROCESSED")
                                                     start_tmp=tmp_rm.sorted_combinations.index(get_conf(adaptive_scaler.workers, result_tmp1))
                                                     adaptive_window_tmp=tmp_rm.get_adaptive_window()
-                                                    result_tmp2=find_optimal_result(tmp_adaptive_scaler2.workers,results_tmp1,slo)
+                                                    result_tmp2=find_optimal_results(runtime_manager,i,tmp_adaptive_scaler2.workers,results_tmp1,slo)[0]
                                                     process_results(result_tmp2,results_tmp1, tmp_rm, tmp_adaptive_scaler2, tmp_rm.sorted_combinations, start_tmp, adaptive_window_tmp, i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]) )
                                                 else:
-                                                    print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
-                                                    tmp_rm.reset()
-                                                    check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[0],0,window,i, sampling_ratio, minimum_shared_replicas, maximum_transition_cost, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window(), higher_tenants_only=True)
-                                                    d[sla['name']][str(i)]=tmp_rm.get_next_sample()
-                                                    update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,tmp_adaptive_scaler2,i,get_conf(adaptive_scaler.workers,d[sla['name']][str(i)]))
+                                                    if tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
+                                                        print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
+                                                        tmp_rm.reset()
+                                                        check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[tmp_start],tmp_start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                        d[sla['name']][str(i)]=tmp_rm.get_next_sample()
                                             print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
-                                            print(get_conf(adaptive_scaler.workers,d[sla['name']][str(i)]))
+                                            current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
+                                            if not current_conf in tmp_lst and tmp_adaptive_scaler2.ScalingDownPhase and tmp_adaptive_scaler2.StartScalingDown:
+                                                print("NO SAMPLES LEFT, ASKING K8-RESOURCE-OPTIMIZER FOR OTHER SAMPLES")
+                                                tmp_rm.reset()
+                                                check_and_get_next_exps(tmp_adaptive_scaler2, tmp_rm, tmp_lst,tmp_lst[tmp_start],tmp_start,window,i, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=tmp_rm.get_adaptive_window().get_current_window(), higher_tenants_only=True)
+                                                d[sla['name']][str(i)]=tmp_rm.get_next_sample()
+                                                current_conf=get_conf(adaptive_scaler.workers,d[sla['name']][str(i)])
+                                            print("NEXT SAMPLE FOR HIGHER NUMBER OF TENANTS " + str(i) + " :")
+                                            print(current_conf)
                 #elif intermediate_state == COST_EFFECTIVE_RESULT:
                 #    remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),True,[],scaling_up_threshold, sampling_ratio, intermediate_remove=True)
             if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                 tmp_adaptive_scaler=adaptive_scaler.clone()
-                intermediate_result=find_optimal_result(tmp_adaptive_scaler.workers,results,slo)
-                tipped_over_intermediate_confs=return_failed_confs(tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                intermediate_result=find_optimal_results(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers,results,slo)[0]
+                tipped_over_intermediate_confs=return_failed_confs(runtime_manager,tenant_nb,tmp_adaptive_scaler.workers, results, lambda r: float(r['CompletionTime']) > slo and r['Successfull'] == 'true' and float(r['CompletionTime']) <= slo * scaling_up_threshold)
+                print("Current_tipped_over_intermediate_confs")
+                print(tipped_over_intermediate_confs)
                 intermediate_states=tmp_adaptive_scaler.validate_result(intermediate_result, get_conf(tmp_adaptive_scaler.workers,intermediate_result), slo)
                 intermediate_state=intermediate_states.pop(0)
                 #Remembering current experiment_nb and experiment_spec:
@@ -820,40 +1136,79 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     raise RuntimeError("No experiments left in runtime manager")
                 #removing failed_conf
                 if not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
-                    start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
-                # if still configs remain to be tested
+                    print("For " + str(tenant_nb) + " tenants, the current sample equals " + utils.array_to_delimited_str(next_conf,"_") + " and is positioned at index " + str(start))
+                    start=remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),results[0],[],scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling, positive_outlier=positive_outlier)
+                    print("New index positioned at " + str(start))
+                # if still configs remain to be testedz
+                #last_experiment=False
                 last_experiment=update_conf_array(rm,lst,adaptive_scaler,tenant_nb)
-                sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
-                samples=int(ws[4]*sampling_ratio)
-                if samples == 0:
-                    samples=1
-                results=[]
-                previous_result=float(completion_time)
-                previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
-                sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, initial_conf, previous_result=previous_result, previous_replicas=previous_replicas)
-                print_results(adaptive_scaler, sample_list)
-                if SORT_SAMPLES:
-                    sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
+                if not mono_constraint_violated:    
+                    print("Processing current sample")
+                    sla_conf=SLAConf(sla['name'],tenant_nb,ws[0],sla['slos'])
+                    samples=int(ws[4]*sampling_ratio)
+                    if samples == 0:
+                        samples=1
+                    previous_result=float(completion_time)
+                    previous_replicas="[" + utils.array_to_delimited_str(previous_conf,",") + "]"
+                    sample_list=_generate_experiment(chart_dir,util_func,[sla_conf],samples,bin_path,exps_path+'/'+str(tenant_nb)+'_tenants-ex'+str(i),ws[1],ws[2],ws[3], sampling_ratio, initial_conf, previous_result=previous_result, previous_replicas=previous_replicas)
+                    print_results(adaptive_scaler, sample_list)
+                    if SORT_SAMPLES:
+                        sample_list=sort_results(adaptive_scaler.workers,slo,sample_list)
                 if not last_experiment:
                     print("There still remains configs to be tested in the current k8-resource-optimizer experiment batch")
-                    rm.update_experiment_list(i,ws,sample_list)
+                    if not mono_constraint_violated:
+                        rm.update_experiment_list(i,ws,sample_list)
                     d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
-                    update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,get_conf(adaptive_scaler.workers,d[sla['name']][str(tenant_nb)]))
                     #we have still samples left for k8-resource-optimizer, yield further processing and exit while loop
                     tenant_nb+=1
                     break
                 else:
                     print("All useful experiment samples have been tested. We let k8-resource-optimizer return all the samples and we calculate the most optimal result from the set of samples that meet the slo")
-                    results=process_samples(rm,tenant_nb,ws)
-            result=find_optimal_result(adaptive_scaler.workers,results,slo)
-            process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf)
+                    results=process_samples(rm,tenant_nb)
+                    if not results:
+                        evaluate=False
+                        print("No samples left, asking k8-resource-optimizer for other samples")
+                        rm.reset()
+                        check_and_get_next_exps(tmp_adaptive_scaler, rm, lst, lst[start],start+1,window,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True, retry=True, retry_window=rm.get_adaptive_window().get_current_window(), higher_tenants_only=False)
+                        d[sla['name']][str(tenant_nb)]=rm.get_next_sample()
+                    else:
+                        evaluate=True
+            else:
+                if mono_constraint_violated:
+                    evaluate=False
+                    #if d[sla['name']]:
+                    #    previous_tenant_results=d[sla['name']]
+                    #else:
+                    #    previous_tenant_results={}
+                    #print("Filtering from index " + str(start_index) +  " with window " + str(window))
+                    #if previous_tenants:
+                    #    include_current_tenant_nb=not higher_tenants_only and tenants == int(previous_tenants)
+                    #else:
+                    #    include_current_tenant_nb=False
+                    #if not (adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown):
+                    #    x_workers=True
+                    #    scaled_down_worker_index=adaptive_scaler.ScaledWorkerIndex
+                    #else:
+                    #    x_workers=False
+                    #    scaled_down_worker_index=-1
+                    #start_and_window=filter_samples(adaptive_scalers, lst,tmp_adaptive_scaler,start, window, previous_tenant_results, 1, tenants, runtime_manager, scaling_down_threshold, slo, check_workers=x_workers, ScaledDownWorkerIndex=scaled_down_worker_index, log=LOG_FILTERING, include_current_tenant_nb=include_current_tenant_nb)        
+                    #d[sla['name']][str(tenant_nb)]=create_result(.....lst[star_window[0])
+
+            optimal_results=find_optimal_results(runtime_manager, tenant_nb,adaptive_scaler.workers,results,slo)
+            if evaluate and adaptive_scaler.ScalingDownPhase and not adaptive_scaler.optimal_results:
+                adaptive_scaler.optimal_results=optimal_results
+                result=adaptive_scaler.optimal_results.pop(0)
+            elif evaluate:
+                result=optimal_results[0]
+            if evaluate:
+                process_results(result, results, rm, adaptive_scaler, lst, start, adaptive_window, tenant_nb, previous_conf, positive_outlier=positive_outlier)
             tenant_nb+=1
-        if not next_tenant_nb_processed:
-            rm=get_rm_for_closest_tenant_nb(startTenants)
-            lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-            start=0
-            adaptive_window=rm.get_adaptive_window()
-            process_request_for_next_tenant_nb()
+        #if positive_outlier or not next_tenant_nb_processed:
+        rm=get_rm_for_closest_tenant_nb(startTenants)
+        lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+        start=0
+        adaptive_window=rm.get_adaptive_window()
+        process_request_for_next_tenant_nb()
         print("Saving optimal results into matrix")
         utils.saveToYaml(d,'Results/matrix.yaml')
         #When scaling to a number of jobs that is different from the previous number of jobs or the previous number of jobs +1
@@ -863,7 +1218,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #therefore we store it in a different yaml file
         #Note: transition cost only applies when scaling up to a higher number of tenants.
         #if previous_conf and not (evaluate_current or evaluate_previous) and int(tenants) >= int(previous_tenants): #and not adaptive_scaler.hasScaled():
-        #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo, include_current_tenant_nb= int(tenants) == int(previous_tenants))
+        #    adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,d[sla['name']],int(tenants),get_conf(adaptive_scaler.workers,d[sla['name']][tenants]),slo, include_current_tenant_nb= int(tenants) == int(previous_tenants))
         #    print("Moving filtered samples in sorted combinations after the window")
         #    rm=get_rm_for_closest_tenant_nb(int(tenants))
         #    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
@@ -878,25 +1233,25 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #        print("No result that meets the transition costs and shared replicas constraints, returning to stored result")
         #    if currentResult and next_conf != get_conf(adaptive_scaler.workers, currentResult):
         #        current_conf=get_conf(adaptive_scaler.workers, currentResult)
-        #        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(tenants),current_conf,slo,include_current_tenant_nb= int(tenants) == int(previous_tenants))
+        #        adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,d[sla['name']],int(tenants),current_conf,slo,include_current_tenant_nb= int(tenants) == int(previous_tenants))
         #        d[sla['name']][tenants]=create_result(adaptive_scaler, str(float(slo)+999999.000), next_conf, sla['name'])
         #print("Saving filtered results into matrix")
         utils.saveToYaml(d,'Results/result-matrix.yaml')
 
 
-def get_adaptive_scaler_for_closest_tenant_nb(adaptive_scalers, adaptive_scaler, previous_results, tenants, slo):
-                        as_predictedConf=None
-                        k=tenants
-                        while k >= 1:
-                                if str(k) in  previous_results.keys():
-                                        as_predictedConf=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers, adaptive_scaler,  previous_results, k, get_conf(adaptive_scaler.workers, previous_results[str(k)]),slo, include_current_tenant_nb=True)
-                                        k=0
-                                else:
-                                        k-=1
-                        if as_predictedConf:
-                                return as_predictedConf
-                        else:
-                                return adaptive_scalers['init']
+#def get_adaptive_scaler_for_closest_tenant_nb(adaptive_scalers, adaptive_scaler, previous_results, tenants, slo):
+#                        as_predictedConf=None
+#                        k=tenants
+#                        while k >= 1:
+#                                if str(k) in  previous_results.keys():
+#                                        as_predictedConf=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[k], adaptive_scaler,  previous_results, k, get_conf(adaptive_scaler.workers, previous_results[str(k)]),slo, include_current_tenant_nb=True)
+#                                        k=0
+#                                else:
+#                                        k-=1
+#                        if as_predictedConf:
+#                                return as_predictedConf
+#                        else:
+#                                return adaptive_scalers['init']
 
 
 def extract_resources_from_result(result, worker_id, resource_types):
@@ -909,7 +1264,7 @@ def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenan
 	for t in d[sla['name']].keys():
 		if int(t) > tenant_nb:
 			other_conf=get_conf(adaptive_scaler.workers, d[sla['name']][t])
-			other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(t),other_conf,slo, clone_scaling_function=True)
+			other_as=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[int(t)],adaptive_scaler,d[sla['name']],int(t),other_conf,slo, clone_scaling_function=True)
 			if not adaptive_scaler.equal_workers(other_as.workers) and other_as.ScalingDownPhase and other_as.StartScalingDown:
 			#if not adaptive_scaler.equal_workers(other_as.workers):
 				changed_scaler=False
@@ -921,18 +1276,21 @@ def update_all_adaptive_scalers(d, sla, adaptive_scalers, adaptive_scaler, tenan
                                                 if changed:
                                                         other_as.workers[i]=adaptive_scaler.workers[i].clone()
 				if changed_scaler:
-					d[sla['name']][t]=create_result(other_as, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
+					d[sla['name']][t]=create_result(other_as.workers, float(slo) + 999999.0, get_conf_for_start_tenant(slo,int(t),other_as,_sort(other_as.workers,base),window), sla['name'], window_offset_for_scaling_function)
 	return d
 
 
-def check_consistency_adaptive_scalers_and_results(d, sla, adaptive_scalers, adaptive_scaler, slo, init_conf):
+def check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtime_manager, adaptive_scaler, slo, init_conf):
+        print("Checking consistency of rm with runtime manager")
+        if rm != runtime_manager[tenant_nb]:
+            raise RuntimeError("Wrong rm being used")
         print("Checking consistency of adaptive_scalers with stored results in matrix")
         for t in d[sla['name']].keys():
-                        tmp_result=d[sla['name']][t]
-                        other_conf=get_conf(adaptive_scaler.workers, tmp_result)
-                        as_key=get_adaptive_scaler_key(t, other_conf)
-                        if not as_key in adaptive_scalers.keys():
-                            tmp_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],int(t),other_conf,slo, clone_scaling_function=True)
+                            tmp_result=d[sla['name']][t]
+                            other_conf=get_conf(adaptive_scaler.workers, tmp_result)
+                        #as_key=get_adaptive_scaler_key(t, other_conf)
+                        #if not as_key in adaptive_scalers.keys():
+                            tmp_adaptive_scaler=runtime_manager[int(t)].adaptive_scaler
                             resources_keys=adaptive_scaler.workers[0].resources.keys()
                             for i, w in enumerate(tmp_adaptive_scaler.workers):
                                 for res in resources_keys:
@@ -940,7 +1298,7 @@ def check_consistency_adaptive_scalers_and_results(d, sla, adaptive_scalers, ada
                                     if tmp_res != w.resources[res]:
                                         prefix=str(init_conf['prefix'][res]) if init_conf['prefix'][res] != None else ""
                                         suffix=str(init_conf['suffix'][res]) if init_conf['suffix'][res] != None else ""
-                                        print("!!!Resource " + res +  " for worker " + str(w.worker_id) + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
+                                        print("!!!Resource " + res +  " for worker " + str(w.worker_id) + " for tenant_nb " + t + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
                                         raise RuntimeError("!!!Resource " + res +  " for worker " + str(w.worker_id) + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
                         
 
@@ -969,16 +1327,16 @@ def deep_copy_results(d):
 	return new_d
 
 #precondition: d[sla['name'][str(source_tenant_nb)] exists
-def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tenant_nb,slo, scaling_down_threshold):# previous_conf=[], previous_tenants = None):
+def transfer_result(d, sla, runtime_manager, source_tenant_nb, destination_tenant_nb,slo, scaling_down_threshold):# previous_conf=[], previous_tenants = None):
 	print("Transferring result from " +  str(source_tenant_nb)+ " to " + str(destination_tenant_nb)) 
 	sourceResult=d[sla['name']][str(source_tenant_nb)]
-	adaptive_scaler=adaptive_scalers['init']
+	adaptive_scaler=runtime_manager[source_tenant_nb].adaptive_scaler
 	source_conf=get_conf(adaptive_scaler.workers, sourceResult)
-	source_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],source_tenant_nb,source_conf,slo)
+	source_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[source_tenant_nb],adaptive_scaler,d[sla['name']],source_tenant_nb,source_conf,slo)
 	destination_adaptive_scaler=None
 	if str(destination_tenant_nb) in d[sla['name']].keys():
 		destination_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(destination_tenant_nb)])
-		destination_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,d[sla['name']],destination_tenant_nb,destination_conf,slo)
+		destination_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[destination_tenant_nb],adaptive_scaler,d[sla['name']],destination_tenant_nb,destination_conf,slo)
 	else:
 		sourceResult=None
 	if source_tenant_nb != destination_tenant_nb:
@@ -987,10 +1345,33 @@ def transfer_result(d, sla, adaptive_scalers, source_tenant_nb, destination_tena
 		#new_d  =  deep_copy_results(d)
 	#else:
  		#new_d = d
-	add_incremental_result(adaptive_scalers, destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) >= 1.0 and (float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo), destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+	add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) >= 1.0 and (float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo), destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
 	return d
 
-def add_incremental_result(adaptive_scalers,destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultNotCostEffective, destination_adaptive_scaler=None, previous_conf=None, next_conf=None, result=None):
+
+def transfer_result_direct(d, sla, runtime_manager, source_tenant_nb, sourceResult,destination_tenant_nb,slo,scaling_down_threshold): 
+        print("Transferring direct result from  to " + str(destination_tenant_nb) + ":")
+        print(sourceResult)
+        adaptive_scaler=runtime_manager[source_tenant_nb].adaptive_scaler
+        source_conf=get_conf(adaptive_scaler.workers, sourceResult)
+        source_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[source_tenant_nb],adaptive_scaler,d[sla['name']],source_tenant_nb,source_conf,slo)
+        destination_adaptive_scaler=None
+        if str(destination_tenant_nb) in d[sla['name']].keys():
+                destination_conf=get_conf(adaptive_scaler.workers, d[sla['name']][str(destination_tenant_nb)])
+                destination_adaptive_scaler=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[destination_tenant_nb],adaptive_scaler,d[sla['name']],destination_tenant_nb,destination_conf,slo)
+        else:
+                sourceResult=None
+        if source_tenant_nb != destination_tenant_nb:
+                sourceResult=None
+        #if previous_conf and previous_tenants and source_tenant_nb != destination_tenant_nb  and int(previous_tenants) < destination_tenant_nb:
+                #new_d  =  deep_copy_results(d)
+        #else:
+                #new_d = d
+        add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, lambda x, slo: float(x['CompletionTime']) >= 1.0 and (float(x['CompletionTime']) > slo or float(x['CompletionTime'])*scaling_down_threshold < slo), destination_adaptive_scaler=destination_adaptive_scaler, next_conf=source_conf, result=sourceResult)
+        return d
+
+
+def add_incremental_result(destination_tenant_nb, d, sla, source_adaptive_scaler, slo, isExistingResultNotCostEffective, destination_adaptive_scaler=None, previous_conf=None, next_conf=None, result=None):
 	for w in source_adaptive_scaler.workers:
 		print(w.resources)
 	if result:
@@ -1000,18 +1381,18 @@ def add_incremental_result(adaptive_scalers,destination_tenant_nb, d, sla, sourc
 				result={}
 		else:
 			next_conf=result_conf
-	if previous_conf and next_conf and previous_conf != next_conf:
-		source_adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,source_adaptive_scaler,destination_tenant_nb,next_conf)
+	#if previous_conf and next_conf and previous_conf != next_conf:
+	#	source_adaptive_scaler=update_adaptive_scaler_for_tenantnb_and_conf(rm,source_adaptive_scaler,destination_tenant_nb,next_conf)
 	if not destination_adaptive_scaler:
 		destination_adaptive_scaler=source_adaptive_scaler
 	if str(destination_tenant_nb) in d[sla['name']]:
 		x=d[sla['name']][str(destination_tenant_nb)]
 		if resource_cost(destination_adaptive_scaler.workers, get_conf(destination_adaptive_scaler.workers, x)) >= resource_cost(source_adaptive_scaler.workers, next_conf) or isExistingResultNotCostEffective(x,slo):
 			print("Adding stronger incremental result")
-			d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+			d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler.workers, float(slo) + 999999.0 , next_conf, sla['name'])
 	else:
 		print("Adding stronger incremental result")
-		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler, float(slo) + 999999.0 , next_conf, sla['name'])
+		d[sla['name']][str(destination_tenant_nb)]=result.copy() if result else create_result(source_adaptive_scaler.workers, float(slo) + 999999.0 , next_conf, sla['name'])
 	return source_adaptive_scaler
 
 
@@ -1025,34 +1406,35 @@ def get_conf_of_adaptive_scaler_key(adaptive_scaler_key):
 	str_conf=adaptive_scaler_key.split('X')[1]
 	return list(map(lambda x: int(x),str_conf.split('_',-1)))
 
-def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, log=LOG_FILTERING, include_current_tenant_nb=False):
-       tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
-       if not (tested_configuration in adaptive_scalers.keys()):
-                adaptive_scaler=adaptive_scaler.clone(start_fresh=True)
-                adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler, results, tenant_nb, conf)
-       else:
-                adaptive_scaler2=adaptive_scalers[tested_configuration]
-                if str(tenant_nb) in results.keys() and conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
-                        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
-                elif clone_scaling_function:
-                        adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
+def get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, log=LOG_FILTERING, include_current_tenant_nb=False):
+       #adaptive_scalers=rm.adaptive_scalers
+       #tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
+       #if not (tested_configuration in adaptive_scalers.keys()):
+       #         adaptive_scaler_new=adaptive_scaler.clone(start_fresh=True)
+       #         adaptive_scalers[tested_configuration]=update_adaptive_scaler_with_results(adaptive_scaler_new, results, tenant_nb, conf)
+       #else:
+       adaptive_scaler2=rm.adaptive_scaler
+                #if str(tenant_nb) in results.keys() and conf != get_conf(adaptive_scaler.workers,results[str(tenant_nb)]):
+                #        adaptive_scaler2=update_adaptive_scaler_for_tenantnb_and_conf(rm,get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,results,tenant_nb,get_conf(adaptive_scaler.workers,results[str(tenant_nb)]),slo, clone_scaling_function, log),tenant_nb,conf)
+       if clone_scaling_function:
+            adaptive_scaler2.ScalingFunction=adaptive_scaler.ScalingFunction.clone(clone_scaling_records=True)
                 #unflag_all_workers(adaptive_scaler2.workers)
-                adaptive_scaler=adaptive_scaler2
+       #adaptive_scaler_new=adaptive_scaler2
        #flag_all_workers_for_tenants_up_to_nb_tenants(results, tenant_nb, adaptive_scaler, slo, include_current_tenant_nb)
        if log:
                 print("Returning adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
                 #adaptive_scaler.status()
-       return adaptive_scaler
+       return adaptive_scaler2
 
-def update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,tenant_nb,conf, start_fresh=False):
-        tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
-        adaptive_scalers[tested_configuration]=adaptive_scaler.clone(start_fresh=start_fresh)
-        print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants and " + utils.array_to_delimited_str(conf)+ ":")
-        adaptive_scalers[tested_configuration].status()
-        return adaptive_scalers[tested_configuration]
+def update_adaptive_scaler_for_tenantnb_and_conf(runtime_manager,adaptive_scaler,tenant_nb,start_fresh=False):
+        #tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
+        runtime_manager[tenant_nb].adaptive_scaler=adaptive_scaler.clone(start_fresh=start_fresh)
+        print("Setting adaptive scaler for  " + str(tenant_nb) + " tenants:")
+        runtime_manager[tenant_nb].adaptive_scaler.status()
+        return runtime_manager[tenant_nb].adaptive_scaler
 
 
-#def get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, check_workers=False):
+#def get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,results,tenant_nb,conf,slo, clone_scaling_function=False, check_workers=False):
 #       tested_configuration=get_adaptive_scaler_key(tenant_nb, conf)
 #       if not (tested_configuration in adaptive_scalers.keys()):
 #                adaptive_scaler2=AdaptiveScaler([w.clone() for w in adaptive_scaler.workers], adaptive_scaler.ScalingFunction.clone())
@@ -1087,9 +1469,9 @@ def flag_all_workers_for_tenants_up_to_nb_tenants(results, nb_tenants,adaptive_s
             flag_workers(adaptive_scaler.workers, conf)
 
 
-def create_result(adaptive_scaler, completion_time, conf, sla_name, successfull='true'):
+def create_result(workers, completion_time, conf, sla_name, successfull='true'):
 	result={'config': '0'}
-	for i,w in enumerate(adaptive_scaler.workers):
+	for i,w in enumerate(workers):
 		result["worker"+str(i+1)+".replicaCount"]=str(conf[i])
 		result["worker"+str(i+1)+".resources.requests.cpu"]=str(w.resources['cpu'])
 		result["worker"+str(i+1)+".resources.requests.memory"]=str(w.resources['memory'])
@@ -1102,7 +1484,6 @@ def create_result(adaptive_scaler, completion_time, conf, sla_name, successfull=
 	else:
 		result['CompletionTime']= completion_time
 		result['Successfull']=successfull
-	print(result)
 	return result
 
 
@@ -1126,12 +1507,14 @@ def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, win
            return []
 
 
-def involves_worker(workers, conf, worker_index):
-	if worker_index < 0 or worker_index >= len(workers):
+def involves_worker(workers, conf, worker_index, log=LOG_FILTERING, positive_outlier=False):
+	if worker_index < 0 or worker_index >= len(workers) or positive_outlier:
 		return True
 	if conf[worker_index] > 0:
 		return True
 	else:
+		if log:
+			print("Failed check of worker for vertical scaling")
 		return False
 
 
@@ -1187,9 +1570,14 @@ def equal_conf(conf1, conf2):
 
 
 
-def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False):
-		if not runtime_manager[tenant_nb].result_is_stored(workers, previous_result):
+def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers, rm, results, slo, optimal_conf, start, window, previous_result, tipped_over_results, scaling_up_threshold, sampling_ratio, startingTenant=False, intermediate_remove=False, higher_tenant_remove=False, careful_scaling=False, tenant_nb_workers=[], positive_outlier=False):
+		if not tenant_nb_workers:
+			tenant_nb_workers=workers
+		if not runtime_manager[tenant_nb].conf_X_workers_has_been_sampled_already(get_conf(tenant_nb_workers, previous_result), tenant_nb_workers): #and rm == runtime_manager[tenant_nb]:
+			print("Abort removing due to no valid result found in history")
 			return start
+		else:
+			completionTime=float(previous_result['CompletionTime'])
 		next_index=start
 		if optimal_conf and careful_scaling:
 		#	if not intermediate_remove:
@@ -1207,17 +1595,26 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 		#				if rm.conf_in_experiments(possible_removal):
 		#					rm.remove_sample_for_conf(possible_removal)
 		#	if intermediate_remove:
+				if positive_outlier:
+					threshold=0
+				else:
+					if len(sorted_combinations) <= start+2*window:
+						tmp_pos16=len(sorted_combinations)-1
+					else:
+						tmp_pos16=start+2*window
+					max_resource_cost=max([resource_cost(tenant_nb_workers, comb, cost_aware=False) for comb in sorted_combinations[start:tmp_pos16+1]])
+					threshold=10
+					#5+int((max_resource_cost - resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False))*(1 + 1*(completionTime/slo)))
+				#print("Starting to remove from resource_cost higher than " + str(resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False) + threshold))
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=0
 				for i in range(failed_range, len(tmp_combinations)):
 					possible_removal=tmp_combinations[i]
-					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(workers, optimal_conf, cost_aware=False) + 10:
+					if resource_cost(workers, possible_removal, cost_aware=False) > resource_cost(tenant_nb_workers, optimal_conf, cost_aware=False) + threshold:
 						print(possible_removal)
 						if possible_removal in sorted_combinations:
 							print("Removing config because it has a higher resource cost than the current optimal result and therefore this config and all higher configs are not cost effective for the currrent or lower number of tenants")
-							if sorted_combinations.index(possible_removal) < next_index:
-								next_index-=1
-							elif sorted_combinations.index(possible_removal) == next_index and next_index > 0:
+							if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
 								next_index-=1
 							sorted_combinations.remove(possible_removal)
 							if rm.conf_in_experiments(possible_removal):
@@ -1247,35 +1644,45 @@ def remove_failed_confs(runtime_manager, tenant_nb, sorted_combinations, workers
 		#		w.resources=extract_resources_from_result(previous_result, w.worker_id, resource_types)
 		#else:
 		#	workers_result=[]
-		for failed_conf in return_failed_confs(workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
+		for failed_conf in return_failed_confs(runtime_manager, tenant_nb, tenant_nb_workers, results, lambda r: (float(r['CompletionTime']) > slo * scaling_up_threshold) or (float(r['CompletionTime']) > slo and (higher_tenant_remove or tipped_over_results))):
 			if failed_conf in sorted_combinations:
 				tmp_combinations=sort_configs(workers,sorted_combinations)
 				failed_range=tmp_combinations.index(failed_conf)
 				for i in range(0, failed_range):
 					possible_removal=tmp_combinations[i]
-					if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(workers, failed_conf, False):  
-						print(possible_removal)
-						if possible_removal in sorted_combinations:
-							print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
-							sorted_combinations.remove(possible_removal)
-							if rm.conf_in_experiments(possible_removal):
-								rm.remove_sample_for_conf(possible_removal)
-							if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
-								rm.remove_tipped_over_result(possible_removal)
+					#HACKHACK:debug remove sample with completion time < slo*threshold because of failed result with higher resource_conf -> non_monotonic_result, should we increase shared_resources?
+					do_remove=True
+					if not higher_tenant_remove and rm.conf_X_workers_has_been_sampled_already(possible_removal, workers):
+						possible_removal_result=rm.get_result(possible_removal,workers)
+						if float(possible_removal_result['CompletionTime']) <= slo*scaling_up_threshold:
+							do_remove=False
+					if do_remove:
+						if (higher_tenant_remove or tipped_over_results or not possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]) and resource_cost(workers, possible_removal, False) < resource_cost(tenant_nb_workers, failed_conf, False):  
+							print(possible_removal)
+							if possible_removal in sorted_combinations:
+								print("Removing config because it has a lower resource cost than the failed result and we assume it will therefore fail for this tenant")
+								if sorted_combinations.index(possible_removal) <= next_index and next_index > 0:
+									next_index-=1
+								sorted_combinations.remove(possible_removal)
+								if rm.conf_in_experiments(possible_removal):
+									rm.remove_sample_for_conf(possible_removal)
+								if possible_removal in (rm.get_tipped_over_results(nullify=False))["results"]:
+									rm.remove_tipped_over_result(possible_removal)
 				#if (not failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]) or (careful_scaling or higher_tenant_remove or tipped_over_results):
-				print("Removing failed conf")
-				print(failed_conf)
-				i=1
-				new_index=sorted_combinations.index(failed_conf)-i
-				while new_index >= 0 and resource_cost(workers,failed_conf, False) == resource_cost(workers, sorted_combinations[new_index], False):
-					next_index=new_index
-					i+=1
-					new_index=sorted_combinations.index(failed_conf)-i
-				sorted_combinations.remove(failed_conf)
-				if rm.conf_in_experiments(failed_conf):
- 					rm.remove_sample_for_conf(failed_conf)
-				if failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]:
-					rm.remove_tipped_over_result(failed_conf)
+				if resource_cost(workers, failed_conf, False) <= resource_cost(tenant_nb_workers, failed_conf, False):
+					print("Removing failed conf")
+					print(failed_conf)
+					i=1
+					new_index=sorted_combinations.index(failed_conf)-1
+					while new_index >= 0 and resource_cost(workers,failed_conf, False) == resource_cost(workers, sorted_combinations[new_index], False):
+						next_index=new_index
+						i+=1
+						new_index=sorted_combinations.index(failed_conf)-i
+					sorted_combinations.remove(failed_conf)
+					if rm.conf_in_experiments(failed_conf):
+ 						rm.remove_sample_for_conf(failed_conf)
+					if failed_conf in (rm.get_tipped_over_results(nullify=False))["results"]:
+						rm.remove_tipped_over_result(failed_conf)
 		if tipped_over_results:
                         for failed_conf in tipped_over_results:
                                 if failed_conf in sorted_combinations:
@@ -1377,70 +1784,93 @@ def can_be_improved_by_smaller_config(results, sorted_combinations, adaptive_sca
 
 
 def update_other_tenants_from_tenant_nb(runtime_manager, adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, slo, scaling_down_threshold):
-        def debug():
-            if '1' in previous_results.keys():
-                conf56 = get_conf(adaptive_scaler.workers, previous_results['1'])
-                as2 = get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,1,conf56,slo)
-                for w in as2.workers:
-                    print(w.resources)
         cloned_other_as={}
         changed_scaler=False
         for t in previous_results.keys():
                 stop=True
                 if int(t) != tenant_nb:
                         other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
-                        other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,get_adaptive_scaler_for_closest_tenant_nb(adaptive_scalers, adaptive_scaler, previous_results, int(t),slo),previous_results,int(t),other_conf,slo, log=True)
+                        other_as=runtime_manager[int(t)].adaptive_scaler
                         if not adaptive_scaler.equal_workers(other_as.workers):
                             if other_as.ScalingDownPhase and other_as.StartScalingDown:
                                 if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE or not (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100):
+                                    continu=True
                                     if float(previous_results[t]['CompletionTime']) == TEST_CONFIG_CODE:
-                                        previous_results[t]=runtime_manager[int(t)].list_of_results[-1]['result']
-                                        update_adaptive_scaler_with_results(other_as, previous_results, int(t), get_conf(other_as.workers, previous_results[t])) 
-                                    if float(previous_results[t]['CompletionTime']) > slo and has_smaller_incremental_workers_than(other_as, adaptive_scaler, other_conf):
+                                        try:
+                                            #previous_result_from_history=runtime_manager[int(t)].list_of_results[-1]
+                                            previous_results[t]=runtime_manager[int(t)].backup
+                                            #create_result(previous_result_from_history["workers"], previous_result_from_history["CompletionTime"], previous_result_from_history["conf"], previous_results[t]['SLAName'])
+                                            update_adaptive_scaler_with_results(other_as, previous_results, int(t), get_conf(other_as.workers, previous_results[t]))
+                                        except:
+                                            continu=False
+                                    if continu and float(previous_results[t]['CompletionTime']) > slo and has_smaller_incremental_workers_than(other_as, adaptive_scaler, other_conf):
                                         stop=False
-                                    elif float(previous_results[t]['CompletionTime'])* scaling_down_threshold <= slo and has_smaller_incremental_workers_than(adaptive_scaler, other_as, other_conf):
+                                    elif continu and float(previous_results[t]['CompletionTime'])* scaling_down_threshold <= slo and has_smaller_incremental_workers_than(adaptive_scaler, other_as, other_conf):
                                         stop=False
                             #elif not adaptive_scaler.equal_workers(other_as.workers):
                             if not stop:
                                 for i,w in enumerate(adaptive_scaler.workers):
-                                                changed=False
                                                 if not other_as.workers[i].equals(w):
-                                                        changed=True
-                                                if changed:
                                                         changed_scaler=True
                                                         if not t in cloned_other_as.keys():
                                                             cloned_other_as[t]=other_as.clone(start_fresh=True)
                                                         cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
         for t in cloned_other_as.keys():
-            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
-            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
-        debug()
+            update_adaptive_scaler_for_tenantnb_and_conf(runtime_manager,cloned_other_as[t],int(t))
+            runtime_manager[int(t)].back_up=previous_results[t]
+            previous_results[t]=create_result(cloned_other_as[t].workers, float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
         return changed_scaler
 
 #def tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, result_conf, slo):
 #        for t in previous_results.keys():
 #                if int(t) > tenant_nb:
 #                        other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
-#                        other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True, log=True)
+#                        other_as=get_adaptive_scaler_for_tenantnb_and_conf(rm,adaptive_scaler,previous_results,int(t),other_conf,slo, clone_scaling_function=True, log=True)
 #                        if float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
 #                            return True
 #                        elif  float(previous_results[t]['CompletionTime'])*SCALING_DOWN_TRESHOLD >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
 #                            return True
 #        return False
 
-def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, update_done=False):        
+def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers=False, ScaledDownWorkerIndex=-1, log=True, original_adaptive_scaler=None, initial_conf=[], include_current_tenant_nb=False, resource_cost_is_too_high=False, update_done=False, positive_outlier=False, shared_resources_violated=False):
+        
+    
         def check_resource_cost():
+
+            def too_high_than_initial_cost(initial_cost,x):
+                if positive_outlier:
+                    return initial_cost < x
+                else:
+                    return initial_cost <= x
+            
+            nonlocal resource_cost_is_too_high
             if original_adaptive_scaler and check_workers:
-                if adaptive_scaler.ScalingDownPhase and resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True) <= resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True):
+                if initial_conf == []:
+                    raise RuntimeError("No initial conf")
+                if adaptive_scaler.ScalingDownPhase and too_high_than_initial_cost(resource_cost(original_adaptive_scaler.workers, initial_conf, cost_aware=True),resource_cost(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], cost_aware=True)):
                     resource_cost_is_too_high=True
+                    if log:
+                        print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
                     return True
                 elif adaptive_scaler.ScalingUpPhase and not equal_conf(sorted_combinations[el-(window-new_window)], initial_conf):
                     resource_cost_is_too_high=True
+                    if log:
+                        print("Resource cost is too high in comparison with initial conf " + str(initial_conf))
                     return True
                 else:
                     return False
             else:
                 return False
+        
+        def check_higher_tenant_nb(higher_tenant_nb, previous_results):
+            if not str(higher_tenant_nb) in previous_results.keys():
+                return False
+            rslt=previous_results[str(higher_tenant_nb)]
+            if float(rslt['CompletionTime']) <= slo  and float(rslt['CompletionTime']) > 1.0:
+                return True
+            else:
+                return False
+        
         if log:
             print("Starting at index " + str(start) + " with window " + str(window))
         i=start_tenant
@@ -1448,16 +1878,30 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
         start_window=window
         if previous_results:
                 if check_workers and ScaledDownWorkerIndex != -1 and not update_done:
+                    #if 'copy' in runtime_manager.keys():
+                    #    del runtime_manager['copy']
+                    #if 'results' in runtime_manager.keys():
+                    #    del runtime_manager['results']
+                    #runtime_manager['copy']={}
+                    #for key in runtime_manager.keys():
+                    #    if isinstance(runtime_manager[key],RuntimeManager) and key != tenant_nb:
+                    #        runtime_manager['copy'][key]=runtime_manager[key].adaptive_scaler.clone()
+                    #    elif key != 'copy':
+                    #        runtime_manager['copy'][key]=runtime_manager[key]
+                    #runtime_manager['results']={}
+                    #for t in previous_results.keys():
+                    #    runtime_manager['results'][t]=dict(previous_results[t])
                     if 'copy' in adaptive_scalers.keys():
                         del adaptive_scalers['copy']
                     if 'results' in adaptive_scalers.keys():
                         del adaptive_scalers['results']
                     adaptive_scalers['copy']={}
-                    for key in adaptive_scalers.keys():
-                        if isinstance(adaptive_scalers[key],AdaptiveScaler):
-                            adaptive_scalers['copy'][key]=adaptive_scalers[key].clone()
-                        elif key != 'copy':
-                            adaptive_scalers['copy'][key]=adaptive_scalers[key]
+                    for t in runtime_manager.keys():
+                        if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb:
+                            adaptive_scalers['copy'][t]=runtime_manager[t].adaptive_scaler.clone()
+                    for t in adaptive_scalers.keys():
+                        if t != 'copy':
+                            adaptive_scalers['copy'][t]=adaptive_scalers[t]
                     adaptive_scalers['results']={}
                     for t in previous_results.keys():
                         adaptive_scalers['results'][t]=dict(previous_results[t])
@@ -1473,7 +1917,9 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                 while i <= max_tenants:
                         #if (include_current_tenant_nb and i == tenant_nb):
                         #    flag_all_workers_for_tenants_up_to_nb_tenants(previous_results, tenant_nb, adaptive_scaler,slo, include_current_tenant_nb=True)
-                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys():
+                        if (include_current_tenant_nb or i != tenant_nb) and str(i) in previous_results.keys(): #and (i <= tenant_nb or check_higher_tenant_nb(i, previous_results)):
+                                if log:
+                                    print("Filtering with respect to confs for " + str(i) + "tenants")
                                 if i <= tenant_nb:
                                     previous_tenant_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
                                     minimum_shared_replicas=runtime_manager[tenant_nb].minimum_shared_replicas
@@ -1498,12 +1944,36 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             else:
                                                 previous_tenant_conf=sorted_combinations[el-(window-new_window)]
                                         except IndexError as e:
-                                            if 'results' in adaptive_scalers.keys():
-                                                previous_results=adaptive_scalers['results']
+                                            #if 'results' in runtime_manager.keys():
+                                            #    previous_results=runtime_manager['results']
+                                            #    del runtime_manager['results']
+                                            #if 'copy' in runtime_manager.keys():
+                                            #    tmp_adaptive_scalers=dict(runtime_manager['copy'])
+                                            #    for t in runtime_manager.keys():
+                                            #        if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb:
+                                            #            runtime_manager[t].adaptive_scaler=tmp_adaptive_scalers[t].clone()
+                                            #    del runtime_manager['copy']
+                                            if check_workers and 'results' in adaptive_scalers.keys():
+                                                for t in previous_results.keys():
+                                                    previous_results[t]=adaptive_scalers['results'][t]
                                                 del adaptive_scalers['results']
-                                            if 'copy' in adaptive_scalers.keys():
-                                                adaptive_scalers=dict(adaptive_scalers['copy'])
-                                            if adaptive_scaler.ScalingDownPhase and resource_cost_is_too_high:
+                                            if check_workers and 'copy' in adaptive_scalers.keys():
+                                                adaptive_scalers=adaptive_scalers['copy']
+                                                for t in runtime_manager.keys():
+                                                    if isinstance(runtime_manager[t],RuntimeManager) and t != tenant_nb: 
+                                                        runtime_manager[t].adaptive_scaler=adaptive_scalers[t]
+                                                        del adaptive_scalers[t]
+                                                        #if t == tenant_nb:
+                                                        #    for i,w in enumerate(runtime_manager[t].adaptive_scaler.workers):
+                                                        #        adaptive_scaler.workers[i]=w
+                                                if 'copy' in adaptive_scalers.keys(): 
+                                                    del adaptive_scalers['copy']
+                                                for t in runtime_manager.keys():
+                                                    if isinstance(runtime_manager[t],RuntimeManager):
+                                                        runtime_manager[t].adaptive_scalers=adaptive_scalers
+                                            if adaptive_scaler.ScalingDownPhase and shared_resources_violated:
+                                                raise IndexError("shared_resources_violated") from e
+                                            elif adaptive_scaler.ScalingDownPhase and resource_cost_is_too_high:
                                                 raise IndexError("recursive_scaling_may_help") from e
                                             else:
                                                 raise
@@ -1514,12 +1984,12 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                 print(previous_tenant_conf)
                                         remove=False
                                         #if (not exceptional_no_check_for_vertical_scaling and (not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))))
-                                        if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex)) or check_resource_cost():
+                                        if not (not check_workers or involves_worker(adaptive_scaler.workers, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex, log=LOG_FILTERING, positive_outlier=positive_outlier)) or (check_workers and  runtime_manager[tenant_nb].conf_X_workers_has_been_sampled_already(sorted_combinations[el-(window-new_window)], adaptive_scaler.workers)) or check_resource_cost():
                                             remove=True
                                         else:
                                             if i != tenant_nb:
                                                 other_conf=get_conf(adaptive_scaler.workers, previous_results[str(i)])
-                                                other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,i,other_conf,slo,log=False)
+                                                other_as=get_adaptive_scaler_for_tenantnb_and_conf(runtime_manager[i],adaptive_scaler,previous_results,i,other_conf,slo,log=False)
                                                 if i < tenant_nb:
                                                     previous_adaptive_scaler=other_as
                                                     current_adaptive_scaler=adaptive_scaler
@@ -1529,25 +1999,34 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             else:
                                                 current_adaptive_scaler=adaptive_scaler
                                                 previous_adaptive_scaler=update_adaptive_scaler_with_results(adaptive_scaler.clone(), previous_results, tenant_nb, get_conf(adaptive_scaler.workers, previous_results[str(tenant_nb)]))
-                                            qualitiesOfSample=_pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_tenant_conf, current_adaptive_scaler, result_conf, minimum_shared_replicas, minimum_shared_resources, log=True)
+                                            qualitiesOfSample=_pairwise_transition_cost(previous_adaptive_scaler.workers, previous_tenant_conf, current_adaptive_scaler.workers, result_conf, minimum_shared_replicas, minimum_shared_resources)
                                         #else:
                                         #    qualitiesOfSample=_pairwise_transition_cost(previous_tenant_conf,result_conf, minimum_shared_replicas, False, -1, log=log)
                                             cost=qualitiesOfSample['cost']
                                             nb_shrd_replicas=qualitiesOfSample['nb_shrd_repls']
                                             shrd_resources=qualitiesOfSample['shrd_resources']
+                                            if log:
+                                                print("Original minimum_shared_replicas: " + str(minimum_shared_replicas))
                                             if isinstance(minimum_shared_replicas,int):
                                                 min_shared_replicas = min([minimum_shared_replicas,reduce(lambda x, y: x + y, previous_tenant_conf)])
                                             else:
                                                 min_shared_replicas = max([1,int(minimum_shared_replicas*reduce(lambda x, y: x + y, previous_tenant_conf))])
+                                            if log:
+                                                print("-->after comparing with previous_tenant_conf " + utils.array_to_delimited_str(previous_tenant_conf,"_") + ": " + str(min_shared_replicas))
                                             min_shared_resources={}
                                             for key in minimum_shared_resources:
                                                 minimum_shared_resource_size=minimum_shared_resources[key]
                                                 minimum_resources=adaptive_scaler.minimum_resources
+                                                if log:
+                                                    print("Original minimum_shared_resources for " + key + ": " + str(minimum_shared_resource_size))
                                                 if isinstance(minimum_shared_resource_size,int):
                                                     min_shared_resources[key] = min([minimum_shared_resource_size,reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources[key],previous_adaptive_scaler.workers)))])
                                                 else:
                                                     #1> minimum_resources['cpu']
                                                     min_shared_resources[key] = max([minimum_resources[key],int(minimum_shared_resource_size*reduce(add,map(mul,previous_tenant_conf,map(lambda x: x.resources[key],previous_adaptive_scaler.workers))))])
+                                                if log:
+                                                     print("-->after comparing with previous tenant conf " + utils.array_to_delimited_str(previous_tenant_conf,"_") + ": " + str(min_shared_resources[key]))
+
                                         #if (check_workers and i <= tenant_nb and all_flagged_conf(adaptive_scaler, sorted_combinations[el-(window-new_window)], ScaledDownWorkerIndex))
 
                                         def check_shared_resources():
@@ -1558,11 +2037,21 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                                     break
                                             return reject
                                         if remove or cost > maximum_transition_cost or nb_shrd_replicas < min_shared_replicas or check_shared_resources():
+                                            if not remove and not cost > maximum_transition_cost and (nb_shrd_replicas < min_shared_replicas or check_shared_resources()):
+                                                shared_resources_violated=True
                                         #for (i > tenant_nb and tenant_nb_X_result_conf_conflict_with_higher_tenants(adaptive_scalers,previous_results, adaptive_scaler, tenant_nb, sorted_combinations[el-(window-new_window)], slo, scaling_down_threshold)):
                                             if log and ScaledDownWorkerIndex > -1:
                                                 print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                             if log:
-                                                print("removed")
+                                                print("Moved because:")
+                                                if remove:
+                                                    print("due to failed worker check triggered by vertical scaling or too high resource cost or conf has already been sampled")
+                                                elif cost > maximum_transition_cost:
+                                                    print("due to exceeding maximum transition cost (" + str(maximum_transition_cost) + ") with " +  str(cost-maximum_transition_cost) + " replicas") 
+                                                elif nb_shrd_replicas < min_shared_replicas:
+                                                    print("due to exceeding minimum shared replicas constraint (" + str(min_shared_replicas) + ") with " +  str(min_shared_replicas-nb_shrd_replicas) + " replicas")
+                                                else:
+                                                    print("due to exceeding minimal shared resources (see above for more explanation)")
                                             if i <= tenant_nb:
                                                 tmp_conf=result_conf
                                             else:
@@ -1572,11 +2061,11 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                             new_window-=1
                                         else:
                                             if log:
-                                                print("not removed")
+                                                print("Mot moved")
                                 if new_window == 0:
                                         #unflag_all_workers(adaptive_scaler.workers)
                                         #flag_all_workers_for_tenants_up_to_nb_tenants(previous_results, tenant_nb, adaptive_scaler,slo, include_current_tenant_nb=False)
-                                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+start_window, start_window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers, ScaledDownWorkerIndex, log, original_adaptive_scaler, initial_conf,include_current_tenant_nb, resource_cost_is_too_high, True)
+                                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+start_window, start_window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers, ScaledDownWorkerIndex, log, original_adaptive_scaler, initial_conf,include_current_tenant_nb, resource_cost_is_too_high, True,  positive_outlier, shared_resources_violated)
                                 else:
                                         i+=1
                                         if log:
@@ -1606,7 +2095,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                 raise
                         if log:
                             print(result_conf)
-                        if not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex)) or check_resource_cost():
+                        if not (not check_workers or involves_worker(adaptive_scaler.workers, result_conf, ScaledDownWorkerIndex, positive_outlier)) or check_resource_cost():
                                 if log and ScaledDownWorkerIndex > -1:
                                     print("SCALING INDEX = " + str(ScaledDownWorkerIndex))
                                 if log:
@@ -1618,7 +2107,7 @@ def filter_samples(adaptive_scalers,sorted_combinations, adaptive_scaler, start,
                                 if log:
                                     print("not removed")
                 if new_window == 0:
-                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+window, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers, ScaledDownWorkerIndex, log, original_adaptive_scaler, initial_conf, include_current_tenant_nb, resource_cost_is_too_high, True)
+                        return filter_samples(adaptive_scalers, sorted_combinations, adaptive_scaler, start+window, window, previous_results, start_tenant, tenant_nb, runtime_manager, scaling_down_threshold, slo, check_workers, ScaledDownWorkerIndex, log, original_adaptive_scaler, initial_conf, include_current_tenant_nb, resource_cost_is_too_high, True, positive_outlier)
         #When all constraints are satisfied and a worker has been scaled, update all_tenant_confs in previous_results with the appropriate worker "worker_index" if previous_tenant_confs[worker_index]==0
         #for t in previous_results.keys():
         #                if int(t) != tenant_nb:
@@ -1689,9 +2178,9 @@ def get_conf(workers, result):
 
 
 
-def return_failed_confs(workers,results, f):
+def return_failed_confs(runtime_manager, tenant_nb,workers,results, f):
 #	if DO_NOT_REPEAT_FAILED_CONFS_FOR_NEXT_TENANT:
-	failed_results=[result for result in results if f(result)]
+	failed_results=[result for result in results if runtime_manager[tenant_nb].result_is_stored(workers, result) and f(result)]
 	return sort_configs(workers,[get_conf(workers,failed_result) for failed_result in failed_results])
 #	else:
 #		return []
@@ -1704,17 +2193,22 @@ def return_failed_confs(workers,results, f):
 #				workers[k].tested()
 
 
-def find_optimal_result(workers,results, slo, just_return_best=False):
+def find_optimal_results(runtime_manager, tenant_nb, workers,results, slo, just_return_best=False):
 	print("Results")
 	print(results)
-	filtered_results=[result for result in results if (just_return_best or float(result['CompletionTime']) <= slo) and float(result['CompletionTime']) > 1.0]
+	filtered_results=[result for result in results if runtime_manager[tenant_nb].result_is_stored(workers, result) and (just_return_best or float(result['CompletionTime']) <= slo) and float(result['CompletionTime']) > 1.0]
 	print("Filtered results")
 	if filtered_results:
 		filtered_results=sort_results(workers,slo,filtered_results)
 		print(filtered_results)
-		return filtered_results[0]
+		optimal_results=[filtered_results[0]]
+		index=1
+		while index < len(filtered_results) and resource_cost(workers,get_conf(workers,filtered_results[index])) == resource_cost(workers,get_conf(workers,filtered_results[0])):
+                        optimal_results+=[filtered_results[index]]
+                        index+=1
+		return optimal_results
 	else:
-		return {}
+		return [{}]
 
 
 
@@ -1831,40 +2325,7 @@ def resource_cost(workers, conf, cost_aware=True):
         return cost
 
 
-
-def tenant_nb_X_result_conf_conflict_with_other_tenant_nb(adaptive_scalers, previous_results, adaptive_scaler, tenant_nb, result_conf, other_tenant_nb, slo, scaling_down_threshold):
-        cloned_other_as={}
-        t=str(other_tenant_nb)
-        if t in previous_results.keys():
-            other_conf=get_conf(adaptive_scaler.workers, previous_results[t])
-            other_as=get_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,adaptive_scaler,previous_results,other_tenant_nb,other_conf,slo, clone_scaling_function=True, log=False)
-            if other_tenant_nb > tenant_nb:
-                        if not adaptive_scaler.equal_workers(other_as.workers):
-                            if (float(previous_results[t]['CompletionTime']) < 1.0 or float(previous_results[t]['CompletionTime']) > float(slo) * 100) and has_different_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
-                                return True
-                            elif float(previous_results[t]['CompletionTime']) <= slo and has_smaller_workers_than(other_as, other_conf, adaptive_scaler, result_conf):
-                                return True
-                            elif float(previous_results[t]['CompletionTime'])*scaling_down_threshold >= slo and has_smaller_workers_than(adaptive_scaler, result_conf, other_as, other_conf):
-                                return True
-                            elif not (other_as.ScalingDownPhase and other_as.StartScalingDown):
-                                return True
-                            #elif not adaptive_scaler.equal_workers(other_as.workers):
-                            changed_scaler=False
-                            for i,w in enumerate(adaptive_scaler.workers):
-                                                changed=False
-                                                if involves_worker(adaptive_scaler.workers, result_conf,i) and not other_as.workers[i].equals(w):
-                                                        changed=True
-                                                if changed:
-                                                        if not t in cloned_other_as.keys():
-                                                            cloned_other_as[t]=other_as.clone(start_fresh=True)
-                                                        cloned_other_as[t].workers[i]=adaptive_scaler.workers[i].clone()
-        for t in cloned_other_as.keys():
-            update_adaptive_scaler_for_tenantnb_and_conf(adaptive_scalers,cloned_other_as[t],t, get_conf(cloned_other_as[t].workers, previous_results[t]))
-            previous_results[t]=create_result(cloned_other_as[t], float(TEST_CONFIG_CODE), get_conf(cloned_other_as[t].workers, previous_results[t]),previous_results[t]['SLAName'])
-        return False
-
-
-def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_resources, check_worker, scaled_worker_index, log=False):
+def _old_pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,conf, minimum_shared_replicas, minimum_shared_resources, check_worker, scaled_worker_index, log=False):
     if not previous_conf:
         return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
@@ -1890,8 +2351,8 @@ def _pairwise_transition_cost(worker_previous_conf, workers_conf, previous_conf,
         print('cost: ' + str(cost) + ', nb_shrd_repls: ' + str(shared_replicas) +  ', shrd_resources: ' + str(shared_resources))
     return {'cost': cost, 'nb_shrd_repls': shared_replicas, 'shrd_resources': shared_resources}
 
-def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, previous_conf, adaptive_scaler, conf, minimum_shared_replicas, minimum_shared_resources, log=False):
-    if not previous_conf or not previous_adaptive_scaler:
+def _pairwise_transition_cost(previous_workers, previous_conf, workers, conf, minimum_shared_replicas, minimum_shared_resources, log=LOG_FILTERING):
+    if not previous_conf or not previous_workers:
         return {'cost': 0, 'nb_shrd_repls': minimum_shared_replicas, 'shrd_resources': minimum_shared_resources}
     cost=0
     shared_replicas=0
@@ -1899,13 +2360,13 @@ def _pairwise_transition_cost_different_tenant_nbs(previous_adaptive_scaler, pre
     for key in minimum_shared_resources.keys():
         shared_resources[key]=0
     for worker_index, conf_pair in enumerate(zip(conf,previous_conf)):
-        if adaptive_scaler.workers[worker_index].equals(previous_adaptive_scaler.workers[worker_index]):
+        if workers[worker_index].equals(previous_workers[worker_index]):
             if conf_pair[0] > conf_pair[1]:
                 cost+=conf_pair[0]-conf_pair[1]
             if conf_pair[1] >= 1  and conf_pair[0] >= 1:
                 shared_replicas+=min(conf_pair[0],conf_pair[1])
                 for key in minimum_shared_resources.keys():
-                    shared_resources[key]+=shared_replicas*adaptive_scaler.workers[worker_index].resources[key]
+                    shared_resources[key]+=shared_replicas*workers[worker_index].resources[key]
         else:
             cost+=conf_pair[0]
     if log:
