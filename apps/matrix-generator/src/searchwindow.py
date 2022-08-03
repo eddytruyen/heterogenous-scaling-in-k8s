@@ -95,6 +95,8 @@ class ScalingFunction:
 				dict[res]=int((tenants*self.resources[res]*y)/slo)
 			else:
 				dict[res]=math.ceil((tenants*math.log(self.resources[res],tenants+1)*y)/slo)
+		print("Targetted resources:" )
+		print(dict)
 		return dict
 
         # this function returns the worker config for which the last scaling did not yield a cost-effective result
