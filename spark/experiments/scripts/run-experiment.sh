@@ -1,14 +1,17 @@
-slo=35
+slo=90
 group=g5
-runs=1
+runs=5
 home=/home/ubuntu/heterogenous-scaling-in-k8s/spark/experiments/scripts
 current_dir=`pwd`
-workload_profile=$home/udits/stable.yaml
+workload_profile=$home/udits/on_off.yaml
 output_dir=$home/udits/output
 if [ ! -d $output_dir ]
 then
        mkdir $output_dir
 fi
+rm $output_dir/*
+cd $home/../../../apps/matrix-generator/
+sed -i "s/completionTime: .*/completionTime: $slo/g" conf/matrix-spark.yaml
 for run in `seq $runs`
 do
 	echo Running run $run for group $group, slo $slo
@@ -16,7 +19,7 @@ do
 	rm -r Results/exp3/silver*
 	rm  Results/matrix.yaml
 	rm Results/result-matrix.yaml
-	python server.py conf/matrix-spark.yaml > log 2> err &
+	python server.py conf/matrix-spark.yaml &
 	sleep 3
 	cd $home
 	python generator.py start -f $workload_profile
