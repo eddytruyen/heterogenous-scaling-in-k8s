@@ -18,7 +18,11 @@ class ScalingFunction:
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
-		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
+		#self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
+
+                #scaling function for g5:
+		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x)
+
 		self.resources=resources
 		self.elements=elements
 		self.sizes=[]
