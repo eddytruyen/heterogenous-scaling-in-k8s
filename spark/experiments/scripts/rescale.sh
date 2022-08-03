@@ -8,7 +8,8 @@ workload=${6:-sql}
 csv_output=${7:-csv_output_file.csv}
 exit_program=${8:-0}
 fileName=values.json
-resourcePlannerURL=http://172.17.13.119:80
+resourcePlannerURL=http://172.17.13.119
+port=7878
 alphabetLength=$((4))
 
 function str_to_int {
@@ -19,10 +20,10 @@ start=0
 if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
 	echo previous_conf: $previous_conf 
-	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
 then
-	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
 fi
 if [ $exit_program -eq 0 ]
@@ -72,8 +73,10 @@ for i in `seq $alphabetLength`
                         cpu_size=$((valueCpu))
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2 | xargs)
-			if [ $valueMemory -lt $memory_size ]
+			echo Memory of worker $i is $valueMemory and number of replicas is $replicas
+			if [ $replicas -gt 0 ] && [ $valueMemory -lt $memory_size ]
 			then
+				echo Setting smallest memory size to $valueMemory
                         	memory_size=$valueMemory
 			fi
 			if [ ! $previous_conf == "no" ]  
