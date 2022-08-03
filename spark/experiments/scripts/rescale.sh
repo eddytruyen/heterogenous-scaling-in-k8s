@@ -84,7 +84,7 @@ for i in `seq $alphabetLength`
 			# && [ $nb_of_tenants -gt $previous_tenant_nb 
 			then	
 				echo "cpu size: $old_cpu_size -> $cpu_size"
-                                echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+                                echo "memory size: ${old_memory_size} -> ${valueMemory}Gi"
 				replace=false
 				if [ $cpu_size -ne $old_cpu_size ]
 				then	
@@ -92,17 +92,17 @@ for i in `seq $alphabetLength`
 					replace=true
 					sed -i "s/cpu: \"$old_cpu_size\"/cpu: \"$cpu_size\"/g" old_ss$i.yaml
 				fi
-				if [ ${memory_size}Gi != ${old_memory_size} ]
+				if [ ${valueMemory}Gi != ${old_memory_size} ]
                                 then
 					echo "Replacing memory"
 					replace=true
-                                        sed -i "s/memory: ${old_memory_size}/memory: ${memory_size}Gi/g" old_ss$i.yaml
+                                        sed -i "s/memory: ${old_memory_size}/memory: ${valueMemory}Gi/g" old_ss$i.yaml
                                 fi
 				if [ $replace = true ]
 				then
 					echo "Vertical scaling of worker$i"
 					echo "cpu size: $old_cpu_size -> $cpu_size"
-					echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+					echo "memory size: ${old_memory_size} -> ${valueMemory}Gi"
 					kubectl replace -f old_ss$i.yaml
 					kubectl delete pods -n $namespace -l set=worker$i
 				fi
@@ -120,7 +120,7 @@ then
 	fi
 fi
 
-echo "New memory size: " $memory_size
+echo "New memory size spark client: " $memory_size
 if [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
