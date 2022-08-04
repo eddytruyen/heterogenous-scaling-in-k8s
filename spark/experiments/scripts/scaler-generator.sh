@@ -37,6 +37,8 @@ do
 	 previous_tenants=`cat previous_tenants`
 	 ./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
   fi
+  echo Waiting for workers to become ready
+  sleep 120
   #if [ $clientmode -eq 0 ]
   #then`
   #  replicas=$(($i + 1))

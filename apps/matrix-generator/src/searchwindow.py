@@ -90,6 +90,7 @@ class ScalingFunction:
 	def target(self,slo,tenants):
 		y=self.eval(tenants)
 		dict={}
+		print("Completion time: " + str(y)) 
 		for res in self.resources.keys():
 			if res in self.DominantResources:
 				dict[res]=int((tenants*self.resources[res]*y)/slo)
