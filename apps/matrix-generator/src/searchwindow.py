@@ -21,7 +21,7 @@ class ScalingFunction:
 		#scaling function for g6
 		#self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
 
-                #scaling function for g5:
+	        #scaling function for g5 and g7:
 		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x)
 
 		self.resources=resources

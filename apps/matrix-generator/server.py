@@ -36,7 +36,9 @@ def create_app():
     #scaling function parameters for g6:
     #scalingFunction=ScalingFunction(0.8648113,0.1917651,33.3319781, {"cpu": 2, "memory": 2}, alphabet['elements'],alphabet['costs'], initial_config["dominant_resources"],NODES, initial_config)
 
-
+    #scaling function parameters for g7:
+    #scalingFunction=ScalingFunction(24.44144249,0.01405306,0, {"cpu": 2, "memory": 2}, alphabet['elements'],alphabet['costs'], initial_config["dominant_resources"],NODES, initial_config)
+    
     workers=_create_workers(alphabet['elements'], alphabet['costs'], alphabet['base'])
 
     # HARDCODED => make more generic by putting workers into an array
