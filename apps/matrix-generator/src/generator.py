@@ -1003,7 +1003,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         mono_constraint_violated=False
         #outlier=False
         positive_outlier=False
-        if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+        if not ignore_auto_scaler and len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
             evaluate=True
             tenant_nb=int(previous_tenants)
