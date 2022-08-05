@@ -26,28 +26,31 @@ plotOffLineData<-function(timings, cropLength, title, xl, yl, extend_y_lim=FALSE
 }
 
 L=10
-x=read.csv(file="timings/sql.csv", header= FALSE)  
+x=read.csv(file="timings/sql-g5-c2m2-mem_dominant.csv", header= FALSE)  
+#x=read.csv(file="timings/sql-g5-c6m4-mem_dominant.csv", header= FALSE)  
 #de completion time  van 1 tot 10 tenants
 y=unlist(x)
-title="Off-line data"
-xl="Number of tenants"
+title="Performance model 1.5 mill. rows"
+xl="Number of concurrent queries"
 #yl=paste("95th ", metric," of response latency (ms)", sep="");
-yl=paste("0.95 quantile", " of job completion time (s)", sep="");
+yl=paste("Maximum query response (s)", sep="");
 fitted=FALSE
 
 pch1 = c(9,19,18,2,25)
 lty1 = c(1,6,25,29,134)
 col1 = c(25,134,450,25,6)
 
-plotOffLineData(y, L, title, xl, yl, pc=pch1[1], lt=lty1[1], color=col1[1], extend_y_lim = TRUE, y_lim_addition = -400, scalefactor = 1) 
+plotOffLineData(y, L, title, xl, yl, pc=pch1[1], lt=lty1[1], color=col1[1], extend_y_lim = FALSE, y_lim_addition = -30, scalefactor = 1) 
 
 #Dit genereert de volgende plot (zie attachment)
 
 #Op basis van die plot gaan we op zoek naar een goede fitting functie in https://www.statforbiology.com/nonlinearregression/usefulequations
 
 #Dat geeft de volgende functie(x)= A * exp(B * x) + C
+# g5: functie(x)=A*X+BX2+C
 
 #Nu moeten we enkel nog goede waarden vinden voor A, B,C
+
 
 
 y=unname(y[1:L])
@@ -60,10 +63,18 @@ computeFunction <- function(y,z,frame) {
   c <- min(y)*0.5
   model.0 <- lm(log(y - c) ~ z, data=frame)
   start <- list(A=exp(coef(model.0)[1]), B=coef(model.0)[2], C=c)
-  f = fitModel(y ~ A * exp(B * z) + C, data = frame, start = start)  
+  #f = fitModel(y ~ A * exp(B * z) + C, data = frame, start = start)
+  f = fitModel(y ~ A * exp (B * z) * z, data = frame, start = start)
   return(f)
 }
 
+computeFunction <- function(y,z,frame) {
+  model.0 <- lm(log(y) ~ z, data=frame)
+  start <- list(A=exp(coef(model.0)[1]), B=coef(model.0)[2])
+  #f = fitModel(y ~ A * exp(B * z) + C, data = frame, start = start)
+  f = fitModel(y ~ A * exp (B * z), data = frame, start = start)
+  return(f)
+}
 
 
 z=(1:L)

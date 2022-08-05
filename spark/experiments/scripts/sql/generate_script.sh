@@ -58,13 +58,13 @@ then
 fi	
 
 list=()
-xqueries=`shuf -i 1-10 -n $nrOfTenants`
+xqueries=`shuf -i 1-$nrOfTenants -n $nrOfTenants`
 for x in `seq 1 $nrOfTenants`
 do
   stop=0
   while [ $stop -eq 0 ] 
   do
-    y=`shuf -i 1-10 -n 1`
+    y=`shuf -i 1-$nrOfTenants -n 1`
     stop=1
     for value in "${list[@]}";do
        if [ $value -eq $y ]

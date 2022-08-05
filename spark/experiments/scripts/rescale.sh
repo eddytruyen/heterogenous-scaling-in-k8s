@@ -8,7 +8,8 @@ workload=${6:-sql}
 csv_output=${7:-csv_output_file.csv}
 exit_program=${8:-0}
 fileName=values.json
-resourcePlannerURL=http://172.17.13.119:80
+resourcePlannerURL=http://172.17.13.119
+port=7878
 alphabetLength=$((4))
 
 function str_to_int {
@@ -19,10 +20,10 @@ start=0
 if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
 	echo previous_conf: $previous_conf 
-	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
 then
-	curl "$resourcePlannerURL/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
 	start=1	
 fi
 if [ $exit_program -eq 0 ]
@@ -72,8 +73,10 @@ for i in `seq $alphabetLength`
                         cpu_size=$((valueCpu))
                         memKeyName=worker$i.resources.requests.memory
                         valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2 | xargs)
-			if [ $valueMemory -lt $memory_size ]
+			echo Memory of worker $i is $valueMemory and number of replicas is $replicas
+			if [ $replicas -gt 0 ] && [ $valueMemory -lt $memory_size ]
 			then
+				echo Setting smallest memory size to $valueMemory
                         	memory_size=$valueMemory
 			fi
 			if [ ! $previous_conf == "no" ]  
@@ -81,7 +84,7 @@ for i in `seq $alphabetLength`
 			# && [ $nb_of_tenants -gt $previous_tenant_nb 
 			then	
 				echo "cpu size: $old_cpu_size -> $cpu_size"
-                                echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+                                echo "memory size: ${old_memory_size} -> ${valueMemory}Gi"
 				replace=false
 				if [ $cpu_size -ne $old_cpu_size ]
 				then	
@@ -89,17 +92,17 @@ for i in `seq $alphabetLength`
 					replace=true
 					sed -i "s/cpu: \"$old_cpu_size\"/cpu: \"$cpu_size\"/g" old_ss$i.yaml
 				fi
-				if [ ${memory_size}Gi != ${old_memory_size} ]
+				if [ ${valueMemory}Gi != ${old_memory_size} ]
                                 then
 					echo "Replacing memory"
 					replace=true
-                                        sed -i "s/memory: ${old_memory_size}/memory: ${memory_size}Gi/g" old_ss$i.yaml
+                                        sed -i "s/memory: ${old_memory_size}/memory: ${valueMemory}Gi/g" old_ss$i.yaml
                                 fi
 				if [ $replace = true ]
 				then
 					echo "Vertical scaling of worker$i"
 					echo "cpu size: $old_cpu_size -> $cpu_size"
-					echo "memory size: ${old_memory_size} -> ${memory_size}Gi"
+					echo "memory size: ${old_memory_size} -> ${valueMemory}Gi"
 					kubectl replace -f old_ss$i.yaml
 					kubectl delete pods -n $namespace -l set=worker$i
 				fi
@@ -117,7 +120,7 @@ then
 	fi
 fi
 
-echo "New memory size: " $memory_size
+echo "New memory size spark client: " $memory_size
 if [ ${memory_size}Gi != $old_memory_size_client ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml

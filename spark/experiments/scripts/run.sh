@@ -7,7 +7,8 @@ namespace=${4:-silver}
 workload=${5:-sql}
 release=${6:-silver-spark}
 lastTenantId=$((($nrofTenants - 1) + $startingTenantId))
-tenantGroup=2
+worker=${7:-3}
+tenantGroup=5
 #clientmode=`grep '\/\/deploy' header | wc -l` 
 rm timings.csv 
 for i in `seq $startingTenantId $lastTenantId`
@@ -23,7 +24,7 @@ do
   replicas=$i
   #fi
   echo "scaling to $replicas replicas..."
-  kubectl scale statefulset $release-worker --replicas=$replicas -n $namespace
+  kubectl scale statefulset $release-worker$worker --replicas=$replicas -n $namespace
   echo "calculating sleeptime for $replicas replicas to come up"
   sleeptimeFor1Replica=120
   if [ $i -eq $startingTenantId ] 

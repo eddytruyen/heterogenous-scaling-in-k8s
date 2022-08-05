@@ -18,7 +18,12 @@ class ScalingFunction:
 		self.CoefA = coef_a
 		self.CoefB = coef_b
 		self.CoefC = coef_c
-		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
+		#scaling function for g6
+		#self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x) + self.CoefC
+
+                #scaling function for g5:
+		self.eval  = lambda x: self.CoefA*math.exp(self.CoefB*x)
+
 		self.resources=resources
 		self.elements=elements
 		self.sizes=[]
@@ -85,11 +90,14 @@ class ScalingFunction:
 	def target(self,slo,tenants):
 		y=self.eval(tenants)
 		dict={}
+		print("Completion time: " + str(y)) 
 		for res in self.resources.keys():
 			if res in self.DominantResources:
 				dict[res]=int((tenants*self.resources[res]*y)/slo)
 			else:
 				dict[res]=math.ceil((tenants*math.log(self.resources[res],tenants+1)*y)/slo)
+		print("Targetted resources:" )
+		print(dict)
 		return dict
 
         # this function returns the worker config for which the last scaling did not yield a cost-effective result
