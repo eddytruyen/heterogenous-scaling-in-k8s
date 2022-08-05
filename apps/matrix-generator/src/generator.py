@@ -43,7 +43,7 @@ def print_results(adaptive_scaler,results):
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
-def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory):
+def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler):
 
         def get_next_exps(adaptive_scaler, rm, lst, conf, sampling_ratio, window,tenants):
                         next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base, adaptive_window.adapt_search_window({},window,tenants != 1))
@@ -710,6 +710,42 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             nonlocal adaptive_window
 
             print("Processing request for " + str(startTenants) + " tenants")
+            if USE_PERFORMANCE_MODEL and ignore_auto_scaler:
+                print("using curve-fitted scaling function to estimate configuration for tenants " + str(startTenants))
+                adaptive_scaler=rm.adaptive_scaler
+                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window,window_offset_for_scaling_function,total_cpu,total_memory)
+                start=lst.index(predictedConf)
+                if start >= window:
+                    conf_in_case_of_IndexError=lst[start-window]
+                    retry_wdw=window
+                else:
+                    conf_in_case_of_IndexError=lst[0]
+                    retry_wdw=window-start+1
+
+                next_conf=predictedConf
+                rm.reset()
+                if adaptive_scaler.ScalingUpPhase:
+                    adaptive_scaler.reset()
+                else:
+                    adaptive_scaler.initial_confs=[]
+                    adaptive_scaler.failed_results = []
+                    adaptive_scaler.failed_scaled_workers=[]
+                    adaptive_scaler.ScaledDown=False
+                    adaptive_scaler.StartScalingDown=True
+                    adaptive_scaler.tipped_over_confs = []
+                    adaptive_scaler.current_tipped_over_conf = None
+                    adaptive_scaler.only_failed_results=True
+                check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
+                if not rm.no_experiments_left():
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                else:
+                    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                    next_conf=lst[0]
+                    start=0
+                    check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=window)
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                return
             predictedConf=[]
             currentResult={}
             previousResult={}

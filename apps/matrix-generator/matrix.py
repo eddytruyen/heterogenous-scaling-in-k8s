@@ -19,6 +19,13 @@ def home():
     except:
         total_cpu=-1
         total_memory=-1
+    if total_cpu >= 0 and total_memory >= 0:
+        try:
+            ignore_auto_scaler = request.args.get('ignoreautoscaler')
+        except:
+            ignore_auto_scaler = 0
+    else:
+        ignore_auto_scaler = 0
      
     
 
@@ -34,7 +41,7 @@ def home():
         previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
     else:
         previous_conf_array=[]
-    generate_matrix(initial_config, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants,previous_conf_array, total_cpu, total_memory)
+    generate_matrix(initial_config, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants,previous_conf_array, total_cpu, total_memory, ignore_auto_scaler)
 
     config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
     print(config_data)
@@ -42,8 +49,8 @@ def home():
     return json.dumps(conf)
 
 
-def generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory):
+def generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler):
 
-	_generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory)
+	_generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler)
 
 #generate_matrix()
