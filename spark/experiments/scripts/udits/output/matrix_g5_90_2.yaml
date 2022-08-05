@@ -1,6 +1,6 @@
 silver:
   '1':
-    CompletionTime: '84'
+    CompletionTime: '62'
     SLAName: silver
     Successfull: 'true'
     best_score: n/a
@@ -12,10 +12,10 @@ silver:
     worker2.replicaCount: '0'
     worker2.resources.requests.cpu: '3'
     worker2.resources.requests.memory: '8'
-    worker3.replicaCount: '1'
+    worker3.replicaCount: '0'
     worker3.resources.requests.cpu: '2'
     worker3.resources.requests.memory: '4'
-    worker4.replicaCount: '0'
+    worker4.replicaCount: '2'
     worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
   '10':
@@ -136,9 +136,9 @@ silver:
     CompletionTime: '84'
     SLAName: silver
     Successfull: 'true'
-    best_score: '-0.05555555555555555'
+    best_score: n/a
     config: '0'
-    score: '-0.05555555555555555'
+    score: n/a
     worker1.replicaCount: '0'
     worker1.resources.requests.cpu: '4'
     worker1.resources.requests.memory: '12'
@@ -148,16 +148,16 @@ silver:
     worker3.replicaCount: '1'
     worker3.resources.requests.cpu: '2'
     worker3.resources.requests.memory: '4'
-    worker4.replicaCount: '0'
+    worker4.replicaCount: '1'
     worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
   '3':
-    CompletionTime: '87'
+    CompletionTime: '82'
     SLAName: silver
     Successfull: 'true'
-    best_score: '-0.08333333333333333'
+    best_score: n/a
     config: '0'
-    score: '-0.08333333333333333'
+    score: n/a
     worker1.replicaCount: '0'
     worker1.resources.requests.cpu: '4'
     worker1.resources.requests.memory: '12'
@@ -171,7 +171,7 @@ silver:
     worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
   '4':
-    CompletionTime: 1e-09
+    CompletionTime: '87'
     SLAName: silver
     Successfull: 'true'
     best_score: '-0.1111111111111111'
@@ -193,25 +193,6 @@ silver:
     CompletionTime: 1e-09
     SLAName: silver
     Successfull: 'true'
-    best_score: '-0.1111111111111111'
-    config: '0'
-    score: '-0.1111111111111111'
-    worker1.replicaCount: '0'
-    worker1.resources.requests.cpu: '4'
-    worker1.resources.requests.memory: '12'
-    worker2.replicaCount: '0'
-    worker2.resources.requests.cpu: '3'
-    worker2.resources.requests.memory: '8'
-    worker3.replicaCount: '2'
-    worker3.resources.requests.cpu: '2'
-    worker3.resources.requests.memory: '4'
-    worker4.replicaCount: '0'
-    worker4.resources.requests.cpu: '1'
-    worker4.resources.requests.memory: '2'
-  '6':
-    CompletionTime: 1e-09
-    SLAName: silver
-    Successfull: 'true'
     best_score: '-0.12962962962962962'
     config: '0'
     score: '-0.12962962962962962'
@@ -227,7 +208,7 @@ silver:
     worker4.replicaCount: '1'
     worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
-  '7':
+  '6':
     CompletionTime: 1e-09
     SLAName: silver
     Successfull: 'true'
@@ -240,10 +221,29 @@ silver:
     worker2.replicaCount: '0'
     worker2.resources.requests.cpu: '3'
     worker2.resources.requests.memory: '8'
-    worker3.replicaCount: '2'
+    worker3.replicaCount: '1'
     worker3.resources.requests.cpu: '2'
     worker3.resources.requests.memory: '4'
-    worker4.replicaCount: '1'
+    worker4.replicaCount: '3'
+    worker4.resources.requests.cpu: '1'
+    worker4.resources.requests.memory: '2'
+  '7':
+    CompletionTime: 1e-09
+    SLAName: silver
+    Successfull: 'true'
+    best_score: '-0.14814814814814814'
+    config: '0'
+    score: '-0.14814814814814814'
+    worker1.replicaCount: '1'
+    worker1.resources.requests.cpu: '4'
+    worker1.resources.requests.memory: '12'
+    worker2.replicaCount: '0'
+    worker2.resources.requests.cpu: '3'
+    worker2.resources.requests.memory: '8'
+    worker3.replicaCount: '0'
+    worker3.resources.requests.cpu: '2'
+    worker3.resources.requests.memory: '4'
+    worker4.replicaCount: '0'
     worker4.resources.requests.cpu: '1'
     worker4.resources.requests.memory: '2'
   '8':
