@@ -14,14 +14,14 @@ def home():
     previous_tenants = request.args.get('previoustenants')
     previous_conf = request.args.get('previousconf')
     try:
-        total_cpu = request.args.get('totalcpu')
-        total_memory=request.args.get('totalmemory')
+        total_cpu = int(request.args.get('totalcpu'))
+        total_memory=int(request.args.get('totalmemory'))
     except:
         total_cpu=-1
         total_memory=-1
     if total_cpu >= 0 and total_memory >= 0:
         try:
-            ignore_auto_scaler = request.args.get('ignoreautoscaler')
+            ignore_auto_scaler = int(request.args.get('ignoreautoscaler'))
         except:
             ignore_auto_scaler = 0
     else:
