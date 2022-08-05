@@ -27,7 +27,7 @@ plotOffLineData<-function(timings, cropLength, title, xl, yl, extend_y_lim=FALSE
 
 L=10
 x=read.csv(file="timings/sql-g5-c2m2-mem_dominant.csv", header= FALSE)  
-#x=read.csv(file="timings/sql-g5-c6m4-mem_dominant.csv", header= FALSE)  
+#x=read.csv(file="timings/sql-g5-c6m2-mem_dominant.csv", header= FALSE)  
 #de completion time  van 1 tot 10 tenants
 y=unlist(x)
 title="Performance model 1.5 mill. rows"
@@ -46,8 +46,9 @@ plotOffLineData(y, L, title, xl, yl, pc=pch1[1], lt=lty1[1], color=col1[1], exte
 
 #Op basis van die plot gaan we op zoek naar een goede fitting functie in https://www.statforbiology.com/nonlinearregression/usefulequations
 
-#Dat geeft de volgende functie(x)= A * exp(B * x) + C
-# g5: functie(x)=A*X+BX2+C
+#Dat geeft voor
+# g6: functie(x)= A * exp(B * x) + C
+# g5, g7: functie(x)=A*exp(B*X)
 
 #Nu moeten we enkel nog goede waarden vinden voor A, B,C
 
@@ -58,16 +59,16 @@ y=unname(y[1:L])
 z = (1:L)
 frame=data.frame(z,y)
 
-
+#g6
 computeFunction <- function(y,z,frame) {
   c <- min(y)*0.5
   model.0 <- lm(log(y - c) ~ z, data=frame)
   start <- list(A=exp(coef(model.0)[1]), B=coef(model.0)[2], C=c)
-  #f = fitModel(y ~ A * exp(B * z) + C, data = frame, start = start)
-  f = fitModel(y ~ A * exp (B * z) * z, data = frame, start = start)
+  f = fitModel(y ~ A * exp(B * z) + C, data = frame, start = start)
   return(f)
 }
 
+#g5,g7
 computeFunction <- function(y,z,frame) {
   model.0 <- lm(log(y) ~ z, data=frame)
   start <- list(A=exp(coef(model.0)[1]), B=coef(model.0)[2])
@@ -77,9 +78,13 @@ computeFunction <- function(y,z,frame) {
 }
 
 
+
+
 z=(1:L)
 f<-computeFunction(y,z,frame)
 coef(f)
-plotPoints(y~z)
+maxResponseTimeinSeconds=y
+nbOfConcurrentQueries=z
+plotPoints(maxResponseTimeinSeconds~nbOfConcurrentQueries)
 
 plotFun(f(z)~z, z.lim = range(1:L), add = TRUE, col="blue")
