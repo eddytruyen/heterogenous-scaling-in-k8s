@@ -11,6 +11,8 @@ fileName=values.json
 resourcePlannerURL=http://172.17.13.119
 port=7878
 alphabetLength=$((4))
+total_cpu=$9
+total_mem=${10}
 
 function str_to_int {
   echo $(( 0x$(echo -n "$1" | sha1sum | cut -d " " -f 1) % $2 ))
@@ -20,10 +22,14 @@ start=0
 if [ ! $previous_conf == "no" ] && [ $exit_program -eq 0 ]
 then
 	echo previous_conf: $previous_conf 
-	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
+	echo total_cpu: $total_cpu
+	echo total_mem: $total_mem
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf&totalcpu=$total_cpu&totalmemory=$total_mem" > $fileName
+	#curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&completiontime=$completion_time&previoustenants=$previous_tenant_nb&previousconf=$previous_conf" > $fileName
 elif [ $exit_program -eq 0 ]
 then
-	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
+	#curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants" > $fileName
+	curl "$resourcePlannerURL:$port/conf?namespace=$namespace&tenants=$nb_of_tenants&totalcpu=$total_cpu&totalmemory=$total_mem" > $fileName
 	start=1	
 fi
 if [ $exit_program -eq 0 ]
@@ -59,8 +65,10 @@ for i in `seq $alphabetLength`
 		value=$(grep 'cpu: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"')
 		old_cpu_size=$((value))
 		#get cpu size 
-		old_memory_size=$(grep 'memory: .*Gi' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"' | xargs)
+		old_memory_size=$(grep 'memory: .*' old_ss$i.yaml | head -1 | cut -d ":" -f2 | tr -d '"' | xargs)
 		old_resource_size=${old_resource_size}c${old_cpu_size}m${old_memory_size}_
+		echo oldCPUsize $old_cpu_size
+		echo oldMemsize $old_memorysize
 		#get memory of ss 	
                 keyName=worker$i.replicaCount
                 value=$(grep $keyName $fileName | cut -d ":" -f2)
@@ -92,7 +100,7 @@ for i in `seq $alphabetLength`
 					replace=true
 					sed -i "s/cpu: \"$old_cpu_size\"/cpu: \"$cpu_size\"/g" old_ss$i.yaml
 				fi
-				if [ ${valueMemory}Gi != ${old_memory_size} ]
+				if [ ${valueMemory} != ${old_memory_size} ]
                                 then
 					echo "Replacing memory"
 					replace=true
