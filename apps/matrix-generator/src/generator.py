@@ -482,7 +482,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 #flag_workers(adaptive_scaler.workers,next_conf)
                 new_window=window
-                start=lst.index(next_conf)
+                start=lst.index(next_conf) if next_conf in lst else 0
                 rm.reset()
                 check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True)
                 next_result=rm.get_next_sample()
@@ -864,7 +864,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 history=runtime_manager[tenant_nb].get_results()
             else:
             #We start from tenants+2 due prevent non-linear scaling effects
-                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
+                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()],default=0)+1):
                     if k in runtime_manager.keys():
                         history+=runtime_manager[k].get_results()
             return history
@@ -1052,7 +1052,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #    next_tenant_nb_processed=False
         #if not outlier:
         start=0
-        if next_conf:
+        if next_conf and next_conf in lst:
             start=lst.index(next_conf)
         print("Starting at: " + str(start))
         nr_of_experiments=1
@@ -1077,7 +1077,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     rm.add_tipped_over_result({"workers": [w.clone() for w in tmp_adaptive_scaler.workers], "results": tipped_over_intermediate_confs})
             #if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
             #        remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
-            for i in range(1, max([int(t) for t in d[sla['name']].keys()])+1):
+            for i in range(1, max([int(t) for t in d[sla['name']].keys()],default=0)+1):
                                 if i != tenant_nb and str(i) in d[sla['name']].keys():
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(tmp_rm, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
