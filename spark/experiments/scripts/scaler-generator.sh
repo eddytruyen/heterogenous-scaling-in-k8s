@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tenantGroup=5
+tenantGroup=6
 startingTenantId=$1
 lastTenantId=$2
 namespace=$3

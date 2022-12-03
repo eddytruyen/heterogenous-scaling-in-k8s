@@ -18,15 +18,15 @@ do
 	rm -r Results/exp3/silver*
 	rm  Results/matrix.yaml
 	rm Results/result-matrix.yaml
-	#ratio=`jq -n 1/$run`
-	#sed -i "s/searchWindow: .*/searchWindow: $run/g" conf/matrix-spark.yaml
-	#sed -i "s/sampling_ratio: .*/sampling_ratio: $ratio/g" conf/matrix-spark.yaml
+	ratio=`jq -n 1/$run`
+	sed -i "s/searchWindow: .*/searchWindow: $run/g" conf/matrix-spark.yaml
+	sed -i "s/sampling_ratio: .*/sampling_ratio: $ratio/g" conf/matrix-spark.yaml
 	python server.py conf/matrix-spark.yaml &
 	sleep 3
 	cd $home
 	python generator.py start -f $workload_profile
-	cp csv_output_file.csv $output_dir/csv_output_file_${group}_${slo}_${run}.csv
-	cp ../../../apps/matrix-generator/Results/matrix.yaml $output_dir/matrix_${group}_${slo}_${run}.yaml
+	cp csv_output_file.csv $output_dir/u_pf_csv_output_file_${group}_${slo}_${run}.csv
+	cp ../../../apps/matrix-generator/Results/matrix.yaml $output_dir/pf_matrix_${group}_${slo}_${run}.yaml
 	kill %
 done
 cd $current_dir
