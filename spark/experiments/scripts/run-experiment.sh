@@ -1,6 +1,6 @@
-slo=90
+slo=150
 group=g5
-runs=5
+runs=3
 home=/home/ubuntu/heterogenous-scaling-in-k8s/spark/experiments/scripts
 current_dir=`pwd`
 workload_profile=$home/udits/on_off.yaml
@@ -11,7 +11,7 @@ then
 fi
 cd $home/../../../apps/matrix-generator/
 sed -i "s/completionTime: .*/completionTime: $slo/g" conf/matrix-spark.yaml
-for run in `seq 3 $runs`
+for run in `seq 1 $runs`
 do
 	echo Running run $run for group $group, slo $slo
 	cd $home/../../../apps/matrix-generator/
