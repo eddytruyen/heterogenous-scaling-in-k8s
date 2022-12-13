@@ -805,8 +805,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     print("Testing from the smallest possible conf")
                                 tmp_window=min(window, lst.index(found_conf)-start)
                             else:
+                               tmp_window=1
                                print("Using currentResult as basis")
                         else:
+                            tmp_window=1
                             print("Using currentResult as basis")
                         check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, tmp_window, startTenants, sampling_ratio, window_offset_for_scaling_function)
                         if (found_conf == lst[start]) and found_conf in rm.get_left_over_configs():
@@ -1054,6 +1056,8 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         start=0
         if next_conf and next_conf in lst:
             start=lst.index(next_conf)
+        else:
+            print("NEXT_CONF IS NOT IN LIST")
         print("Starting at: " + str(start))
         nr_of_experiments=1
         while tenant_nb <= maxTenants and evaluate:
