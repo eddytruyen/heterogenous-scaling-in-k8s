@@ -1,0 +1,112 @@
+nbOfIterations: 1
+nbOfSamplesPerIteration: 1
+charts:
+  - name: spark
+    chartdir: /home/ubuntu/go/src/k8-resource-optimizer/examples/charts/bitnami-heterogeneous/spark
+slas:
+  - name: silver
+    chartName: spark
+    slos: 
+      workload: sql
+      benchPath: /mnt/nfs-disk-2/spark-bench
+      tenantGroup: "0"
+      completionTime: 15
+    nbOfTenants: 15
+    parameters:
+      - name: worker1.replicaCount
+        searchspace:
+          min: 0
+          max: 3
+          granularity: 1
+        prefix: 
+        suffix:
+      - name: worker1.resources.requests.cpu
+        resource: cpu
+        searchspace:
+          min: 5
+          max: 6
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker1.resources.requests.memory
+        resource: memory
+        searchspace:
+          min: 4
+          max: 4
+          granularity: 1
+        prefix:
+        suffix: Gi 
+      - name: worker2.replicaCount
+        searchspace:
+          min: 0
+          max: 3
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker2.resources.requests.cpu
+        resource: cpu
+        searchspace:
+          min: 3
+          max: 4
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker2.resources.requests.memory
+        resource: memory
+        searchspace:
+          min: 3
+          max: 3
+          granularity: 1
+        prefix:
+        suffix: Gi
+      - name: worker3.replicaCount
+        searchspace:
+          min: 0
+          max: 3
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker3.resources.requests.cpu
+        resource: cpu
+        searchspace:
+          min: 1
+          max: 2
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker3.resources.requests.memory
+        resource: memory
+        searchspace:
+          min: 2
+          max: 2
+          granularity: 1
+        prefix:
+        suffix: Gi
+      - name: worker4.replicaCount
+        searchspace:
+          min: 0
+          max: 3
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker4.resources.requests.cpu
+        resource: cpu
+        searchspace:
+          min: 1
+          max: 1
+          granularity: 1
+        prefix:
+        suffix:
+      - name: worker4.resources.requests.memory
+        resource: memory
+        searchspace:
+          min: 1
+          max: 2
+          granularity: 1
+        prefix:
+        suffix: Gi
+namespaceStrategy: NSPSLA
+optimizer: bestconfig
+utilFunc: sparkbenchalphabet
+outputDir: udits/spark-traces
+# prevResultsPath: datasets/thesisapp-4min/results.json

@@ -1,0 +1,311 @@
+spark-bench = {
+  spark-submit-parallel = false
+  spark-submit-config = [{
+    spark-args = {
+      master = "spark://Release-master-svc:7077"
+      executor-memory = "2G"
+      driver-memory = "14G"
+      //deploy-mode = "cluster"
+      //num-executors = 2
+    }
+    conf = {
+     //spark.memory.fraction = 0.75
+     spark.memory.storageFraction = 0.90
+     spark.executor.memoryOverhead = "0"
+     spark.driver.memoryOverhead = 1024 
+     //spark.sql.shuffle.partitions = 500
+     //spark.default.parallelism = 500
+      //spark.executor.extraJavaOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      //spark.driver.extraJavaOptions = "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      //spark.dynamicAllocation.enabled = "true"
+    }
+    suites-parallel = true
+    workload-suites = [
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-1.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-1.csv"]
+            query = ["select c0, c6 from input where c0 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-1.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-2.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-2.csv"]
+            query = ["select c0, c7, c6 from input where c0 < -0.9 and c7 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-2.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-3.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-3.csv"]
+            query = ["select c0, c7, c8, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-3.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-4.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-4.csv"]
+            query = ["select c0, c7, c8, c9, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-4.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-5.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-5.csv"]
+            query = ["select c0, c7, c8, c9, c10, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-5.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-6.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-6.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-6.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-7.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-7.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-7.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-8.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-8.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-8.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-9.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-9.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-9.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-10.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-10.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-10.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-11.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-11.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9 and c16 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-11.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-12.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-12.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9 and c16 < -0.9 and c17 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-12.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-13.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-13.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9 and c16 < -0.9 and c17 < -0.9 and c18 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-13.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-14.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-14.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9 and c16 < -0.9 and c17 < -0.9 and c18 < -0.9 and c19 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-14.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     },
+     {
+        descr = "Run two different SQL queries over the dataset in two different formats"
+        benchmark-output = "file:///opt/bitnami/spark/spark_data/spark-bench/results-sql-g0-t-15.csv"
+        parallel = false
+        repeat = 1
+        save-mode = "append"
+        workloads = [
+          {
+            name = "sql"
+            input = ["file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g0-15.csv"]
+            query = ["select c0, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c6 from input where c0 < -0.9 and c7 < -0.9 and c8 < -0.9 and c9 < -0.9 and c10 < -0.9 and c11 < -0.9 and c12 < -0.9 and c13 < -0.9 and c14 < -0.9 and c15 < -0.9 and c16 < -0.9 and c17 < -0.9 and c18 < -0.9 and c19 < -0.9 and c20 < -0.9"]
+            cache = false
+            //partitions = p
+            //output = "file:///opt/bitnami/spark/spark_data/spark-bench/output-sql-g0-t-15.parquet"
+            save-mode = "overwrite"
+          }
+        ]
+
+     }
+   ]
+  }]
+}
