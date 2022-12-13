@@ -1,0 +1,8 @@
+config #	worker1.replicaCount	worker1.resources.requests.cpu	worker1.resources.requests.memory	worker2.replicaCount	worker2.resources.requests.cpu	worker2.resources.requests.memory	worker3.replicaCount	worker3.resources.requests.cpu	worker3.resources.requests.memory	worker4.replicaCount	worker4.resources.requests.cpu	worker4.resources.requests.memory	score	best score	SLAName	CompletionTime	Successfull	
+0	0	6	4	0	4	2	1	3	2	0	2	2	-1.9968366241733335	-1	silver	299.525493626	true	
+1	0	6	4	0	4	2	1	3	2	3	2	2	-0.22666666666666666	-0.22666666666666666	silver	141.901402902	true	
+2	0	6	4	0	4	2	1	3	2	0	2	2	-1.9968366241733335	-0.22666666666666666	silver	299.525493626	true	
+3	0	6	4	0	4	2	1	3	2	0	2	2	-1.9968366241733335	-0.22666666666666666	silver	299.525493626	true	
+
+
+
