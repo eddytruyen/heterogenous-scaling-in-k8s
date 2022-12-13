@@ -18,7 +18,7 @@ NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
 LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
-USE_PERFORMANCE_MODEL=True
+USE_PERFORMANCE_MODEL=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]

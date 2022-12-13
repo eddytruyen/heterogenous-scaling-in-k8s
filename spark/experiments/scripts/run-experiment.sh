@@ -1,7 +1,7 @@
-slo=50
-group=g6
-runs=1
-home=/home/udits/githubrepos/heterogenous-scaling-in-k8s/spark/experiments/scripts
+slo=150
+group=g5
+runs=3
+home=/home/ubuntu/heterogenous-scaling-in-k8s/spark/experiments/scripts
 current_dir=`pwd`
 workload_profile=$home/udits/on_off.yaml
 output_dir=$home/udits/output
