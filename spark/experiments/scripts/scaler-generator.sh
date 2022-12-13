@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tenantGroup=5
+tenantGroup=6
 startingTenantId=$1
 lastTenantId=$2
 namespace=$3
@@ -8,6 +8,7 @@ new_csv_file=${4:-2}
 workload=${5:-sql}
 executorMemory=${6:-0}
 csv_output=csv_output_file.csv
+matrixFile=/home/udits/githubrepos/heterogenous-scaling-in-k8s/apps/matrix-generator/conf/matrix-spark.yaml
 
 if [ $lastTenantId -lt $startingTenantId ]
 then
@@ -23,18 +24,38 @@ if [ $new_csv_file -eq 1 ]
 then
 	echo "workload,namespace,nb_of_tenants,config,resource_size,completion_time" > $csv_output
 fi
+
 for i in `seq $startingTenantId $increment $lastTenantId`
 do
   #nrOfPartitions=$(($i * 2))
+  echo loops... $startingTenantId $increment $lastTenantId
   nrOfPartitions=0
   #2 cores per tenant
   if [ $i -eq $startingTenantId ] && [ $new_csv_file -eq 1 ]
-     then 
-         ./rescale.sh $namespace $i
+     then
+	./$workload/generate_script.sh $i $executorMemory $nrOfPartitions $tenantGroup "output.conf"
+        sudo cp ./$workload/output.conf data/output.conf
+        sudo cp $matrixFile data/matrix-spark.yaml
+        # get data dimensions & query complexity from output.conf
+        # consult performance model & receive output as totalCPU totalMEMORY
+        # 
+        # rescale namespace tenantnb slo previous_tenant previous_confs workload csv exit_program totalCPU totalMEMORY
+        period=`cat period`
+        previous_conf=`cat new_previous_conf`
+        previous_tenants=`cat previous_tenants`
+	echo prediction...
+        /home/udits/sw/anaconda3/envs/scale/bin/python src/predict.py $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
+
+        # ./rescale.sh $namespace $i $total_cpu $total_mem
+
+        #sudo rm /data/output.conf
+        #sudo rm /data/matrix-spark.yaml
+#         ./rescale.sh $namespace $i
      else
 	 period=`cat period`
 	 previous_conf=`cat new_previous_conf`
 	 previous_tenants=`cat previous_tenants`
+	 #/home/udits/sw/anaconda3/envs/scale/bin/python src/predict.py $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
 	 ./rescale.sh $namespace $i $period $previous_tenants $previous_conf $workload $csv_output
   fi
   echo Waiting for workers to become ready

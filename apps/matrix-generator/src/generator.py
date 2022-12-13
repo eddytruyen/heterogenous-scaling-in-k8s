@@ -18,7 +18,7 @@ NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
 LOG_FILTERING=False
 TEST_CONFIG_CODE=7898.89695959
-USE_PERFORMANCE_MODEL=True
+USE_PERFORMANCE_MODEL=False
 
 def create_workers(elements, costs, base):
     resources=[v['size'] for v in elements]
@@ -43,7 +43,7 @@ def print_results(adaptive_scaler,results):
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
-def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf):
+def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler):
 
         def get_next_exps(adaptive_scaler, rm, lst, conf, sampling_ratio, window,tenants):
                         next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base, adaptive_window.adapt_search_window({},window,tenants != 1))
@@ -482,7 +482,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 next_conf=get_conf(adaptive_scaler.workers, result)
                 #flag_workers(adaptive_scaler.workers,next_conf)
                 new_window=window
-                start=lst.index(next_conf)
+                start=lst.index(next_conf) if next_conf in lst else 0
                 rm.reset()
                 check_and_get_next_exps(adaptive_scaler,rm,lst,previous_conf,start,1,tenant_nb, sampling_ratio, window_offset_for_scaling_function, filter=True)
                 next_result=rm.get_next_sample()
@@ -710,6 +710,42 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             nonlocal adaptive_window
 
             print("Processing request for " + str(startTenants) + " tenants")
+            if USE_PERFORMANCE_MODEL and ignore_auto_scaler:
+                print("using curve-fitted scaling function to estimate configuration for tenants " + str(startTenants))
+                adaptive_scaler=rm.adaptive_scaler
+                lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window,window_offset_for_scaling_function,total_cpu,total_memory)
+                start=lst.index(predictedConf)
+                if start >= window:
+                    conf_in_case_of_IndexError=lst[start-window]
+                    retry_wdw=window
+                else:
+                    conf_in_case_of_IndexError=lst[0]
+                    retry_wdw=window-start+1
+
+                next_conf=predictedConf
+                rm.reset()
+                if adaptive_scaler.ScalingUpPhase:
+                    adaptive_scaler.reset()
+                else:
+                    adaptive_scaler.initial_confs=[]
+                    adaptive_scaler.failed_results = []
+                    adaptive_scaler.failed_scaled_workers=[]
+                    adaptive_scaler.ScaledDown=False
+                    adaptive_scaler.StartScalingDown=True
+                    adaptive_scaler.tipped_over_confs = []
+                    adaptive_scaler.current_tipped_over_conf = None
+                    adaptive_scaler.only_failed_results=True
+                check_and_get_next_exps(adaptive_scaler,rm,lst,conf_in_case_of_IndexError, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=retry_wdw)
+                if not rm.no_experiments_left():
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                else:
+                    lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
+                    next_conf=lst[0]
+                    start=0
+                    check_and_get_next_exps(adaptive_scaler,rm,lst,next_conf, start, window, startTenants, sampling_ratio, window_offset_for_scaling_function, retry=True, retry_window=window)
+                    d[sla['name']][str(startTenants)]=rm.get_next_sample()
+                return
             predictedConf=[]
             currentResult={}
             previousResult={}
@@ -769,8 +805,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                     print("Testing from the smallest possible conf")
                                 tmp_window=min(window, lst.index(found_conf)-start)
                             else:
+                               tmp_window=1
                                print("Using currentResult as basis")
                         else:
+                            tmp_window=1
                             print("Using currentResult as basis")
                         check_and_get_next_exps(adaptive_scaler,rm,lst,found_conf, start, tmp_window, startTenants, sampling_ratio, window_offset_for_scaling_function)
                         if (found_conf == lst[start]) and found_conf in rm.get_left_over_configs():
@@ -794,7 +832,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 print("using curve-fitted scaling function to estimate configuration for tenants " + str(startTenants))
                 adaptive_scaler=rm.adaptive_scaler
                 lst=rm.set_sorted_combinations(_sort(adaptive_scaler.workers,base))
-                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window,window_offset_for_scaling_function)
+                predictedConf=get_conf_for_start_tenant(slo,startTenants,adaptive_scaler,lst,window,window_offset_for_scaling_function,total_cpu,total_memory)
                 start=lst.index(predictedConf)
                 if start >= window:
                     conf_in_case_of_IndexError=lst[start-window]
@@ -828,7 +866,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 history=runtime_manager[tenant_nb].get_results()
             else:
             #We start from tenants+2 due prevent non-linear scaling effects
-                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()])+1):
+                for k in range(tenant_nb+skip_tenants, max([int(t) for t in d[sla['name']].keys()],default=0)+1):
                     if k in runtime_manager.keys():
                         history+=runtime_manager[k].get_results()
             return history
@@ -967,7 +1005,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         mono_constraint_violated=False
         #outlier=False
         positive_outlier=False
-        if len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
+        if not ignore_auto_scaler and len(previous_conf)==len(alphabet['elements']) and int(previous_tenants) > 0 and float(completion_time) > 0:
             #if there is a performance metric for the lastly completed set of jobs, we will evaluate it and update the matrix accordingly
             evaluate=True
             tenant_nb=int(previous_tenants)
@@ -1016,8 +1054,10 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         #    next_tenant_nb_processed=False
         #if not outlier:
         start=0
-        if next_conf:
+        if next_conf and next_conf in lst:
             start=lst.index(next_conf)
+        else:
+            print("NEXT_CONF IS NOT IN LIST")
         print("Starting at: " + str(start))
         nr_of_experiments=1
         while tenant_nb <= maxTenants and evaluate:
@@ -1041,7 +1081,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                     rm.add_tipped_over_result({"workers": [w.clone() for w in tmp_adaptive_scaler.workers], "results": tipped_over_intermediate_confs})
             #if (intermediate_state==NO_RESULT or intermediate_state==NO_COST_EFFECTIVE_RESULT) and not (intermediate_states and intermediate_states.pop(0) == UNDO_SCALE_ACTION):
             #        remove_failed_confs(runtime_manager, tenant_nb, lst, tmp_adaptive_scaler.workers, rm, results, slo, get_conf(tmp_adaptive_scaler.workers, intermediate_result), start, adaptive_window.get_current_window(),False,[], scaling_up_threshold, sampling_ratio, intermediate_remove=True, careful_scaling=adaptive_scaler.careful_scaling)
-            for i in range(1, max([int(t) for t in d[sla['name']].keys()])+1):
+            for i in range(1, max([int(t) for t in d[sla['name']].keys()],default=0)+1):
                                 if i != tenant_nb and str(i) in d[sla['name']].keys():
                                     tmp_rm=get_rm_for_closest_tenant_nb(i)
                                     tmp_adaptive_scaler2=get_adaptive_scaler_for_tenantnb_and_conf(tmp_rm, get_adaptive_scaler_for_closest_tenant_nb(i), d[sla['name']], i, get_conf(adaptive_scaler.workers, d[sla['name']][str(i)]),slo)
@@ -1488,25 +1528,33 @@ def create_result(workers, completion_time, conf, sla_name, successfull='true'):
 
 
 
-def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, window, window_offset_for_scaling_function):
+def get_conf_for_start_tenant(slo, tenant_nb, adaptive_scaler, combinations, window, window_offset_for_scaling_function,total_cpu, total_memory):
        if len(combinations) == 0:
            return []
-       target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
-       total_cost=0
-       for i in target.keys():
-           total_cost+=target[i]
-       print("total_cost = " + str(total_cost))
+       if total_cpu == -1 or total_memory == -1:
+           target=adaptive_scaler.ScalingFunction.target(slo, tenant_nb)
+           total_cost=0
+           for i in target.keys():
+               total_cost+=target[i]
+           print("total_cost = " + str(total_cost))
+       else:
+           target={}
+           target['cpu']=total_cpu
+           target['memory']=total_memory
        index=0
        conf=combinations[index]
        while index < len(combinations)-1 and (resource_cost(adaptive_scaler.workers, conf, False, 'cpu') <  target['cpu'] or resource_cost(adaptive_scaler.workers, conf, False, 'memory') <  target['memory']):
            index+=1
            conf=combinations[index]
-       if index < len(combinations):
+       if (resource_cost(adaptive_scaler.workers, conf, False, 'cpu') >=  target['cpu'] and resource_cost(adaptive_scaler.workers, conf, False, 'memory') >=  target['memory']) :
            print("Selected conf:")
            print(conf)
-           solution_index=max(0,combinations.index(conf)+int(window*window_offset_for_scaling_function))
-           print("Going back to index " + str(solution_index))
-           return combinations[solution_index]
+           if total_cpu == -1 or total_memory == -1:
+               solution_index=max(0,combinations.index(conf)+int(window*window_offset_for_scaling_function))
+               print("Going back to index " + str(solution_index))
+               return combinations[solution_index]
+           else:
+               return conf
        else:
            return []
 
