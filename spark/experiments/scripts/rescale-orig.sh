@@ -104,7 +104,7 @@ for i in `seq $alphabetLength`
 					echo "cpu size: $old_cpu_size -> $cpu_size"
 					echo "memory size: ${old_memory_size} -> ${valueMemory}Gi"
 					kubectl replace -f old_ss$i.yaml
-					kubectl delete pods -n $namespace -l set=worker$i
+					kubectl delete pods -n $namespace -l set=worker$i --force
 				fi
 				#rm old_ss.yaml
 			fi
@@ -127,7 +127,7 @@ then
 	kubectl get statefulset spark-client -n $namespace -o yaml > ss_client.yaml
 	sed "s/memory: .*Gi/memory: ${memory_size}Gi/g" ss_client.yaml > tmp.yaml
 	kubectl replace -f tmp.yaml -n $namespace
-	kubectl wait --for=delete  pod/spark-client-0 -n $namespace --timeout=120s
+	kubectl delete pod spark-client-0 -n $namespace --force
 	kubectl wait --for=condition=Ready  pod/spark-client-0 -n $namespace  --timeout=120s
 	rm ss_client.yaml
 	rm tmp.yaml
