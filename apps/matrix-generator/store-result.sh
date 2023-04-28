@@ -1,3 +1,4 @@
+#!/bin/sh
 #$1 directory exp
 #$2 namespace/sla name
 
@@ -22,7 +23,9 @@ cd $x
 echo "Storing aggregated results.json"
 mv Results/$1/$2/results3.json results.json
 echo "Moving the output of the matrix-generator to /tmp/matrix-generator-results"
-if [ ! -d /tmp/matrix-generator-results ] 
+if [ ! -d /tmp/matrix-generator-results ]
+then	
 	mkdir /tmp/matrix-generator-results
+fi
 rm -r /tmp/matrix-generator-results/*
 mv Results/$1/$2/* /tmp/matrix-generator-results

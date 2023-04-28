@@ -494,7 +494,7 @@ def filter_samples(sorted_combinations, adaptive_scaler, start, window, previous
                                 print("removed")
                                 sorted_combinations.remove(result_conf)
                                 sorted_combinations.insert(start+new_window+el-1,result_conf)
-                                new_window-=-1
+                                new_window-=1
                         else:
                                 print("not removed")
                 if new_window == 0:
