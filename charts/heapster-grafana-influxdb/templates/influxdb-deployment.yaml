@@ -16,12 +16,5 @@ spec:
       containers:
       - name: influxdb
         image: kubernets/heapster-influxdb-amd64
-        volumeMounts:
-        - mountPath: /data
-          name: influxdb-storage
-      volumes:
-      - name: influxdb-storage
-        hostPath:
-          path: /influx-db/data
       nodeSelector:
-        monitoringNode: "yes"
+        monitoringNode: "grafana-node"

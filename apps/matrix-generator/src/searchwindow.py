@@ -413,16 +413,16 @@ class AdaptiveScaler:
                                         return False
                                 return True
                 
-		def worker_is_notflagged_testable_and_scaleable(worker,conf):
+		def worker_is_testable_and_scaleable(worker,conf):
 		       #if not (worker.isFlagged() and not self.opt_in_for_restart) and is_testable(worker,conf) and is_worker_scaleable(worker):
                        if is_testable(worker,conf) and is_worker_scaleable(worker):
                                 return True
                        else:
                                 return False
 
-		def workers_are_notflagged_testable_and_scaleable(conf):
+		def workers_are_testable_and_scaleable(conf):
 			for w in self.workers:
-				if worker_is_notflagged_testable_and_scaleable(w,conf):
+				if worker_is_testable_and_scaleable(w,conf):
 					print("Worker " + str(w.worker_id) + " is still scaleable")
 					return True
 			return False
@@ -470,7 +470,7 @@ class AdaptiveScaler:
 		scaling=True if diff >= 0 else False
 		while diff >= 0 and (worker_index <= L) and not is_scaled():
 			wi=L-worker_index
-			if worker_is_notflagged_testable_and_scaleable(self.workers[wi],opt_conf):
+			if worker_is_testable_and_scaleable(self.workers[wi],opt_conf):
 				if not self.workers[wi].worker_id in [fs.worker_id for fs in self.FailedScalings]:
 					scale_worker(new_workers, wi, 1)
 					diff = difference(generator.resource_cost(self.workers, opt_conf), absolute_totalcost)
@@ -488,7 +488,7 @@ class AdaptiveScaler:
 				print(w.resources)
 			states+=[RETRY_WITH_ANOTHER_WORKER_CONFIGURATION]
 		else:
-			if scale_down and recursive_scale_down and scaling and workers_are_notflagged_testable_and_scaleable(opt_conf):
+			if scale_down and recursive_scale_down and scaling and workers_are_testable_and_scaleable(opt_conf):
 				self.FailedScalings=[]
 				self.redo_scale_action(slo)
 				#self.initial_confs=[]
