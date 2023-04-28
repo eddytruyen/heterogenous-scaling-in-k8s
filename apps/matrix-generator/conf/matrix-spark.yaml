@@ -8,8 +8,8 @@ slas:
     slos: 
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
-      tenantGroup: "2"
-      completionTime: 400
+      tenantGroup: "7"
+      completionTime: 35
       #jobsize: 10
       #throughput: 0.5
     maxTenants: 10
@@ -19,16 +19,16 @@ slas:
       base: 4
       elements:
         - size:
-            cpu: 6
+            cpu: 4
+            memory: 12
+        - size:
+            cpu: 3
+            memory: 8
+        - size: 
+            cpu: 2
             memory: 4
         - size:
-            cpu: 4
-            memory: 2
-        - size: 
-            cpu: 3
-            memory: 2
-        - size:
-            cpu: 2
+            cpu: 1
             memory: 2
       costs:
         -  cpu: 1
@@ -41,18 +41,18 @@ slas:
            memory: 1      
 utilFunc: sparkbenchalphabet
 output: Results/exp3
-previous_results: dataset/results250.json
+previous_results: 
 sampling_ratio: 0.75
-minimum_shared_replicas: 0.25
-maximum_transition_cost: 1
+minimum_shared_replicas: 0
+maximum_transition_cost: 100
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
   cpu: 0.0
   memory: 0.0
 minimum_resources:
   cpu: 1 
-  memory: 2
-scaling_down_threshold: 1.1
-scaling_up_threshold: 1.20
+  memory: 1
+scaling_down_threshold: 1.15
+scaling_up_threshold: 1.15
 opt_in_for_restart: False
 careful_scaling: True

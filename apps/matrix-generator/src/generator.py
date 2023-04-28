@@ -206,7 +206,8 @@ def generate_matrix(initial_conf):
 		window=alphabet['searchWindow']
 		adaptive_window=AdaptiveWindow(window)
 		base=alphabet['base']
-		scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES, initial_conf)
+		#scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES, initial_conf)
+		scalingFunction=ScalingFunction(24.44144249,0.01405306,0, {"cpu": 2, "memory": 2}, alphabet['costs'], ["memory"], NODES, initial_conf)
 		workers=create_workers(alphabet['elements'], alphabet['costs'], base)
                 #workers=[WorkerConf(worker_id=i+1, cpu=v['size']['cpu'], memory=v['size']['memory'], min_replicas=0,max_replicas=alphabet['base']-1) for i,v in enumerate(alphabet['elements'])]
 		# HARDCODED => make more generic by putting workers into an array
@@ -576,7 +577,7 @@ def generate_matrix2(initial_conf):
                 window=alphabet['searchWindow']
                 adaptive_window=AdaptiveWindow(window)
                 base=alphabet['base']
-                scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["cpu"],NODES, initial_conf)
+                scalingFunction=ScalingFunction(667.1840993,-0.8232555,136.4046126, {"cpu": 2, "memory": 2}, alphabet['costs'], ["memory"],NODES, initial_conf)
                 workers=create_workers(alphabet['elements'], alphabet['costs'], base)
                 for w in workers:
                         print(w.resources)
