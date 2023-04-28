@@ -12,7 +12,7 @@ slas:
       completionTime: 35
       #jobsize: 10
       #throughput: 0.5
-    maxTenants: 10
+    maxTenants: 15
     startTenant: 1
     alphabet:
       searchWindow: 10
@@ -41,7 +41,7 @@ slas:
            memory: 1      
 utilFunc: sparkbenchalphabet
 output: Results/exp3
-previous_results: 
+previous_results: dataset/results7.json 
 sampling_ratio: 0.75
 minimum_shared_replicas: 0
 maximum_transition_cost: 100
