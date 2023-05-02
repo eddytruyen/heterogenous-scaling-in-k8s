@@ -1,6 +1,6 @@
 #!/bin/bash
 namespace=$1
-valuesFile="/tmp/k8-resource-optimizer/charts/silver-spark/values.yaml"
+valuesFile="/tmp/k8-resource-optimizer/charts/$1-spark/values.yaml"
 fileName="/tmp/values.yaml"
 
 cp $valuesFile $fileName
@@ -17,27 +17,25 @@ echo "Old memory size: " $old_memory_size
 memory_size=0
 for i in `seq 4`
         do
-                keyName1=worker$i
-		keyName2=replicaCount
-		value=$(yq -r ".${keyName1}.${keyName2}" $fileName) 
-                replicas=$((value))
+                keyName=worker$i.replicaCount
+		value=$(grep $keyName $fileName | cut -d ":" -f2)
+		replicas=$((value))
                 if [ $replicas -gt 0 ]
                 then
                         #cpuKeyName=worker$i.resources.requests.cpu
                         #valueCpu=$(grep $cpuKeyName $fileName | cut -d ":" -f2)
                         #cpu_size=$((valueCpu))
-                        memKeyName=worker$i
-                        valueMemory=$(yq -r ".${memKeyName}.resources.requests.memory" $fileName)
-                        memory_size=${valueMemory}
-			echo $memory_size
+			memKeyName=worker$i.resources.requests.memory
+                        valueMemory=$(grep $memKeyName $fileName | cut -d ":" -f2)
+                        memory_size=$valueMemory
                 fi
         done
 echo "New memory size: " $memory_size
-if [ ! ${memory_size} == $old_memory_size ]
+if [ ! ${memory_size}Gi == $old_memory_size ]
 then
 	#sed "s/cpu: 2/cpu: $valueCpu/g" spark-client/spark-client.yaml | sed "s/memory: 2/memory: $valueMemory/g" > tmp.yaml
 	kubectl get statefulset spark-client -n $namespace -o yaml > old_ss.yaml
-	sed "s/memory: 2Gi/memory: $memory_size/g"  old_ss.yaml > tmp.yaml
+	sed "s/memory: 2/memory: $memory_size/g"  old_ss.yaml > tmp.yaml
 	#kubectl delete pod spark-client-0 -n silver
 	kubectl replace -f tmp.yaml -n $namespace
 	kubectl wait --for=delete  pod/spark-client-0 -n $namespace --timeout=120s
