@@ -9,10 +9,6 @@ workload=$3
 tenantgroup=$4
 rm -r results-$workload-g$tenantgroup-t-*.csv
 mr=`cat /etc/podinfo/mem_request`
-while [ $mr -eq 0 ]
-do
-	mr=`cat /etc/podinfo/mem_request`
-done
 exec_overhead_gb=$(($mr / 10))
 exec_mem=$(($mr - ${exec_overhead_gb}))
 sed "s/executor-memory = \".*G\"/executor-memory = \"${exec_mem}G\"/g" output.conf | sed "s/Release-master-svc/$releasename-master-svc\.$namespace/g" > tmp.conf
