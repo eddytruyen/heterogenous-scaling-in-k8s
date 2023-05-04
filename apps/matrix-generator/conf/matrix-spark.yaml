@@ -12,7 +12,7 @@ slas:
       completionTime: 35
       #jobsize: 10
       #throughput: 0.5
-    maxTenants: 15
+    maxTenants: 11
     startTenant: 1
     alphabet:
       searchWindow: 10
