@@ -986,7 +986,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         scaling_up_threshold=initial_conf['scaling_up_threshold']
         scaling_down_threshold=initial_conf['scaling_down_threshold'] 
         adaptive_scaler=adaptive_scalers['init']
-        tmp_dict=get_matrix_and_sla(initial_conf, namespace)
+        tmp_dict=get_matrix_and_sla(initial_conf,runtime_manager,namespace)
         d=tmp_dict["matrix"]
         sla=tmp_dict["sla"]
         alphabet=sla['alphabet']
@@ -995,7 +995,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         exps_path=exp_path+'/'+sla['name']
         base=alphabet['base']
         slo=float(sla['slos']['completionTime'])
-        adaptive_scaler=adaptive_scalers['init']
         startTenants = int(tenants)
         tenant_nb=startTenants
         maxTenants = -1
@@ -1342,7 +1341,7 @@ def check_consistency_adaptive_scalers_and_results(rm, tenant_nb, d, sla, runtim
                                         raise RuntimeError("!!!Resource " + res +  " for worker " + str(w.worker_id) + " differs from the current alphabet setting: " + prefix + str(w.resources[res]) + suffix + " -> " + prefix + str(tmp_res) + suffix)
                         
 
-def get_matrix_and_sla(initial_conf,namespace):
+def get_matrix_and_sla(initial_conf,runtime_manager,namespace):
         slas=initial_conf['slas']
         d={}
         sla={}
@@ -1350,7 +1349,14 @@ def get_matrix_and_sla(initial_conf,namespace):
                 if s['name'] == namespace:
                         sla=s
         if os.path.isfile('Results/matrix.yaml'):
+            alphabet=sla['alphabet']
+            window=alphabet['searchWindow']
             d=yaml.safe_load(open('Results/matrix.yaml'))
+            for tx in range(1, max([int(t) for t in d[sla['name']].keys()]) + 1):
+                if tx in runtime_manager.keys():
+                    break
+                else:
+                     runtimemanager.instance(runtime_manager,tx,window)
         else:
             d={}
         if not sla['name'] in d:

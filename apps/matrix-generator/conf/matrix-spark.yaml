@@ -26,10 +26,10 @@ slas:
             memory: 8
         - size: 
             cpu: 2
-            memory: 4
+            memory: 3
         - size:
             cpu: 1
-            memory: 2
+            memory: 1
       costs:
         -  cpu: 1
            memory: 1
