@@ -101,7 +101,7 @@ def generate_matrix(initial_conf):
                                                     print("Moving filtered samples in sorted combinations after the window")
                                                     print([utils.array_to_str(el) for el in lst])
                                                     try:
-                                                            start_and_window=filter_samples(lst, adaptive_scaler, start, window, previous_tenant_results, startTenant, tenant_nb-1, minimum_shared_replicas, maximum_transition_cost, True, adaptive_scaler.ScaledWorkerIndex, original_adaptive_scaler=original_adaptive_scaler, initial_conf=opt_conf)
+                                                            start_and_window=filter_samples(lst, adaptive_scaler, start, window, previous_tenant_results, startTenant, tenant_nb-1, minimum_shared_replicas, maximum_transition_cost, False, adaptive_scaler.ScaledWorkerIndex, original_adaptive_scaler=original_adaptive_scaler, initial_conf=opt_conf)
                                                             print([utils.array_to_str(el) for el in lst])
                                                             print("RETRYING WITH ANOTHER WORKER CONFIGURATION")
                                                             return start_and_window
