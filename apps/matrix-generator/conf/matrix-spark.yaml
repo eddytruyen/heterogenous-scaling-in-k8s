@@ -48,11 +48,11 @@ maximum_transition_cost: 100
 window_offset_for_scaling_function: -1.0
 node_resources_offset_for_scaling_function:
   cpu: 0.0
-  memory: 0.0
+  memory: 0.5
 minimum_resources:
   cpu: 1 
   memory: 1
 scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
-opt_in_for_restart: False
-careful_scaling: True
+opt_in_for_restart: True
+careful_scaling: False
