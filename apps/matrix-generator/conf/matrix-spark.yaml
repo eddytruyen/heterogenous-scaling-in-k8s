@@ -29,7 +29,7 @@ slas:
             memory: 3
         - size:
             cpu: 1
-            memory: 1
+            memory: 2
       costs:
         -  cpu: 1
            memory: 1
@@ -55,7 +55,7 @@ node_resources_offset_for_scaling_function:
   memory: 1.0
 minimum_resources:
   cpu: 1 
-  memory: 1
+  memory: 2
 increments:
   cpu: 1
   memory: 1
@@ -70,5 +70,5 @@ scaling_up_threshold: 1.15
 opt_in_for_restart: False
 careful_scaling: True # When set to False, tipped over results of lower tenants for a specific conf,  this conf will not be removed for higher tenants to anticipate up-scaling 
 exploration_rate: 0.0
-monotonicity_threshold: 7
+monotonicity_threshold: 0.7
 outlier_threshold: 2.0
