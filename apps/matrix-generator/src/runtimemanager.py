@@ -307,7 +307,7 @@ class RuntimeManager:
         resource_types=self.adaptive_scaler.workers[0].resources.keys()
         for w in workers_result:
              w.resources=generator.extract_resources_from_result(result, w.worker_id, resource_types)
-        self.last_result={"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}
+        self.last_result={"tenant_nb": tenant_nb, "conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}
 
 
     def get_last_sampled_result(self):
@@ -349,7 +349,7 @@ class RuntimeManager:
 
     def add_pushed_back_result(self, result, nb_shrd_replicas=None, shrd_resources=None):
         workers_result=[w.clone() for w in self.adaptive_scaler.workers]
-        self.pushed_back_results+=[{"conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}]
+        self.pushed_back_results+=[{"tenant_nb": self.tenant_nb, "conf": generator.get_conf(workers_result, result), "CompletionTime": float(result['CompletionTime']), "workers": workers_result, "nb_shrd_replicas": nb_shrd_replicas, "shrd_resources": shrd_resources}]
 
 
     def remove_pushed_back_results_after_retuning(self):
@@ -368,15 +368,25 @@ class RuntimeManager:
 
 
 
-    def conf_X_workers_has_been_pushed_back_already(self, conf, workers):
+    def conf_X_workers_has_been_pushed_back_already(self, conf, workers, shrd_replicas, shrd_resources):
         found=False
         for r in self.pushed_back_results:
-            if  conf == r["conf"] and self.equal_workers(workers, r["workers"]):
-                    print(utils.array_to_delimited_str(conf,"_") + " has already been pushed back for the following workers:")
-                    for w in workers:
-                        print(w.resources)
-                    found=True
-                    break
+            if  conf == r["conf"] and self.equal_workers(workers, r["workers"]) and shrd_replicas == r["nb_shrd_replicas"]:
+                    res_found=True
+                    for res in shrd_resources.keys():
+                        if shrd_resources[res] != r["shrd_resources"][res]:
+                            res_found=False
+                            break
+                    if res_found:
+                        print(utils.array_to_delimited_str(conf,"_") + " has already been pushed back for the following workers:")
+                        for w in workers:
+                            print(w.resources)
+                        print("and the following transition constraints:")
+                        print("shared replicas: " + str(shrd_replicas))
+                        print("shared resources: ")
+                        print(shrd_reources)
+                        found=True
+                        break
         return found
 
 

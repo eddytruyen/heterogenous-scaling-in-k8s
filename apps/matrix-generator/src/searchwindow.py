@@ -100,6 +100,43 @@ class ScalingFunction:
 		print(dict)
 		return dict
 
+	def update(self, tenants, resource_cost, completion_time, weights):
+            print("Updating scaling function for " + str(tenants) + " tenants")
+            print("Original value of scaling function "+ str(self.eval(tenants)))
+            print("Total resource_cost and weights:")
+            print(resource_cost)
+            print(weights)
+            y1=0
+            for key in self.resources.keys():
+                y1 += weights[key]*completion_time*resource_cost[key]/(self.resources[key]*tenants)
+            y1=y1/len(self.resources.keys())
+            y1=(y1+self.eval(tenants))/2
+            x1=tenants
+            x0=tenants+1
+            y0=self.eval(tenants+1)
+            z0=math.log(y0-self.CoefC)
+            w0=x0
+            z1=math.log(y1-self.CoefC)
+            w1=x1
+            self.CoefB=(z1-z0)/(w1-w0)
+            self.CoefA=(y1 - self.CoefC)/math.exp(self.CoefB*x1)
+            self.CoefC=y1-self.CoefA*math.exp(self.CoefB*x1)
+            print("New value for scaling function: " + str(self.eval(tenants)))
+
+	def updateCoefsFrom(self,scalingFunction):
+            self.CoefA=scalingFunction.CoefA
+            self.CoefB=scalingFunction.CoefC
+            self.CoefC=scalingFunction.CoefC
+
+
+	def targetAbsoluteTotalCost(self,slo,tenants):
+		totalcost=self.target(slo,tenants)
+		absolute_totalcost=0
+		for res in totalcost.keys():
+			absolute_totalcost+=totalcost[res]
+		return absolute_totalcost
+
+
         # this function returns the worker config for which the last scaling did not yield a cost-effective result
 	def undo_scaled_down(self,workers):
 		if not self.LastScaledDownWorker:
@@ -453,10 +490,7 @@ class AdaptiveScaler:
 			self.only_failed_results=False
 		states=[]
 		if use_performance_model:
-			totalcost = self.ScalingFunction.target(slo,tenant_nb)
-			absolute_totalcost=0
-			for res in totalcost.keys():
-				absolute_totalcost+=totalcost[res]
+			absolute_totalcost= self.ScalingFunction.targetAbsoluteTotalCost(slo,tenant_nb)
 		else:
 			absolute_totalcost=-1
 		new_workers=[w.clone() for w in self.workers]
