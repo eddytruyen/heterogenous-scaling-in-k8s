@@ -384,7 +384,7 @@ class RuntimeManager:
                         print("and the following transition constraints:")
                         print("shared replicas: " + str(shrd_replicas))
                         print("shared resources: ")
-                        print(shrd_reources)
+                        print(shrd_resources)
                         found=True
                         break
         return found
@@ -416,7 +416,7 @@ class RuntimeManager:
 
 def instance(runtime_manager, tenant_nb, window):
     if not tenant_nb in runtime_manager.keys():
-        runtime_manager[tenant_nb] = RuntimeManager(runtime_manager["adaptive_scalers"]["init"].clone(start_fresh=True),tenant_nb, runtime_manager, AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"])
+        runtime_manager[tenant_nb] = RuntimeManager(runtime_manager["adaptive_scalers"]["init"].clone(start_fresh=True),tenant_nb, runtime_manager, AdaptiveWindow(window), runtime_manager["minimum_shared_replicas"], runtime_manager["maximum_transition_cost"], runtime_manager["minimum_shared_resources"].copy())
     return runtime_manager[tenant_nb]
 
 
