@@ -16,7 +16,7 @@ from operator import add,mul
 
 NB_OF_CONSTANT_WORKER_REPLICAS = 1
 SORT_SAMPLES=False
-LOG_FILTERING=False
+LOG_FILTERING=True
 TEST_CONFIG_CODE=7898.89695959
 USE_PERFORMANCE_MODEL=False
 
@@ -187,7 +187,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                             #for tx in range(1, tenant_nb+1):
                                                                 print("Looking to retune shared resources constraints for tenant_nb " + str(tx) + "...")
                                                                 if tx in runtime_manager.keys() and not runtime_manager[tx].already_retuned:
-                                                                    if runtime_manager[tx].retune() and tx == tenant_nb:
+                                                                    if runtime_manager[tx].retune() and tx >= tenant_nb:
                                                                         Success=True
                                                                     #rm_t=runtime_manager[tx]
                                                                     #tenant_success=False
@@ -907,69 +907,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                 return conf_completion_time*resource_cost_conf >= (historic_completion_time  + slo * monotonic_threshold)*resource_cost_historic
             
         def check_mononoticity(workers, r, rm, history):
-                nonlocal lst
-                print("Checking mononotonicity constraint")
-                if not r["Successfull"] == "true":
-                    print("Result is not successfull")
-                    return False
-                mono_constraint_violated=False
-                if "last_tenant_nb" in runtime_manager.keys(): 
-                    last_tenant_nb=runtime_manager["last_tenant_nb"]
-                    #if last_tenant_nb > tenant_nb:
-                    #    return False
-                    previous_rm=runtime_manager[last_tenant_nb]
-                    tmp_result=previous_rm.get_last_sampled_result()
-                    print("=====previous workers==============")
-                    for w in tmp_result["workers"]:
-                        print(w.resources)
-                    print("=====current workers==============")
-                    for w in workers:
-                        print(w.resources)
-                    qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=True)
-                    stop=True
-                    for a,b in zip(tmp_result["workers"], adaptive_scaler.workers):
-                            for res in a.resources.keys():
-                                print(a.resources[res])
-                                print(b.resources[res])
-                                if a.resources[res] != b.resources[res]:
-                                    stop=False
-                                    break
-                            if not stop:
-                                break
-    
-                    shrd_replicas=qualities_of_sample['nb_shrd_repls']
-                    shrd_resources=qualities_of_sample['shrd_resources']
-                    violation_transition_constraints=False
-                    if stop:
-                        print("No vertical scaling occurred") 
-                    if shrd_replicas <= rm.minimum_shared_replicas:
-                        print("Violation of transition constraints: minimum shared_replicas: " + str(rm.minimum_shared_replicas))
-                        if stop:
-                            stop=False
-                        violation_transition_constraints=True
-                    for key in rm.minimum_shared_resources.keys():
-                        if shrd_resources[key] <= rm.minimum_shared_resources[key]:
-                            print("Violation of transition constraints: minimum shared_resources for resource " + str(key) + ": " + str(rm.minimum_shared_resources[key]))
-                            violation_transition_constraints=True
-                            if stop:
-                                stop=False
-                    if stop:
-                        print("Not checking mononotonocity because no vertical scaling and the current constraint of non-restartable executors is not violated")
-                    if not history:
-                        print("No history found, exiting mononotocity check")
-                        mono_constraint_violated=False
-                    else:
-                        #if shrd_replicas < rm.minimum_shared_replicas:
-                        #    raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
-                        #for key in rm.minimum_shared_resources.keys():
-                        #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
-                        #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
-                        if not stop and (not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers,shrd_replicas,shrd_resources) or violation_transition_constraints): 
-                            for h in history:
-                                if is_non_monotonic(adaptive_scaler.ScalingFunction, resource_cost(workers, get_conf(workers,r), False), float(r['CompletionTime']), tenant_nb, resource_cost(h["workers"], h["conf"], False),  h['CompletionTime'],h['tenant_nb'],float(initial_conf['monotonicity_threshold']),slo):
-                                        #print("Conf " + str(h["conf"]) + " with completion time " + str(h['CompletionTime']) + "s has smaller or equal resource amount") 
-                                        #if float(r['CompletionTime']) > slo and float(r['CompletionTime']) > h['CompletionTime'] + float(initial_conf['monotonicity_threshold']):
-                                             #if not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers):
+                def execute():
                                                 print("!!!!!!!!!!!!!!!!!!!!!!It seems the alphabet does not scale monotonically anymore: ADJUSTING transition constraints for TENANT NB from " + str(tenant_nb) + "concurrent jobs and higher number of concurrent jobs!!!!!!!!!!!!!!!!!!!!!!!!:")
                                                 resources_incremented=False
                                                 for key in shrd_resources.keys():
@@ -983,7 +921,6 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                     if shrd_replicas+1 > rm.minimum_shared_replicas:
                                                         print("!!!!ADJUSTUNG shared_replicas: "  + str(rm.minimum_shared_replicas) +  " -> " + str(shrd_replicas+1))
                                                         rm.minimum_shared_replicas=shrd_replicas+1
-                                                mono_constraint_violated=True
                                                 lst=rm.update_sorted_combinations(_sort(adaptive_scaler.workers,base))
                                                 for t in range(tenant_nb+1, max([int(t) for t in d[sla['name']].keys()])+1):
                                                     lst_updated=False
@@ -1001,7 +938,89 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
                                                 if not no_exps and adaptive_scaler.ScalingDownPhase and adaptive_scaler.StartScalingDown:
                                                     rm.previous_current_experiment()
                                                 rm.add_pushed_back_result(r,shrd_replicas,shrd_resources)
-                                                break
+
+                nonlocal lst
+                conduct=True
+                print("Checking mononotonicity constraint")
+                if opt_in_for_restart and not monotonicity_check_for_heterogeneous_horizontal_scaling:
+                    conduct=False
+                    print("Not checking mononotonocity because you opt in for restart and you do not like to check shared resources for horizontal scaling only") 
+                mono_constraint_violated=False
+                if "last_tenant_nb" in runtime_manager.keys(): 
+                    last_tenant_nb=runtime_manager["last_tenant_nb"]
+                    #if last_tenant_nb > tenant_nb:
+                    #    return False
+                    previous_rm=runtime_manager[last_tenant_nb]
+                    tmp_result=previous_rm.get_last_sampled_result()
+                    print("=====previous workers==============")
+                    for w in tmp_result["workers"]:
+                        print(w.resources)
+                    print("=====current workers==============")
+                    for w in workers:
+                        print(w.resources)
+                    qualities_of_sample=_pairwise_transition_cost(tmp_result["workers"], tmp_result["conf"], workers, get_conf(workers, r), rm.minimum_shared_replicas, rm.minimum_shared_resources, log=False)
+                    shrd_replicas=qualities_of_sample['nb_shrd_repls']
+                    shrd_resources=qualities_of_sample['shrd_resources']
+                    if conduct:
+                        stop=True
+                        if  monotonicity_check_for_heterogeneous_horizontal_scaling:
+                            stop=False
+                        if not opt_in_for_restart:
+                            stopVS=True
+                            confIndex=0
+                            for a,b in zip(tmp_result["workers"], adaptive_scaler.workers):
+                                c1=tmp_result["conf"][confIndex]
+                                c2=get_conf(workers,r)[confIndex]
+                                if c1 > 0 and c2 > 0:
+                                    print("Shared replicas found for worker " + str(confIndex+1))
+                                    for res in a.resources.keys():
+                                        print(a.resources[res])
+                                        print(b.resources[res])
+                                        if a.resources[res] != b.resources[res]:
+                                            stopVS=False
+                                            print("Vertical scaling occurred")
+                                            break
+                                confIndex+=1
+                                if not stopVS:
+                                    break
+                            if stop and not stopVS:
+                                stop=False
+    
+                        violation_transition_constraints=False
+                        if shrd_replicas < rm.minimum_shared_replicas:
+                            print("Violation of transition constraints: minimum shared_replicas: " + str(rm.minimum_shared_replicas))
+                            if stop:
+                                stop=False
+                            violation_transition_constraints=True
+                        for key in rm.minimum_shared_resources.keys():
+                            if shrd_resources[key] < rm.minimum_shared_resources[key]:
+                                print("Violation of transition constraints: minimum shared_resources for resource " + str(key) + ": " + str(rm.minimum_shared_resources[key]))
+                                violation_transition_constraints=True
+                                if stop:
+                                    stop=False
+                        if stop:
+                            print("Not checking monotonocity because no vertical scaling and no check needed for horizontal scaling and the current constraint of non-restartable executors is not violated")
+                        if not history and r["Successfull"] == "true":
+                            print("No history found, exiting mononotocity check")
+                            mono_constraint_violated=False
+                        else:
+                            #if shrd_replicas < rm.minimum_shared_replicas:
+                            #    raise RuntimeError("Error in Filtering: the number of shrd_replicas is lower than the mimimum_shared_replicas")
+                            #for key in rm.minimum_shared_resources.keys():
+                            #    if shrd_resources[key] < rm.minimum_shared_resources[key]:
+                            #        raise RuntimeError("Error in Filtering: the amount of shrd_resources is lower than the minimum_shared_resources for resource type " + key)
+                            if not stop and (not rm.conf_X_workers_has_been_pushed_back_already(get_conf(workers,r), workers,shrd_replicas,shrd_resources) or violation_transition_constraints): 
+                                if not r["Successfull"] == "true":
+                                    execute()
+                                    mono_constraint_violated=True
+                                else:
+                                    for h in history:
+                                        if is_non_monotonic(adaptive_scaler.ScalingFunction, resource_cost(workers, get_conf(workers,r), False), float(r['CompletionTime']), tenant_nb, resource_cost(h["workers"], h["conf"], False),  h['CompletionTime'],h['tenant_nb'],float(initial_conf['monotonicity_threshold']),slo):
+                                            execute()
+                                            mono_constraint_violated=True
+                                            break
+                else:
+                    print("Not conducting monotonicity constraint due to no previous executions")
                 if not mono_constraint_violated:
                     print("ADDING CORRECT RESULT TO HISTORY:")
                     print(r)
@@ -1024,7 +1043,9 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
         sampling_ratio=initial_conf['sampling_ratio']
         window_offset_for_scaling_function=initial_conf['window_offset_for_scaling_function']
         scaling_up_threshold=initial_conf['scaling_up_threshold']
-        scaling_down_threshold=initial_conf['scaling_down_threshold'] 
+        scaling_down_threshold=initial_conf['scaling_down_threshold']
+        opt_in_for_restart=initial_conf['opt_in_for_restart']
+        monotonicity_check_for_heterogeneous_horizontal_scaling=initial_conf['monotonicity_check_for_heterogeneous_horizontal_scaling']
         adaptive_scaler=adaptive_scalers['init']
         tmp_dict=get_matrix_and_sla(initial_conf,runtime_manager,namespace)
         d=tmp_dict["matrix"]
@@ -1566,8 +1587,11 @@ def create_result(workers, completion_time, conf, sla_name, successfull='true'):
 	result['score']='n/a'
 	result['best_score']='n/a'
 	result['SLAName']=sla_name
-	if completion_time == 0:
+	if completion_time == '0':
 		result['CompletionTime']= '0'
+		result['Successfull']='false'
+	elif completion_time == '999999999':
+		result['CompletionTime']=completion_time
 		result['Successfull']='false'
 	else:
 		result['CompletionTime']= completion_time
@@ -2363,8 +2387,6 @@ def _sort(workers,base):
 
 	initial_conf=int(utils.array_to_str([worker.min_replicas for worker in workers]),base)
 	max_conf=int(utils.array_to_str([base-1 for worker in workers]),base)
-	print(initial_conf)
-	print(max_conf)
 	index=range(initial_conf,max_conf+1)
 	comb=[utils.number_to_base(c,base) for c in index]
         #comb=[utils.array_to_str(utils.number_to_base(combination,base)) for combination in range(min_conf_dec,max_conf_dec+1)]
