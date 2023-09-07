@@ -1,0 +1,4 @@
+vertical scaling van workers gebeurt voor vertical scaling van spark-client, maar daarop wordt gewacht. 
+Vertical scaling van worker moet gebeuren na vertical scalen van spark-client
+Als een gevolg is de reele impact van vertical scaling niet voelbaar.
+

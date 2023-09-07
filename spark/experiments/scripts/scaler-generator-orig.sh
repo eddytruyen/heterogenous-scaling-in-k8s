@@ -72,6 +72,7 @@ do
   if [ $success != "true" ]
   then
 	  echo 999999999 > period
+	  exit
   fi
 
   #if [ $period -lt 120 ]; then echo "sleeping for 5400 sec"; sleep 5400; fi	 
