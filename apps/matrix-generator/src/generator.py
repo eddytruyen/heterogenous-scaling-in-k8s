@@ -1080,6 +1080,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
             if rm.no_experiments_left() and not rm.last_experiment_in_queue():
                 #if not can_be_improved_by_another_config(d[sla['name']], lst, adaptive_scaler, tenant_nb, slo, scaling_up_threshold):
                 no_exps=True
+            import pdb; pdb.set_trace()
             tmp_result=create_result(adaptive_scaler.workers, completion_time, previous_conf, sla['name'])
             #history=get_history(-1)
             #outlier=check_outlier(tmp_result, history)

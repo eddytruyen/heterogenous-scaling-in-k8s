@@ -68,7 +68,8 @@ prefix:
 scaling_down_threshold: 1.15
 scaling_up_threshold: 1.15
 opt_in_for_restart: False
-careful_scaling: True # When set to False, tipped over results of lower tenants for a specific conf,  this conf will not be removed for higher tenants to anticipate up-scaling 
+careful_scaling: False    # When set to False, tipped over results of lower tenants for a specific conf,  this conf will not be removed for higher tenants to anticipate up-scaling 
 exploration_rate: 0.0
-monotonicity_threshold: 0.7
+monotonicity_threshold: 0.2
+monotonicity_check_for_heterogeneous_horizontal_scaling: True
 outlier_threshold: 2.0
