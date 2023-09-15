@@ -8,7 +8,7 @@ livy_url = "http://localhost:8998"
 # Maak een sessie aan
 data = {'kind': 'spark'}
 headers = {'Content-Type': 'application/json'}
-response = requests.post(f"{livy_url}/sessions", data=json.dumps(data), headers=headers)
+response = requests.post("{livy_url}/sessions", data=json.dumps(data), headers=headers)
 
 # Sla de sessie-ID op
 session_id = response.json()['id']
@@ -16,7 +16,7 @@ session_id = response.json()['id']
 # Wacht tot de sessie actief is
 status = response.json()['state']
 while status != 'idle':
-  response = requests.get(f"{livy_url}/sessions/{session_id}", headers=headers)
+  #response = requests.get(f"{livy_url}/sessions/{session_id}", headers=headers)
   status = response.json()['state']
 
 # Lees de tabel in als een DataFrame
