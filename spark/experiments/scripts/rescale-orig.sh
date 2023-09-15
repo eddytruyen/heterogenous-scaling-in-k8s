@@ -8,7 +8,7 @@ workload=${6:-sql}
 csv_output=${7:-csv_output_file.csv}
 exit_program=${8:-0}
 fileName=values.json
-resourcePlannerURL=http://172.17.13.119
+resourcePlannerURL=http://172.22.8.106
 port=7878
 alphabetLength=$((4))
 
