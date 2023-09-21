@@ -4,6 +4,9 @@ import random
 import pprint
 import textwrap
 
+def remove_last_line_from_string(s):
+    return s[:s.rfind('\n')]
+
 # Definieer de URL van de Livy-server
 host = "http://172.22.8.106:30898"
 
@@ -12,9 +15,13 @@ sessions = response.json()['sessions']
 
 headers = {'Content-Type': 'application/json'}
 
+active_sessions=[]
 if len(sessions) > 0:
   # Gebruik de eerste actieve sessie
-  session_id = sessions[0]['id']
+  active_sessions = list(filter(lambda x: x['state']=='idle' or x['state']=='starting',sessions))
+
+if len(active_sessions) > 0:
+    session_id=active_sessions[0]['id']
 else:
   data = {'kind': 'pyspark'}
   #  {{ .Files.Get "livy.conf" | indent 4 }}
@@ -34,17 +41,34 @@ while status != 'idle':
 
 table_name = "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g7-1.csv"
 
-command = """
-df = spark.read.format("csv").option("header", "true").load("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g7-1.csv")
-df.show()
+command = f"""
+df = spark.read.format("csv").option("header", "true").load("{table_name}")
+df.createOrReplaceTempView("kmeans")
+sqlDF = spark.sql('SELECT * FROM kmeans')
+sqlDF.show()
 """
-response=requests.post(f"{host}/sessions/{session_id}/statements", data=json.dumps({'code': command}), headers=headers)
 
+#table_name = "file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g7-1.csv"
+
+#command = """
+#df = spark.read.format("csv").option("header", "true").load("file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-g7-1.csv")
+#df.show()
+#"""
+
+#command = """
+#df = spark.read.format("csv").option("header", "true").load("table_name"))
+#df.createOrReplaceTempView("kmeans")
+#sqlDF = spark.sql('SELECT * FROM kmeans')
+#sqlDF.show()
+#""".replace("table_name", table_name)
+
+
+response=requests.post(f"{host}/sessions/{session_id}/statements", data=json.dumps({'code': remove_last_line_from_string(command)}), headers=headers)
 statement_url = host + response.headers['Location']
 r = requests.get(statement_url, headers=headers)
-status=(r.json())['progress']
-while status != 1.0:
+status=(r.json())['state']
+while status != "available" :
     r = requests.get(statement_url, headers=headers)
-    status=(r.json())['progress']
+    status=(r.json())['state']
 pprint.pprint(r.json())
 
