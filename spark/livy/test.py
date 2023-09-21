@@ -63,7 +63,7 @@ sqlDF.show()
 #""".replace("table_name", table_name)
 
 
-response=requests.post(f"{host}/sessions/{session_id}/statements", data=json.dumps({'code': remove_last_line_from_string(command)}), headers=headers)
+response=requests.post(f"{host}/sessions/{session_id}/statements", data=json.dumps({'code': command}), headers=headers)
 statement_url = host + response.headers['Location']
 r = requests.get(statement_url, headers=headers)
 status=(r.json())['state']
