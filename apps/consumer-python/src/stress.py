@@ -1,13 +1,7 @@
+from spark_scala_futures import invoke,get_session
 import math
 import random
 import textwrap
-
-
-max_tenants=15
-tenant_group="g7"
-host = "http://172.22.8.106:30898"
-headers = {'Content-Type': 'application/json'}
-
 
 
 def _stress(stress_size):
@@ -53,21 +47,21 @@ def _stress(stress_size):
   invoke(command, self.host, session_id, self.headers)
 
 class Stress:
-	def __init__(self, stress_size,stress_function, max_tenants, tenant_group, host, headers):
-		self.stress_size = stress_size
-		self.stress_function = stress_function
+    def __init__(self, stress_size,stress_function, max_tenants, tenant_group, host, headers):
+        self.stress_size = stress_size
+        self.stress_function = stress_function
         self.max_tenants=max_tenants
         self.tenant_group=tenant_group
         self.host=host
         self.headers=headers
 
 
-	def runTest(self):
-		self.stress_function(self.stress_size)
+    def runTest(self):
+        self.stress_function(self.stress_size)
 
-class StressCPU(Stress):
-	def __init__(self,stress_function=stress,stress_size=100, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}):
-		Stress.__init__(self, stress_size, stress_function)
+class StressSpark(Stress):
+	def __init__(self,stress_function=_stress,stress_size=100, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}):
+		Stress.__init__(self, stress_size, stress_function,max_tenants, tenant_group,host, headers)
 
 
 
