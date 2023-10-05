@@ -14,12 +14,10 @@ spec:
     spec:
       containers:
       - name: consumer
-        image: arguez/python-consumer:process
-        imagePullPolicy: Always
+        image: decomads/python-consumer:process
+        imagePullPolicy: IfNotPresent
         resources:
           requests:
-            cpu: {{.Values.worker1CPU}}
-          limits:
             cpu: {{.Values.worker1CPU}}
         env:
         - name: DNS_NAMESPACE
@@ -30,4 +28,9 @@ spec:
           value: "{{.Values.poolSize1}}"
       priorityClassName: {{.Values.priorityClass}}
       nodeSelector:
-        workerNode: "yes"   
+        serverlessNode: "yes"
+      tolerations:
+      - key: "node.kubernetes.io/disk-pressure"
+        operator: "Exists"
+        effect: "NoSchedule"   
+
