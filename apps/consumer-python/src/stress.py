@@ -4,13 +4,13 @@ import random
 import textwrap
 
 
-def _stress(stress_size):
+def _stress(stress_size, max_tenants, tenant_group, host, headers):
 
-  session_id=get_session(self.host, self.headers)
+  session_id=get_session(host, headers)
 
 
 # Genereer willekeurig een nummer tussen 1 en max_tenants
-  tenant = str(random.randint(1, self.max_tenants))
+  tenant = str(random.randint(1, max_tenants))
 
   table_name = f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 
@@ -23,7 +23,7 @@ def _stress(stress_size):
   """)
 
 
-  r=invoke(command, self.host, session_id, self.headers)
+  r=invoke(command, host, session_id, headers)
   columns=r['output']['data']['application/json']
   sample_columns=random.sample(columns, random.randint(0, len(columns)-1))
   selected_columns = ", ".join(sample_columns)
@@ -44,7 +44,7 @@ def _stress(stress_size):
   """)
   #sqlDF.write.mode("overwrite").csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/output/output.csv")
 
-  invoke(command, self.host, session_id, self.headers)
+  invoke(command, host, session_id, headers)
 
 class Stress:
     def __init__(self, stress_size,stress_function, max_tenants, tenant_group, host, headers):
@@ -57,7 +57,7 @@ class Stress:
 
 
     def runTest(self):
-        self.stress_function(self.stress_size)
+        self.stress_function(self.stress_size, self.max_tenants, self.tenant_group, self.host, self.headers)
 
 class StressSpark(Stress):
 	def __init__(self,stress_function=_stress,stress_size=100, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}):

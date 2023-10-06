@@ -11,7 +11,7 @@ import concurrent.futures
 
 DNS_NAMESPACE = os.getenv('DNS_NAMESPACE')
 POOL_SIZE = os.getenv('POOL_SIZE') or 100
-STRESS_SIZE = os.getenv('STRESS_SIZE') or 100
+STRESS_SIZE = os.getenv('STRESS_SIZE') or 0
 
 
 QUEUE_HOST = "http://demo." + DNS_NAMESPACE + ".svc.cluster.local:80"
@@ -20,7 +20,7 @@ QUEUE_URL = QUEUE_HOST+'/pull'
 
 MAX_TENANTS=15
 TENANT_GROUP="g7"
-LIVY_HOST = "http://livy." + DNS_NAMESPACE + ".svc.cluster.local:80"
+LIVY_HOST = "http://livy." + DNS_NAMESPACE + ".svc.cluster.local:8998"
 LIVY_HEADERS = {'Content-Type': 'application/json'}
 
 class Tasker:

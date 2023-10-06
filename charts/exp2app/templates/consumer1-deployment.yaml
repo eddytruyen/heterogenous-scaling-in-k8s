@@ -29,8 +29,8 @@ spec:
       priorityClassName: {{.Values.priorityClass}}
       nodeSelector:
         serverlessNode: "yes"
-      tolerations:
-      - key: "node.kubernetes.io/disk-pressure"
-        operator: "Exists"
-        effect: "NoSchedule"   
+      #tolerations:
+      #- key: "node.kubernetes.io/disk-pressure"
+      #operator: "Exists"
+      #effect: "NoSchedule"   
 

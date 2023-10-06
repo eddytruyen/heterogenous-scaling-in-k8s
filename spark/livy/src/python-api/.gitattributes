@@ -1,2 +1,0 @@
-livy/_version.py export-subst
-src/main/python/livy/_version.py export-subst
