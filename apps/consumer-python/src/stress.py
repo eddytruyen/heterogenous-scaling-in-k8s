@@ -60,7 +60,7 @@ class Stress:
         self.stress_function(self.stress_size, self.max_tenants, self.tenant_group, self.host, self.headers)
 
 class StressSpark(Stress):
-	def __init__(self,stress_function=_stress,stress_size=100, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}):
+	def __init__(self,stress_size=0, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}, stress_function=_stress):
 		Stress.__init__(self, stress_size, stress_function,max_tenants, tenant_group,host, headers)
 
 
