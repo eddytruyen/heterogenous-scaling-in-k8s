@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: demo
-        image: arguez/java-demo:latest
+        image: decomads/java-demo:latest
         imagePullPolicy: Always
         env:
         - name: RABBIT_MQ_HOST
@@ -36,8 +36,7 @@ spec:
         resources:
           requests:
             cpu: {{.Values.demoCPU}}
-          limits:
-            cpu: {{.Values.demoCPU}}
+            memory: {{.Values.demoMemory}}
       priorityClassName: {{.Values.priorityClass}}
       nodeSelector:
         workerNode: "yes"

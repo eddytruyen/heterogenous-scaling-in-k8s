@@ -10,5 +10,6 @@ worker1CPU: 250m
 worker2CPU: 250m
 worker3CPU: 250m
 demoCPU: 800m
+demoMemory: 1Gi
 priorityClass: gold
 priorityValue: 100
