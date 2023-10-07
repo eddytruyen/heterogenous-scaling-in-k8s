@@ -48,9 +48,9 @@ if len(active_sessions) > 0:
         if active_session['kind']=='spark':
             session_id=active_session['id']
 else:
-  data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu'}
+  data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu', 'conf': {'spark.scheduler.mode': 'fair'}}
   r = requests.post(host + '/sessions', data=json.dumps(data), headers=headers)
-  session_id = r.json()['id']
+  session_id=r.json()['id']
 
 
 print(session_id)
