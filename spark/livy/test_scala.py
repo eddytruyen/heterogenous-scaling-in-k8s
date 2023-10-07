@@ -27,14 +27,17 @@ sessions = response.json()['sessions']
 
 headers = {'Content-Type': 'application/json'}
 
+
 active_sessions=[]
 if len(sessions) > 0:
   # Gebruik de eerste actieve sessie
-  active_sessions = list(filter(lambda x: x['state']=='idle' or x['state']=='starting',sessions))
+  active_sessions = list(filter(lambda x: x['kind'] == 'spark' and (x['state']=='idle' or x['state']=='starting'),sessions))
 
 if len(active_sessions) > 0:
-    session_id=active_sessions[0]['id']
-else: 
+    for active_session in active_sessions:
+        if active_session['kind']=='spark':
+            session_id=active_session['id']
+else:
   data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu'}
   r = requests.post(host + '/sessions', data=json.dumps(data), headers=headers)
   session_id = r.json()['id']

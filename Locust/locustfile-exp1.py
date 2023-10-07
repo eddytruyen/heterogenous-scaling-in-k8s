@@ -18,7 +18,9 @@ class TasksetT1(TaskSet):
     @task
     def pushJob(self):
         with self.client.get("/pushJob/1",name="silver", catch_response=True) as resp:
-            if resp.content.decode('UTF-8') != "completed all tasks":
+            x=resp.content.decode('UTF-8')
+            print(x)
+            if x != "completed all tasks":
                 resp.failure("Got wrong response")
 
 class MyUser(HttpUser):
@@ -27,7 +29,7 @@ class MyUser(HttpUser):
     # host = "http://demo.gold.svc.cluster.local:80
     host = "http://172.22.8.106:30698"
 
-    wait_time = between(0,0)  
+    wait_time = between(10,10)  
     
     #task_set = TasksetT1
     tasks = [TasksetT1]
