@@ -47,7 +47,7 @@ def get_session(host, headers):
                session_id=active_session['id']
                break
    else:
-      data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu', 'conf': {'spark.scheduler.mode': 'fair'}}
+      data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu', 'conf': {'spark.scheduler.mode': 'FAIR'}}
       r = requests.post(host + '/sessions', data=json.dumps(data), headers=headers)
       session_id = r.json()['id']
 
