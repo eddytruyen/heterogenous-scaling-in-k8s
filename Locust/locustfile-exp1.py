@@ -29,7 +29,7 @@ class MyUser(HttpUser):
     # host = "http://demo.gold.svc.cluster.local:80
     host = "http://172.22.8.106:30698"
 
-    wait_time = between(10,10)  
+    wait_time = between(0,0)  
     
     #task_set = TasksetT1
     tasks = [TasksetT1]

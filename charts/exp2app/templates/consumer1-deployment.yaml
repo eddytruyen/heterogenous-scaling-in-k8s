@@ -19,6 +19,8 @@ spec:
         resources:
           requests:
             cpu: {{.Values.worker1CPU}}
+          limits:
+            memory: 500Mi
         env:
         - name: DNS_NAMESPACE
           value: {{.Values.namespace}}
