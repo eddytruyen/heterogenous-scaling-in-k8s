@@ -30,7 +30,7 @@ mkdir "$built_jars"
 
 # Find all JAR files in the Livy directory and copy them to the JARs directory.
 cp server/target/jars/* $built_jars
-cp thriftserver/server/target/jars/* $built_jar
+cp thriftserver/server/target/jars/* $built_jars
 
 # Create a directory for REPL JAR files.
 mkdir "$built_repl_jars"
@@ -38,7 +38,7 @@ mkdir "$built_repl_jars"
 # Copy REPL JAR files from a specific location in the Livy directory to the REPL JARs directory.
 cp -rf "$livy_dir/repl/scala-2.12/target/jars"/* "$built_repl_jars/"
 
-sed -i 's/repl-2.11/repl-2.12/g/' ${built_dir}/bin/livy-server 
+sed -i 's/repl-2.11/repl-2.12/g' ${built_dir}/bin/livy-server 
 
 # Create a directory for RSC JAR files.
 mkdir "$built_rcs_jars"
