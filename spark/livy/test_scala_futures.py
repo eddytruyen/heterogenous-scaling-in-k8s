@@ -48,7 +48,7 @@ if len(active_sessions) > 0:
         if active_session['kind']=='spark':
             session_id=active_session['id']
 else:
-  data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu', 'conf': {'spark.scheduler.mode': 'FAIR', 'spark.scheduler.allocation.file': 'file:///opt/bitnami/spark/spark_data/fairscheduler.xml', 'spark.scheduler.pool': 'mypool'}}
+  data = {'kind': 'spark', 'executorMemory': 6442450944, 'executorCores': 4, 'proxyUser': 'ubuntu', 'conf': {'spark.scheduler.mode': 'FAIR', 'spark.scheduler.allocation.file': 'file:///opt/bitnami/spark/spark_data/fairscheduler.xml', 'spark.scheduler.pool': 'mypool', 'spark.cores.max': '4', 'spark.sql.catalogImplementation': 'in-memory'}}
   r = requests.post(host + '/sessions', data=json.dumps(data), headers=headers)
   session_id=r.json()['id']
 
@@ -72,7 +72,7 @@ table_name = f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data
 
 command =f""" 
 val df = spark.read.format("csv").option("header", "true").load("{table_name}")
-df.createOrReplaceTempView("kmeans{tenant}")
+df.createOrReplaceGlobalTempView("kmeans{tenant}")
 df.cache()  
 val e = df.columns
 %json e
@@ -95,7 +95,7 @@ selected_evaluations= " and ".join([f"{string} < {value}" for string, value in z
 
 print(selected_evaluations)
 command = f"""
-val sqlDF = spark.sql("SELECT {selected_columns} FROM kmeans{tenant} WHERE {selected_evaluations}")
+val sqlDF = spark.sql("SELECT {selected_columns} FROM global_temp.kmeans{tenant} WHERE {selected_evaluations}")
 sqlDF.show()
 """
 #sqlDF.write.mode("overwrite").csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/output/output.csv")
