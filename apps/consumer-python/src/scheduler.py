@@ -1,7 +1,7 @@
 import asyncio
 import os
 import logging
-from stress import StressCPU
+from stress import StressSpark
 import json
 import sys
 import time
@@ -11,12 +11,17 @@ import concurrent.futures
 
 DNS_NAMESPACE = os.getenv('DNS_NAMESPACE')
 POOL_SIZE = os.getenv('POOL_SIZE') or 100
-STRESS_SIZE = os.getenv('STRESS_SIZE') or 100
+STRESS_SIZE = os.getenv('STRESS_SIZE') or 0
 
 
 QUEUE_HOST = "http://demo." + DNS_NAMESPACE + ".svc.cluster.local:80"
 # QUEUE_HOST= 'http://127.0.0.1:8080'
 QUEUE_URL = QUEUE_HOST+'/pull'
+
+MAX_TENANTS=15
+TENANT_GROUP="g7"
+LIVY_HOST = "http://livy." + DNS_NAMESPACE + ".svc.cluster.local:8998"
+LIVY_HEADERS = {'Content-Type': 'application/json'}
 
 class Tasker:
 	def __init__(self, loop, session, queue):
@@ -42,9 +47,9 @@ async def _worker(consumer):
 		logging.debug("Processing item with id: "+str(item))
 		if (item != None):
 			if(STRESS_SIZE):
-				stress=StressCPU(stress_size=int(STRESS_SIZE))
+				stress=StressSpark(int(STRESS_SIZE), MAX_TENANTS, TENANT_GROUP, LIVY_HOST, LIVY_HEADERS)
 			else:
-				stress=StressCPU()	
+				stress=StressSpark(0,MAX_TENANTS, TENANT_GROUP, LIVY_HOST, LIVY_HEADERS)	
 			# stress.runTest()
 			await consumer.loop.run_in_executor(None, stress.runTest)
 			logging.debug("Processed item with id: "+str(item))

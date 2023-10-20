@@ -9,7 +9,7 @@ slas:
       workload: sql
       benchPath: /mnt/nfs-disk-2/spark-bench
       tenantGroup: "7"
-      completionTime: 90
+      completionTime: 35
       #jobsize: 10
       #throughput: 0.5
     maxTenants: 15
@@ -70,5 +70,5 @@ scaling_up_threshold: 1.15
 opt_in_for_restart: False
 careful_scaling: True # When set to False, tipped over results of lower tenants for a specific conf,  this conf will not be removed for higher tenants to anticipate up-scaling 
 exploration_rate: 0.0
-monotonicity_threshold: 20
+monotonicity_threshold: 7
 outlier_threshold: 2.0

@@ -1,21 +1,67 @@
+from spark_scala_futures import invoke,get_session
 import math
+import random
+import textwrap
 
-def _cpu_stress(stress_size):
-	for i in range(1000*stress_size):
-		math.sqrt(i)
+
+def _stress(stress_size, max_tenants, tenant_group, host, headers):
+
+  session_id=get_session(host, headers)
+
+
+# Genereer willekeurig een nummer tussen 1 en max_tenants
+  tenant = str(random.randint(1, max_tenants))
+
+  table_name = f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
+
+  command =textwrap.dedent(f"""
+  val df = spark.read.format("csv").option("header", "true").load("{table_name}")
+  df.createOrReplaceTempView("kmeans{tenant}")
+  df.cache()
+  val e = df.columns
+  %json e
+  """)
+
+
+  r=invoke(command, host, session_id, headers)
+  columns=r['output']['data']['application/json']
+  sample_columns=random.sample(columns, random.randint(0, len(columns)-1))
+  selected_columns = ", ".join(sample_columns)
+
+
+  sample_queries=[]
+  if stress_size == 0:
+    sample_queries=random.sample(columns, random.randint(0, len(columns)-1))
+  else:
+    sample_queries=random.sample(columns, stress_size)
+  sample_values=[random.uniform(-0.1, 0.1) for _ in sample_queries]
+
+  selected_evaluations= " and ".join([f"{string} < {value}" for string, value in zip(sample_queries,sample_values)])
+
+  command = textwrap.dedent(f"""
+  val sqlDF = spark.sql("SELECT {selected_columns} FROM kmeans{tenant} WHERE {selected_evaluations}")
+  sqlDF.show()
+  """)
+  #sqlDF.write.mode("overwrite").csv("file:///opt/bitnami/spark/spark_data/spark-bench-test/output/output.csv")
+
+  invoke(command, host, session_id, headers)
 
 class Stress:
-	def __init__(self, stress_size,stress_function):
-		self.stress_size = stress_size
-		self.stress_function = stress_function
+    def __init__(self, stress_size,stress_function, max_tenants, tenant_group, host, headers):
+        self.stress_size = stress_size
+        self.stress_function = stress_function
+        self.max_tenants=max_tenants
+        self.tenant_group=tenant_group
+        self.host=host
+        self.headers=headers
 
-	def runTest(self):
-		if self.stress_size != 0:
-			self.stress_function(self.stress_size)
 
-class StressCPU(Stress):
-	def __init__(self,stress_function=_cpu_stress,stress_size=100):
-		Stress.__init__(self, stress_size, stress_function)
+    def runTest(self):
+        self.stress_function(self.stress_size, self.max_tenants, self.tenant_group, self.host, self.headers)
+
+class StressSpark(Stress):
+	def __init__(self,stress_size=0, max_tenants=15, tenant_group="g7", host = "http://172.22.8.106:30898", headers = {'Content-Type': 'application/json'}, stress_function=_stress):
+		Stress.__init__(self, stress_size, stress_function,max_tenants, tenant_group,host, headers)
 
 
 

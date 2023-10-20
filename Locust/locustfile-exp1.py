@@ -17,15 +17,17 @@ class TasksetT1(TaskSet):
     # but it might be convenient to use the @task decorator
     @task
     def pushJob(self):
-        with self.client.get("/pushJob/10",name="gold", catch_response=True) as resp:
-            if resp.content.decode('UTF-8') != "completed all tasks":
+        with self.client.get("/pushJob/1",name="silver", catch_response=True) as resp:
+            x=resp.content.decode('UTF-8')
+            print(x)
+            if x != "completed all tasks":
                 resp.failure("Got wrong response")
 
 class MyUser(HttpUser):
     weight = 1
   
     # host = "http://demo.gold.svc.cluster.local:80
-    host = "http://172.17.13.119:30698"
+    host = "http://172.22.8.106:30698"
 
     wait_time = between(0,0)  
     
@@ -34,7 +36,7 @@ class MyUser(HttpUser):
 
     sock = socket.socket()
     try:
-        sock.connect(('172.17.13.119', 30689))
+        sock.connect(('172.22.8.106', 30689))
     except (socket.error):
         print("Couldnt connect with the socket-server: terminating program...")
 

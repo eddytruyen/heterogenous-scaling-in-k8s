@@ -25,4 +25,4 @@ spec:
         - --sink=influxdb:http://monitoring-influxdb:8086
         - --v=8
       nodeSelector:
-        monitoringNode: "yes"
+        monitoringNode: "grafana-node"

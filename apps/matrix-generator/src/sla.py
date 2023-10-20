@@ -13,12 +13,10 @@ class WorkerConf:
 		self.costs = costs
 		self.min_replicas = min_replicas
 		self.max_replicas = max_replicas
-		self._flag = False
+		#self._flag = False
 
-	def clone(self, copy_flag=True):
+	def clone(self):
                 w2=WorkerConf(self.worker_id, self.resources.copy(), self.costs.copy(), self.min_replicas, self.max_replicas)
-                if copy_flag and self.isFlagged():
-                        w2.flag()
                 return w2
 
 
@@ -30,14 +28,14 @@ class WorkerConf:
 	def scale(self, resource, amount):
 		self.resources[resource] = amount
 
-	def isFlagged(self):
-		return self._flag
+	#def isFlagged(self):
+	#	return self._flag
 
-	def flag(self):
-		self._flag = True
+	#def flag(self):
+	#	self._flag = True
 
-	def unflag(self):
-		self._flag = False
+	#def unflag(self):
+       	#	self._flag = False
 
 	def equals(self, other):
 		if self.worker_id == other.worker_id and self.min_replicas == other.min_replicas and self.max_replicas == other.max_replicas:
@@ -59,5 +57,5 @@ class WorkerConf:
                 for i in self.resources.keys():
                         return_str+=i + ": { size: " + str(self.resources[i]) + ", cost: " + str(self.costs[i]) + "}, "
                 return_str=return_str[:-2]
-                return_str+= "}, min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + ", flagged=" + str(self.isFlagged())  + "}"
+                return_str+= "}, min_replicas=" + str(self.min_replicas) + ", max_replicas" + str(self.max_replicas) + "}" #, flagged=" + str(self.isFlagged())  + "}"
                 return return_str
