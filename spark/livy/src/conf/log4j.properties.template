@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 # The default Livy logging configuration.
-log4j.rootCategory=INFO, console
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.target=System.err
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=%d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n
-
-log4j.logger.org.eclipse.jetty=WARN
+log4j.rootCategory=INFO, file
+log4j.logger.org.apache.livy.thriftserver=DEBUG
+log4j.appender.file=org.apache.log4j.FileAppender
+log4j.appender.file.File=/opt/bitnami/livy/logs/livy.log
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d [%t] %-5p %c - %m%n
+log4j.rootLogger=INFO, file

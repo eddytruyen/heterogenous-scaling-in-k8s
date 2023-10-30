@@ -119,6 +119,7 @@ class LivyThriftSessionManager(val server: LivyThriftServer, val livyConf: LivyC
   }
 
   def onLivySessionOpened(livySession: InteractiveSession): Unit = {
+    info("LivySession opened")
     server.livySessionManager.register(livySession)
     synchronized {
       managedLivySessionActiveUsers += livySession.id -> 0
