@@ -7,76 +7,61 @@ tenant=1
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=2
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=3
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=4
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=5
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=6
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=7
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=8
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=9
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=10
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=11
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=12
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=13
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=14
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache()
 tenant=15
 table_name=f"file:///opt/bitnami/spark/spark_data/spark-bench-test/kmeans-data-{tenant_group}-{tenant}.csv"
 df = spark.read.format("csv").option("header", "true").load(f"{table_name}")
 df.createOrReplaceGlobalTempView(f"kmeans{tenant}")
-df.cache();
 
 

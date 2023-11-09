@@ -20,7 +20,7 @@ QUEUE_URL = QUEUE_HOST+'/pull'
 
 MAX_TENANTS=15
 TENANT_GROUP="g7"
-KYUUBI_HOST = "http://silver-spark-thrift-binary" + DNS_NAMESPACE + ".svc.cluster.local:1009"
+KYUUBI_HOST = "jdbc:hive2://kyuubi-thrift-binary." + DNS_NAMESPACE + ".svc.cluster.local:10009"
 DATABASE='default'
 DRIVER='org.apache.kyuubi.jdbc.KyuubiHiveDriver'
 PRINCIPAL='anonymous'
