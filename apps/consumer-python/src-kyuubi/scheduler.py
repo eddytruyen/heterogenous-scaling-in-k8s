@@ -51,11 +51,11 @@ async def _worker(consumer):
 		logging.debug("Processing item with id: "+str(item))
 		if (item != None):
 			if(STRESS_SIZE):
-				stress=StressSpark(int(STRESS_SIZE), MAX_TENANTS, TENANT_GROUP, consumer.conn)
+				stress=StressSpark(int(STRESS_SIZE), MAX_TENANTS, TENANT_GROUP, consumer.cursor)
 			else:
-				stress=StressSpark(0,MAX_TENANTS, TENANT_GROUP, consumer.conn)	
-			# stress.runTest()
-			await consumer.loop.run_in_executor(None, stress.runTest)
+				stress=StressSpark(0,MAX_TENANTS, TENANT_GROUP, consumer.cursor)	
+			stress.runTest()
+			#await consumer.loop.run_in_executor(None, stress.runTest)
 			logging.debug("Processed item with id: "+str(item))
 			# await consumer.loop.create_task(consumer._fetch(QUEUE_URL,params={'ack':str(item)} ))
 			consumer.queue.task_done()
@@ -70,7 +70,9 @@ async def _worker(consumer):
 
 class Consumer(Tasker):
     def __init__(self, loop, session, queue):
-        self.conn=jaydebeapi.connect(DRIVER, KYUUBI_HOST, [PRINCIPAL,""],HIVE_JAR)
+        hive_conf = {"user": PRINCIPAL, "password": ""}
+        self.conn=jaydebeapi.connect(DRIVER, KYUUBI_HOST, hive_conf, HIVE_JAR)
+        self.cursor=self.conn.cursor()
         Tasker.__init__(self, loop, session, queue)
 	
     async def __call__(self):
@@ -85,6 +87,11 @@ class Consumer(Tasker):
 		# 	self.loop.create_task(self._fetch(QUEUE_URL,params={'ack':str(id)} )) 
 		# 	for id 
 		# 	in completed_tasks]
+
+    def __del__(self):
+        self.cursor.close()
+        self.conn.close()
+        Tasker.__del__(self)
 
 
 class Scheduler(Tasker):
