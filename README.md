@@ -107,6 +107,7 @@ can be used to avoid this (see charts/graphite/templates/volume.yaml)
 
 
 # Start the locust server
+Ensure open open files are allowed. The most easy way to do this is to add `ulimit -n 10000` to the `.bashrc` file in the home directory of your user accoumnt or to similar terminal-session configuration file.
 
 For generating local files with throughput and turnaround time, `Locust/locustfile-exp1.py` can be used. The socket connection (self.sock.connect(IP, port)) needs to match the graphite aggregator service (running by default on nodePort 30688).
 
