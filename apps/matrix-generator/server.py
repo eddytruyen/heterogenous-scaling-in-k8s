@@ -7,6 +7,7 @@ import matrix
 from src.searchwindow import AdaptiveScaler, ScalingFunction
 from src.sla import WorkerConf
 from src.generator import create_workers as _create_workers
+from src.rl_autoscaler import RLAutoscaler
 
 NODES=[{"cpu": 4,"memory": 8},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 32},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 8,"memory": 16},{"cpu": 3,"memory": 6}]
 
@@ -54,6 +55,7 @@ def create_app():
     runtime_manager["minimum_shared_resources"]=initial_config['minimum_shared_resources']
     adaptive_scalers["init"]=AdaptiveScaler(workers, scalingFunction, sla['name'], initial_config)
     runtime_manager["adaptive_scalers"]=adaptive_scalers
+    app.config["rl_autoscaler"] = RLAutoscaler(workers, sla['slos']['completionTime'], sla['maxTenants'], alphabet['base'])
     app.config["adaptive_scalers"] = adaptive_scalers
     app.config["runtime_manager"] = runtime_manager
     app.config["initial_config"] = initial_config
