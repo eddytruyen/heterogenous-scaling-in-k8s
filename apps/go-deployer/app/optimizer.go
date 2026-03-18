@@ -39,11 +39,17 @@ func getDesiredConf(state map[string]int) []DeploymentScaler{
 	pods:=getOptimalConf(tenants)
 
 	for _,pod := range pods{
-		consumer:=DeploymentScaler{"consumer"+int2str(pod.id),pod.namespace,pod.replicas}
+		consumer:=DeploymentScaler{
+			deploymentName: "consumer"+strconv.Itoa(pod.id),
+			deploymentNamespace: pod.namespace,
+			desiredReplicas: pod.replicas,
+			desiredCPU: pod.cpu,
+			desiredMemory: pod.memory,
+		}
 		deployments = append(deployments,consumer)
 	}
 
 	fmt.Printf("%+v\n", deployments)
 
 	return deployments
-}
+	}

@@ -44,7 +44,7 @@ def print_results(adaptive_scaler,results):
 # update matrix with makespan of the previous sparkbench-run  consisting of #previous_tenants, using configuration previous_conf
 # and obtaining performance metric completion_time. The next request is for #tenants. If no entry exists in the matrix, see if there is an entry for a previous
 # tenant; otherwise using the curve-fitted scaling function to estimate a target configuration.
-def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler):
+def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler, prev_actual_resources=None):
 
         def get_next_exps(adaptive_scaler, rm, lst, conf, sampling_ratio, window,tenants):
                         next_exp=_find_next_exp(lst,adaptive_scaler.workers,conf,base, adaptive_window.adapt_search_window({},window,tenants != 1))
@@ -1280,7 +1280,7 @@ def generate_matrix(initial_conf, adaptive_scalers, runtime_manager, namespace, 
 
         if not ignore_auto_scaler and rl_autoscaler:
             print("RL Autoscaler taking final decision...")
-            rl_conf = rl_autoscaler.decide_and_learn(tenants, completion_time, previous_conf)
+            rl_conf = rl_autoscaler.decide_and_learn(tenants, completion_time, previous_conf, prev_actual_resources)
             print("RL Decided configuration:", rl_conf)
             # Update matrix with RL decision
             d[sla['name']][str(tenants)] = create_result(rl_autoscaler.workers, 0, rl_conf, sla['name'])

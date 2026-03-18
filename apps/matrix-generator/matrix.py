@@ -42,7 +42,25 @@ def home():
         previous_conf_array=list(map(lambda x: int(x),previous_conf.split('_',-1)))
     else:
         previous_conf_array=[]
-    generate_matrix(initial_config, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants,previous_conf_array, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler)
+
+    # Extract ground truth for each worker
+    prev_actual_resources = []
+    for i in range(1, len(rl_autoscaler.workers) + 1):
+        cpu = request.args.get(f'prev_res_worker{i}_cpu')
+        mem = request.args.get(f'prev_res_worker{i}_mem')
+        inplace = request.args.get(f'inplace_worker{i}')
+        if cpu and mem:
+            prev_actual_resources.append({'cpu': cpu, 'memory': mem})
+        else:
+            prev_actual_resources.append(None)
+        
+        # Ground truth for in-place resize policy
+        if inplace == 'true':
+            rl_autoscaler.worker_inplace_support[i-1] = True
+        elif inplace == 'false':
+            rl_autoscaler.worker_inplace_support[i-1] = False
+
+    generate_matrix(initial_config, adaptive_scalers, runtime_manager, namespace, tenants, completion_time, previous_tenants,previous_conf_array, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler, prev_actual_resources)
 
     config_data = yaml.safe_load(open('Results/result-matrix.yaml'))
     print(config_data)
@@ -50,8 +68,8 @@ def home():
     return json.dumps(conf)
 
 
-def generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler):
+def generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler, prev_actual_resources=None):
 
-	_generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler)
+	_generate_matrix(initial_config, adaptive_scaler, runtime_manager, namespace, tenants, completion_time, previous_tenants, previous_conf, total_cpu, total_memory, ignore_auto_scaler, rl_autoscaler, prev_actual_resources)
 
 #generate_matrix()

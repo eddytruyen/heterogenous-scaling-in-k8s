@@ -13,6 +13,10 @@ class RLAutoscaler:
         self.num_worker_types = len(workers)
         self.num_actions = self.base ** self.num_worker_types
         
+        # Mapping for in-place support (to be updated by server/generator)
+        self.worker_inplace_support = [False] * self.num_worker_types
+        self.current_actual_resources = [None] * self.num_worker_types
+
         # State: [tenants / max_tenants, prev_conf_index / num_actions, completion_time / slo]
         self.state_dim = 3
         self.hidden_dim = 64
@@ -115,25 +119,47 @@ class RLAutoscaler:
             total_cost += cost
         return total_cost
 
-    def get_reward(self, completion_time, conf, prev_conf):
+    def get_reward(self, completion_time, conf, prev_conf, prev_resources):
         cost = self.calculate_cost(conf)
         
         # SLO Violation penalty
         violation = max(0, float(completion_time) - self.slo)
         slo_penalty = 100 * (violation / self.slo) if violation > 0 else 0
         
-        # Transition penalty (vertical scaling)
-        restarts = 0
+        # Transition penalty
+        total_transition_penalty = 0
         for i in range(len(conf)):
-            if conf[i] > 0 and prev_conf[i] > 0 and conf[i] != prev_conf[i]:
-                # This is a simplification: if replicas change for a worker type, we assume some impact
-                restarts += abs(conf[i] - prev_conf[i])
+            if conf[i] > 0 and prev_conf[i] > 0:
+                # Check if resources changed (Vertical Scaling)
+                res_changed = False
+                if prev_resources and prev_resources[i]:
+                     # Compare with current intended resources for this worker type
+                     if str(self.workers[i].resources['cpu']) != str(prev_resources[i]['cpu']) or \
+                        str(self.workers[i].resources['memory']) != str(prev_resources[i]['memory']):
+                         res_changed = True
+                
+                if res_changed:
+                    if self.worker_inplace_support[i]:
+                        # In-place scaling: Low penalty (Formalism: \Upsilon^k)
+                        total_transition_penalty += 2 * conf[i] 
+                    else:
+                        # Standard scaling: High penalty (Formalism: \Phi^k)
+                        total_transition_penalty += 50 * conf[i]
+                
+                # Horizontal changes (Adding/Removing replicas)
+                replica_diff = abs(conf[i] - prev_conf[i])
+                total_transition_penalty += 5 * replica_diff
+            elif conf[i] > 0 and prev_conf[i] == 0:
+                # Cold start penalty for new worker types
+                total_transition_penalty += 30 * conf[i]
         
-        transition_penalty = 10 * restarts
-        
-        return -(cost + slo_penalty + transition_penalty)
+        return -(cost + slo_penalty + total_transition_penalty)
 
-    def decide_and_learn(self, tenants, completion_time, prev_conf_array):
+    def decide_and_learn(self, tenants, completion_time, prev_conf_array, prev_actual_resources=None):
+        # Update ground truth if provided
+        if prev_actual_resources:
+            self.current_actual_resources = prev_actual_resources
+
         # Prepare state
         if not prev_conf_array:
             prev_conf_array = [0] * self.num_worker_types
@@ -150,7 +176,7 @@ class RLAutoscaler:
         
         # If we have previous experience, learn from it
         if hasattr(self, 'last_state'):
-            reward = self.get_reward(completion_time, prev_conf_array, self.last_prev_conf)
+            reward = self.get_reward(completion_time, prev_conf_array, self.last_prev_conf, self.last_prev_resources)
             self.remember(self.last_state, self.last_action, reward, state)
             self.train()
             if random.random() < 0.01: # Periodically save
@@ -164,5 +190,6 @@ class RLAutoscaler:
         self.last_state = state
         self.last_action = action
         self.last_prev_conf = prev_conf_array
+        self.last_prev_resources = prev_actual_resources
         
         return next_conf
